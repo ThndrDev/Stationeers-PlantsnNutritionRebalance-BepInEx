@@ -1,6 +1,6 @@
 # Stationeers mod "Plants and Nutrition Rebalance" port for BepInEx.
 
-Note that, if you use Windows, you don't need this. Just install the Stationeers.Addons so you'll get mod updates automatically through steam. This port is just for the people who want to run the mod in OS's that are not supported by Stationeers.Addons.
+Note that, if you use Windows, you don't need this. On Windows, just use the Stationeers.Addons and you'll get mod updates automatically through steam. This port is just for the people who want to run the mod in OS's that are not supported by Stationeers.Addons.
 
 This is just the scripts part of the mod ported to work with BepInEx. The mod also changes stuff through XML files, so, for it to work correctly, you need to:
 - Follow the Installation instructions below;
