@@ -28,10 +28,7 @@
     <Reference Include="0Harmony">
       <HintPath>.\externals\0Harmony.dll</HintPath>
     </Reference>
-
-    <Reference Include="com.unity.multiplayer-hlapi.Runtime">
-      <HintPath>.\externals\com.unity.multiplayer-hlapi.Runtime.dll</HintPath>
-    </Reference>
+ 
   </ItemGroup>
 
   <PropertyGroup>
