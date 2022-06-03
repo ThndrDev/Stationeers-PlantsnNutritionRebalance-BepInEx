@@ -5,6 +5,8 @@ using JetBrains.Annotations;
 using UnityEngine;
 using Assets.Scripts.Objects.Items;
 using Assets.Scripts.Serialization;
+using Assets.Scripts.Objects;
+
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -18,7 +20,7 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             for (int i = 1; i < __instance.GrowthStates.Count; i++)
             {
-                if (i < __instance.GrowthStates.Count - 2)
+               if (i < __instance.GrowthStates.Count - 2)
                 {
                     __instance.GrowthStates[i].Length = 3600f;
                 }
@@ -40,43 +42,49 @@ namespace PlantsnNutritionRebalance.Scripts
             __instance.WaterPerTick = 0.0034f;
         }
     }
+
     [HarmonyPatch(typeof(Human))]
-    public static class NutritionHydrationPatch
+    public static class HumanNutritionHydrationPatch
     {
         [HarmonyPatch("Awake")]
         [HarmonyPostfix]
-        static public void HungerHydrationPatch(Human __instance)
+        [UsedImplicitly]
+        static public void HungerHydrationPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ___BaseDehydrationRate)
         {
             __instance.MaxNutritionStorage = 5400f;
             __instance.MetabolismRate = 0.1125f;
             __instance.WarningNutrition = 1080f;
             __instance.CriticalNutrition = 540f;
-            Human.MaxHydrationStorage = 42f;
-            Human.BaseDehydrationRate = 0.0063f;
+            ___MaxHydrationStorage = 42f;
+            ___BaseDehydrationRate = 0.0063f;
             __instance.WarningHydration = 10.5f;
             __instance.CriticalHydration = 5.25f;
         }
-            
+    }
+	[HarmonyPatch(typeof(Entity))]
+    public static class OnLifeCreatedPatch
+	{
         [HarmonyPatch("OnLifeCreated")]
-        [UsedImplicitly]
         [HarmonyPostfix]
-        public static void RespawnNutritionPatch(Human __instance)
+        [UsedImplicitly]
+        private static void RespawnNutritionPatch(Entity __instance)
         {
             float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f;
             float Foodslice = __instance.MaxNutritionStorage / 200f;
             float Hydrationslice = Human.MaxHydrationStorage / 200f;
-
-            if (Dayspastnorm <= 195)
+            float Hydrationtogive;
+             if (Dayspastnorm <= 195)
             {
                 // Calculate the food for respawn acordingly to the days past and SunOrbit
                 __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
-                __instance.Hydration = (200f - Dayspastnorm) * Hydrationslice;
+                Hydrationtogive = (200f - Dayspastnorm) * Hydrationslice;
             }
             else
             {
                 __instance.Nutrition = Foodslice * 3f;
-                __instance.Hydration = Hydrationslice * 5f;
+                Hydrationtogive = Hydrationslice * 5f;
             }
+            Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
         }
     }
     [HarmonyPatch(typeof(Food))]
