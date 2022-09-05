@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition Rebalance", "0.6.0.0")]
+    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition Rebalance", "0.8.0.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -13,14 +13,14 @@ namespace PlantsnNutritionRebalance.Scripts
 
         public void Log(string line)
         {
-            Debug.Log("[PlantsnNutritionRebalance]: " + line);
+            Debug.Log("[PlantsnNutrition]: " + line);
         }
 
         void Awake()
         {
             PlantsnNutritionRebalancePlugin.Instance = this;
             Log("Hello World");
-
+            PlantGrowStagePatch.PatchPrefabs();
             try
             {
                 // Harmony.DEBUG = true;
