@@ -3,7 +3,6 @@ using Assets.Scripts.UI;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
-using Assets.Scripts;
 using Assets.Scripts.Objects.Items;
 using Assets.Scripts.Serialization;
 using Assets.Scripts.Objects;
@@ -132,20 +131,17 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
+
     // Adjusts the fertilizer to be less OP:
     [HarmonyPatch(typeof(Plant))]
-    public class PlantPatch
+    public class FertilizerPatch
     {
         [HarmonyPatch("ApplyFertilizer")]
         [UsedImplicitly]
-        [HarmonyPrefix]
-        public static bool PlantApplyFertilizerPatch(Plant __instance)
+        [HarmonyPostfix]
+        static public void PlantApplyFertilizerPatch(Plant __instance)
         {
-            __instance.HarvestQuantity += 2; // yields + 2 
-            __instance.SeedQuantity = __instance.HarvestQuantity;
             __instance.FertilizerBoost = 1.15f; // 15% boost in growth time
-            __instance.IsFertilized = true;
-            return false;
         }
     }
 
