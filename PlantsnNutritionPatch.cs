@@ -10,142 +10,20 @@ using System.Collections.Generic;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    // Adjust the growth stages and water consumption from plants
-    public class PlantGrowStagePatch
+    // Adjusts the water consumption of plants:
+    [HarmonyPatch(typeof(PlantLifeRequirements))]
+    public class PlantLifeRequirementsPatch
     {
-        //plant & seed
-        private static int[] cornStages = { 1, 1600, 3200, 4800, 6400, -1, 0 }; //258339687 & -1290755415 
-        private static int[] tomatoStages = { 1, 1600, 1600, 3200, 6400, -1, 0 }; //-998592080 & -1922066841 
-        private static int[] pumpkinStages = { 1, 1600, 4800, 6400, 6400, -1, 0 }; //1277828144 & 1423199840 
-        private static int[] riceStages = { 1, 3600, 3600, 3600, -1, 0 }; //658916791 & -1691151239 
-        private static int[] soyStages = { 1, 3600, 3600, 4800, -1, 0 }; //1924673028 & 1783004244 
-        private static int[] fernStages = { 1, 2400, 3600, 4800, -1, 0 }; //892110467 & -1990600883 
-        private static int[] potatoStages = { 1, 3200, 6400, 4800, -1, 0 }; //1929046963 & 1005571172
-        private static int[] wheatStages = { 1, 4800, 11200, 3200, -1, 0 }; //-1057658015 & -654756733
-        
-        private static int[] flowerStages = { 1, 2400, 2400, 3600, 3600, -1, 0 }; //1712822019,-81376085,-1411986716,-1513337058,-1573623434
-
-        private static int[] filterFernStages = { 1, 2400, 3600, 4800, 3600, -1, 0 }; //266654416
-        private static int[] tropicalLilyPlantStages = { 1, 2400, 2400, 3600, 3600, -1, 0 }; //-800947386
-        private static int[] peaceLilyPlantStages = { 1, 2400, 2400, 3600, 3600, -1, 0 }; //2042955224 
-        private static int[] alienMushroomStages = { 1, 2400, 3600, 4800, -1, 0 }; //176446172 
-        private static int[] mushroomStages = { 1, 3600, 1200, 4800, -1, 0 }; //2044798572
-        private static int[] thermogenicGenepool1Stages = { 1, 2400, 2400, 3600, 3600, 4800, -1, 0 }; //-177792789 
-        private static int[] thermogenicGenepool2Stages = { 1, 2400, 2400, 3600, 3600, 4800, -1, 0 }; //1819167057 
-        private static int[] thermogenicCreativeStages = { 1, 2400, 2400, 3600, 3600, 4800, -1, 0 }; //-1208890208 
-        private static int[] endothermicGenepool1Stages = { 1, 1200, 1200, 2400, 2400, 2400, -1, 0 }; //851290561 
-        private static int[] endothermicGenepool2Stages = { 1, 2400, 2400, 3600, 4800, -1, 0 }; //-1414203269 
-        private static int[] endothermicCreativeStages = { 1, 2400, 3600, 3600, 4800, -1, 0 }; //-1159179557 
-
-        private static Dictionary<int, int[]> plantStages = new Dictionary<int, int[]>();
-        static PlantGrowStagePatch()
-        {
-            //seedbag seeds
-            plantStages.Add(-1290755415, cornStages);
-            plantStages.Add(-1922066841, tomatoStages);
-            plantStages.Add(1423199840, pumpkinStages);
-            plantStages.Add(-1691151239, riceStages);
-            plantStages.Add(1783004244, soyStages);
-            plantStages.Add(-1990600883, fernStages);
-            plantStages.Add(1005571172, potatoStages);
-            plantStages.Add(-654756733, wheatStages);
-            //seedbag plants
-            plantStages.Add(258339687, cornStages);
-            plantStages.Add(-998592080, tomatoStages);
-            plantStages.Add(1277828144, pumpkinStages);
-            plantStages.Add(658916791, riceStages);
-            plantStages.Add(1924673028, soyStages);
-            plantStages.Add(892110467, fernStages);
-            plantStages.Add(1929046963, potatoStages);
-            plantStages.Add(-1057658015, wheatStages);
-
-            //flowers
-            plantStages.Add(1712822019, flowerStages);
-            plantStages.Add(-81376085, flowerStages);
-            plantStages.Add(-1411986716, flowerStages);
-            plantStages.Add(-1513337058, flowerStages);
-            plantStages.Add(-1573623434, flowerStages);
-
-            //others
-            plantStages.Add(266654416, filterFernStages);
-            plantStages.Add(-800947386, tropicalLilyPlantStages);
-            plantStages.Add(2042955224, peaceLilyPlantStages);
-            plantStages.Add(2044798572, mushroomStages);
-            plantStages.Add(176446172, alienMushroomStages);
-            plantStages.Add(-177792789, thermogenicGenepool1Stages);
-            plantStages.Add(1819167057, thermogenicGenepool2Stages);
-            plantStages.Add(-1208890208, thermogenicCreativeStages);
-            plantStages.Add(-1159179557, endothermicCreativeStages);
-            plantStages.Add(851290561, endothermicGenepool1Stages);
-            plantStages.Add(-1414203269, endothermicGenepool2Stages);
-        }
-
-        public static void PatchPrefabs()
-        {
-            var type = typeof(Assets.Scripts.Objects.Prefab);
-            var fieldInfo = type.GetFields()[0];
-            Dictionary<int, Thing> allPrefabs = (Dictionary<int, Thing>)fieldInfo.GetValue(null);
-            foreach (var keyValuePair in plantStages)
-            {
-                Plant plant = (Plant)allPrefabs[keyValuePair.Key];
-                if (plant is Seed seed)
-                {
-                    plant = seed.PlantType;
-                }
-                for (var index = 0; index < plant.GrowthStates.Count; index++)
-                {
-                    var plantStage = plant.GrowthStates[index];
-                    if (plantStage.Length > 2)
-                    {
-                        plantStage.Length = plantStages[plant.PrefabHash][index];
-                    }
-                }
-                plant.WaterPerTick = 0.0034f; 
-                switch (plant.DisplayName)
-                { 
-                    case "Tomato":
-                        plant.WaterPerTick *= 0.6f;
-                        break;
-                    case "Wheat":
-                        plant.WaterPerTick *= 1.2f;
-                        break;
-                    case "Rice":
-                        plant.WaterPerTick *= 1.4f;
-                        break;
-                    case "Pumpkin":
-                        plant.WaterPerTick *= 0.6f;
-                        break;
-                    case "Darga Fern":
-                        plant.WaterPerTick *= 0.8f;
-                        break;
-                    case "Soybean":
-                        plant.WaterPerTick *= 1.3f;
-                        break;
-                    case "Mushroom":
-                        plant.WaterPerTick *= 1.4f;
-                        break;
-                } //TODO: Make water consumption to be different through growth stages, preferably with a gradient increase
-                  //TODO: Find a way to change the yields of each plant, right now all plants HarvestQuantity are equal: 2
-            }
-            Debug.Log("Plants and Nutrition - Prefabs for plants are patched!");
-        }
-    }
-
-
-    // Adjusts the fertilizer to be less OP:
-    [HarmonyPatch(typeof(Plant))]
-    public class FertilizerPatch
-    {
-        [HarmonyPatch("ApplyFertilizer")]
+        [HarmonyPatch("get_WaterPerTick")]
         [UsedImplicitly]
         [HarmonyPostfix]
-        static public void PlantApplyFertilizerPatch(Plant __instance)
+        public static void WaterPerTickPatch(ref float __result)
         {
-            __instance.FertilizerBoost = 1.15f; // 15% boost in growth time
+            __result *= 566.67f; //increase plants water consumtpion from 6E-05f to 0.0034f
         }
     }
 
-        [HarmonyPatch(typeof(Human))]
+    [HarmonyPatch(typeof(Human))]
     public static class HumanNutritionHydrationPatch
     {
         // Adjusts the Human hydration based on the world difficulty and the warning/critical alerts
@@ -155,7 +33,7 @@ namespace PlantsnNutritionRebalance.Scripts
         static public void HydrationAndWarningsPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ____hydrationLossPerTick)
         {
             ___MaxHydrationStorage = 42f;
-            switch (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate) 
+            switch (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)
             {
                 case 1.5f: //stationeers difficulty, water will last 2 and half days
                     ____hydrationLossPerTick = 0.0019446f;
@@ -172,23 +50,23 @@ namespace PlantsnNutritionRebalance.Scripts
                 default: // if it's none of the above, will try to calculate hydrationLossPerTick based on DifficultySetting.HydrationRate:
                     float a = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
                     ____hydrationLossPerTick = Mathf.Lerp(0.00106953f, 0.00281967f, a);
-                break;
+                    break;
             }
             // Nutrition/hydration warnings:
-            __instance.WarningNutrition = 1080f;
-            __instance.CriticalNutrition = 540f;
+            __instance.WarningNutrition = 1000f;
+            __instance.CriticalNutrition = 500f;
             __instance.WarningHydration = 10.5f;
             __instance.CriticalHydration = 5.25f;
         }
 
-        
+
         [HarmonyPatch("get_MaxNutritionStorage")]
         [HarmonyPostfix]
         [UsedImplicitly]
         static public void MaxNutritionPatch(ref float __result)
         {
             // Adjusts the max food of the character:
-            __result = 5400f;
+            __result = 5000f;
         }
 
         // Adjusts the HungerRate based on the world difficulty and changes the damage system for Starvation
@@ -201,23 +79,23 @@ namespace PlantsnNutritionRebalance.Scripts
             switch (WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate)
             {
                 case 1.5f: //stationeers difficulty, full food will last 10 game days
-                    NutritionLossPerTick = 0.1125f; 
+                    NutritionLossPerTick = 0.1042f;
                     break;
                 case 1f: //normal difficulty, 85% food usage of stationeers difficulty
-                    NutritionLossPerTick = 0.09f;
+                    NutritionLossPerTick = 0.0833f;
                     break;
                 case 0.5f: //easy difficulty, 70% food usage of stationeers difficulty, should be easy enough
-                    NutritionLossPerTick = 0.07875f;
+                    NutritionLossPerTick = 0.072917f;
                     break;
                 case 0f: //user disabled food consumption directly on world config
                     NutritionLossPerTick = 0f;
                     break;
                 default: // if it's none of the above, will try to calculate an hydrationLossPerTick based on DifficultySetting.HungerRate:                    
                     float hungerdifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);
-                    NutritionLossPerTick = Mathf.Lerp(0.061875f, 0.163125f, hungerdifficulty);
+                    NutritionLossPerTick = Mathf.Lerp(0.0572917f, 0.1510417f, hungerdifficulty);
                     break;
             }
-            // Human.LifeNutrition
+            // Complete rewrite of base method Human.LifeNutrition
             float num = NutritionLossPerTick * (__instance.OrganBrain.IsOnline ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.LifeFunctionLoggedOut);
             __instance.Nutrition -= num;
             // Entity.LifeNutrition
@@ -225,12 +103,12 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 return false;
             }
-            if (__instance.Nutrition <= 0f)
+            if (__instance.Nutrition <= 0f) // increase the damage when nutrition reaches 0
             {
                 __instance.DamageState.Damage(ChangeDamageType.Increment, 0.2f, DamageUpdateType.Starvation);
                 return false;
             }
-            if (__instance.DamageState.Starvation > 0f && __instance.Nutrition >= 540f)
+            if (__instance.DamageState.Starvation > 0f && __instance.Nutrition >= 500f) // Only heals the character when nutrition is over 540 (after "Nutrition Critical" warning)
             {
                 __instance.DamageState.Damage(ChangeDamageType.Decrement, 0.1f, DamageUpdateType.Starvation);
             }
@@ -238,10 +116,10 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-    // After Death/Respawn, don't give 100% food and water:
-	[HarmonyPatch(typeof(Entity))]
+    // Calculates the Food and Nutrition to give to the player based on the dayspast in the save, so we don't reward a character who dies with 100% stats
+    [HarmonyPatch(typeof(Entity))]
     public static class OnLifeCreatedPatch
-	{
+    {
         [HarmonyPatch("OnLifeCreated")]
         [HarmonyPostfix]
         [UsedImplicitly]
@@ -251,7 +129,7 @@ namespace PlantsnNutritionRebalance.Scripts
             float Foodslice = __instance.MaxNutritionStorage / 200f;
             float Hydrationslice = Human.MaxHydrationStorage / 200f;
             float Hydrationtogive;
-             if (Dayspastnorm <= 195)
+            if (Dayspastnorm <= 195)
             {
                 // Calculate the food for respawn acordingly to the days past and SunOrbit
                 __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
@@ -280,49 +158,49 @@ namespace PlantsnNutritionRebalance.Scripts
             switch (__instance.DisplayName)
             {
                 case "Tomato Soup":
-                    __instance.NutritionValue = 190f;
+                    __instance.NutritionValue = 150f;
                     break;
                 case "Corn Soup":
-                    __instance.NutritionValue = 280f;
+                    __instance.NutritionValue = 240f;
                     break;
                 case "Canned Rice Pudding":
-                    __instance.NutritionValue = 180f;
-                    break;
-                case "Pumpkin Soup":
-                    __instance.NutritionValue = 375f;
-                    break;
-                case "Pumpkin Pie":
-                    __instance.NutritionValue = 1000f;
-                    break;
-                case "Baked Potato":
-                    __instance.NutritionValue = 45f;
-                    break;
-                case "French Fries":
                     __instance.NutritionValue = 120f;
                     break;
+                case "Pumpkin Soup":
+                    __instance.NutritionValue = 310f;
+                    break;
+                case "Pumpkin Pie":
+                    __instance.NutritionValue = 700f;
+                    break;
+                case "Baked Potato":
+                    __instance.NutritionValue = 40f;
+                    break;
+                case "French Fries":
+                    __instance.NutritionValue = 62f;
+                    break;
                 case "Canned French Fries":
-                    __instance.NutritionValue = 200f;
+                    __instance.NutritionValue = 120f;
                     break;
                 case "Milk":
-                    __instance.NutritionValue = 2f;
+                    __instance.NutritionValue = 1.5f;
                     break;
                 case "Canned Condensed Milk":
-                    __instance.NutritionValue = 370f;
+                    __instance.NutritionValue = 290f;
                     break;
                 case "Muffin":
-                    __instance.NutritionValue = 840f;
+                    __instance.NutritionValue = 300f;
                     break;
                 case "Bread Loaf":
-                    __instance.NutritionValue = 535f;
+                    __instance.NutritionValue = 155f;
                     break;
                 case "Cereal Bar":
-                    __instance.NutritionValue = 200f;
+                    __instance.NutritionValue = 60f;
                     break;
                 case "Canned Powdered Eggs":
-                    __instance.NutritionValue = 500f;
+                    __instance.NutritionValue = 370f;
                     break;
                 case "Canned Edamame":
-                    __instance.NutritionValue = 190f;
+                    __instance.NutritionValue = 75f;
                     break;
             }
         }
@@ -339,25 +217,25 @@ namespace PlantsnNutritionRebalance.Scripts
             switch (__instance.DisplayName)
             {
                 case "Condensed Milk":
-                    __instance.NutritionValue = 220f;
+                    __instance.NutritionValue = 150f;
                     break;
                 case "Cooked Soybean":
-                    __instance.NutritionValue = 60f;
+                    __instance.NutritionValue = 25f;
                     break;
                 case "Cooked Rice":
-                    __instance.NutritionValue = 40f;
+                    __instance.NutritionValue = 25f;
                     break;
                 case "Cooked Corn":
-                    __instance.NutritionValue = 65f;
+                    __instance.NutritionValue = 50f;
                     break;
                 case "Cooked Pumpkin":
-                    __instance.NutritionValue = 90f;
+                    __instance.NutritionValue = 65f;
                     break;
                 case "Powdered Eggs":
-                    __instance.NutritionValue = 350f;
+                    __instance.NutritionValue = 180f;
                     break;
                 case "Cooked Tomato":
-                    __instance.NutritionValue = 40f;
+                    __instance.NutritionValue = 30f;
                     break;
             }
         }
@@ -386,7 +264,8 @@ namespace PlantsnNutritionRebalance.Scripts
                     OnServer.Interact(__instance.InteractOnOff, 1, false);
                 }
             }
-            else if (__instance.HasAtmosphere == true) { 
+            else if (__instance.HasAtmosphere == true)
+            {
                 //Bad enviroment, not hatching.
             }
             return false;
@@ -418,9 +297,7 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             if (__instance.DisplayName == "Egg" || __instance.DisplayName == "Fertilized Egg")
             {
-                Debug.Log($"__instance.name {__instance.name}    __instance.CustomName {__instance.CustomName}");
-                __instance.DecayRate = 0.000091f; //should spoil in ~12 game days without refrigeration with this value
-                Debug.Log($"new __instance.DecayRate: {__instance.DecayRate}");
+                __instance.DecayRate = 0.000091f; //should spoil in ~12 game days without refrigeration
             }
         }
     }

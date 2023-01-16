@@ -41,3 +41,5 @@ obj/Release/netstandard2.0/.NETStandard,Version=v2.0.AssemblyAttributes.cs
 obj/Release/netstandard2.0/stationeers-PlantsnNutritionRebalance.AssemblyInfo.cs
 obj/Release/netstandard2.0/stationeers-PlantsnNutritionRebalance.AssemblyInfoInputs.cache
 obj/Release/netstandard2.0/stationeers-PlantsnNutritionRebalance.assets.cache
+*.dll
+*.zip
