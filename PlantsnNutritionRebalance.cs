@@ -8,7 +8,7 @@ using System;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition", "0.8.1.0")]
+    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition", "0.8.4.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
