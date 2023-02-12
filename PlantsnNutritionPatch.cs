@@ -6,7 +6,7 @@ using UnityEngine;
 using Assets.Scripts.Objects.Items;
 using Assets.Scripts.Serialization;
 using Assets.Scripts.Objects;
-using System.Collections.Generic;
+
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -19,7 +19,10 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         public static void WaterPerTickPatch(ref float __result)
         {
-            __result *= 566.67f; //increase plants water consumtpion from 6E-05f to 0.0034f
+            __result *= 566.67f; //increase most plants water consumtpion from 6E-05f to 0.0034f with max consumption limited to this value.
+            if (__result > 0.0034f)
+                __result = 0.0034f;
+            //TODO: Transfer the water consumption boost to the prefab load, so it also shows the correct modded values in Stationpedia.
         }
     }
 
@@ -53,10 +56,13 @@ namespace PlantsnNutritionRebalance.Scripts
                     break;
             }
             // Nutrition/hydration warnings:
-            __instance.WarningNutrition = 1000f;
-            __instance.CriticalNutrition = 500f;
+            __instance.WarningNutrition = 800f;
+            __instance.CriticalNutrition = 400f;
             __instance.WarningHydration = 10.5f;
             __instance.CriticalHydration = 5.25f;
+            // Fix for the character nutrition if it's bigger than 4000 (due to the 20% reduction of maxnutrition made in v0.9)
+            if (__instance.Nutrition > 4000f)
+                __instance.Nutrition *= 0.8f;
         }
 
 
@@ -66,7 +72,7 @@ namespace PlantsnNutritionRebalance.Scripts
         static public void MaxNutritionPatch(ref float __result)
         {
             // Adjusts the max food of the character:
-            __result = 5000f;
+            __result = 4000f;
         }
 
         // Adjusts the HungerRate based on the world difficulty and changes the damage system for Starvation
@@ -78,21 +84,24 @@ namespace PlantsnNutritionRebalance.Scripts
             float NutritionLossPerTick;
             switch (WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate)
             {
-                case 1.5f: //stationeers difficulty, full food will last 10 game days
-                    NutritionLossPerTick = 0.1042f;
+                case 1.5f: //stationeers difficulty, character food will last 8 game days
+                    NutritionLossPerTick = 0.104167f;
                     break;
-                case 1f: //normal difficulty, 85% food usage of stationeers difficulty
-                    NutritionLossPerTick = 0.0833f;
+                case 1f: //normal difficulty, will last 10 game days
+                    NutritionLossPerTick = 0.083333f;
                     break;
-                case 0.5f: //easy difficulty, 70% food usage of stationeers difficulty, should be easy enough
-                    NutritionLossPerTick = 0.072917f;
+                case 0.5f: //easy difficulty, will last 12 game days
+                    NutritionLossPerTick = 0.069444f;
                     break;
                 case 0f: //user disabled food consumption directly on world config
                     NutritionLossPerTick = 0f;
                     break;
-                default: // if it's none of the above, will try to calculate an hydrationLossPerTick based on DifficultySetting.HungerRate:                    
+                default: // if it's none of the above, will try to calculate an hydrationLossPerTick based on DifficultySetting.HungerRate, examples:
+                         // Difficulty in 3 should give 0.208334f, will last 4 game days 
+                         // Difficulty in 2.25 should give 0.1562505f, will last 6 game days
+                         // Difficulty in 0.001 should give 0.055555f, will last 14 days
                     float hungerdifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);
-                    NutritionLossPerTick = Mathf.Lerp(0.0572917f, 0.1510417f, hungerdifficulty);
+                    NutritionLossPerTick = Mathf.Lerp(0.055555f, 0.208334f, hungerdifficulty);
                     break;
             }
             // Complete rewrite of base method Human.LifeNutrition
@@ -108,7 +117,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 __instance.DamageState.Damage(ChangeDamageType.Increment, 0.2f, DamageUpdateType.Starvation);
                 return false;
             }
-            if (__instance.DamageState.Starvation > 0f && __instance.Nutrition >= 500f) // Only heals the character when nutrition is over 540 (after "Nutrition Critical" warning)
+            if (__instance.DamageState.Starvation > 0f && __instance.Nutrition >= 400f) // Only heals the character when nutrition is over 400 (after "Nutrition Critical" warning)
             {
                 __instance.DamageState.Damage(ChangeDamageType.Decrement, 0.1f, DamageUpdateType.Starvation);
             }
@@ -123,7 +132,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPatch("OnLifeCreated")]
         [HarmonyPostfix]
         [UsedImplicitly]
-        private static void RespawnNutritionPatch(Entity __instance)
+        private static void RespawnPatch(Entity __instance)
         {
             float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f;
             float Foodslice = __instance.MaxNutritionStorage / 200f;
@@ -142,6 +151,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 Hydrationtogive = Hydrationslice * 5f;
             }
             Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
+            //TODO: Make it to calculate the food and hydration based also on the difficulty setting
         }
     }
 
@@ -158,49 +168,49 @@ namespace PlantsnNutritionRebalance.Scripts
             switch (__instance.DisplayName)
             {
                 case "Tomato Soup":
-                    __instance.NutritionValue = 150f;
+                    __instance.NutritionValue = 135f;
                     break;
                 case "Corn Soup":
-                    __instance.NutritionValue = 240f;
+                    __instance.NutritionValue = 223f;
                     break;
                 case "Canned Rice Pudding":
-                    __instance.NutritionValue = 120f;
+                    __instance.NutritionValue = 220f;
                     break;
                 case "Pumpkin Soup":
-                    __instance.NutritionValue = 310f;
+                    __instance.NutritionValue = 270f;
                     break;
                 case "Pumpkin Pie":
-                    __instance.NutritionValue = 700f;
+                    __instance.NutritionValue = 800f;
                     break;
                 case "Baked Potato":
-                    __instance.NutritionValue = 40f;
+                    __instance.NutritionValue = 45f;
                     break;
                 case "French Fries":
-                    __instance.NutritionValue = 62f;
+                    __instance.NutritionValue = 85f;
                     break;
                 case "Canned French Fries":
-                    __instance.NutritionValue = 120f;
+                    __instance.NutritionValue = 150f;
                     break;
                 case "Milk":
-                    __instance.NutritionValue = 1.5f;
+                    __instance.NutritionValue = 2.3f;
                     break;
                 case "Canned Condensed Milk":
-                    __instance.NutritionValue = 290f;
+                    __instance.NutritionValue = 400f;
                     break;
                 case "Muffin":
-                    __instance.NutritionValue = 300f;
+                    __instance.NutritionValue = 570f;
                     break;
                 case "Bread Loaf":
-                    __instance.NutritionValue = 155f;
+                    __instance.NutritionValue = 290f;
                     break;
                 case "Cereal Bar":
-                    __instance.NutritionValue = 60f;
+                    __instance.NutritionValue = 110f;
                     break;
                 case "Canned Powdered Eggs":
-                    __instance.NutritionValue = 370f;
+                    __instance.NutritionValue = 550f;
                     break;
                 case "Canned Edamame":
-                    __instance.NutritionValue = 75f;
+                    __instance.NutritionValue = 100f;
                     break;
             }
         }
@@ -217,22 +227,22 @@ namespace PlantsnNutritionRebalance.Scripts
             switch (__instance.DisplayName)
             {
                 case "Condensed Milk":
-                    __instance.NutritionValue = 150f;
+                    __instance.NutritionValue = 235f;
                     break;
                 case "Cooked Soybean":
-                    __instance.NutritionValue = 25f;
+                    __instance.NutritionValue = 38f;
                     break;
                 case "Cooked Rice":
-                    __instance.NutritionValue = 25f;
-                    break;
-                case "Cooked Corn":
                     __instance.NutritionValue = 50f;
                     break;
+                case "Cooked Corn":
+                    __instance.NutritionValue = 52f;
+                    break;
                 case "Cooked Pumpkin":
-                    __instance.NutritionValue = 65f;
+                    __instance.NutritionValue = 60f;
                     break;
                 case "Powdered Eggs":
-                    __instance.NutritionValue = 180f;
+                    __instance.NutritionValue = 330f;
                     break;
                 case "Cooked Tomato":
                     __instance.NutritionValue = 30f;
@@ -250,7 +260,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         public static bool PatchFertilizedEgg(FertilizedEgg __instance)
         {
-            if (__instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= 20f && __instance.WorldAtmosphere.PressureGasses < 200f && __instance.WorldAtmosphere.Temperature > 309.15f && __instance.WorldAtmosphere.Temperature <= 311.15f)
+            if (__instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= 50f && __instance.WorldAtmosphere.PressureGasses <= 120.5f && __instance.WorldAtmosphere.Temperature >= 309.15f && __instance.WorldAtmosphere.Temperature < 311.65f)
             {
                 if (__instance.ParentSlot != null && __instance.ParentSlot.Occupant)
                 {
@@ -259,14 +269,15 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 //Good enviroment, Hatching.
                 __instance.HatchTime -= 0.5f;
+                //If it's near hatching (1 day left), then randomly move the egg to simulate the chick trying to pip the shell.
+                if (__instance.HatchTime < 2400){
+                    if (UnityEngine.Random.Range(0f, 10f) > 9)
+                        __instance.RigidBody.AddForce(new Vector3(UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f)));
+                }
                 if (__instance.HatchTime <= 0f)
                 {
                     OnServer.Interact(__instance.InteractOnOff, 1, false);
                 }
-            }
-            else if (__instance.HasAtmosphere == true)
-            {
-                //Bad enviroment, not hatching.
             }
             return false;
         }
@@ -282,7 +293,6 @@ namespace PlantsnNutritionRebalance.Scripts
         private static void PatchFertilizedEggAwake(FertilizedEgg __instance)
         {
             __instance.HatchTime = 16800f; //Should hatch in 7 days
-                                           //TODO: Make a patch to show the egg status, if it's hatching or not and how long it will take.
         }
     }
 
@@ -302,16 +312,56 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-    //TODO: Find a way to write/update stuff in Stationpedia:
-    /*[HarmonyPatch(typeof(Stationpedia))]
-    [HarmonyPatch("Render")]
-    public class StationpediaRenderPatch
+    [HarmonyPatch(typeof(DynamicThing))]
+    [HarmonyPatch("GetPassiveTooltip")]
+    public class FertilizedeggSTooltipPatch
     {
         [UsedImplicitly]
         [HarmonyPostfix]
-        private static void PatchRenderStatiopedia(StationpediaPage __instance)
+        private static PassiveTooltip PatchFertilizedEggTooltip(PassiveTooltip __result, DynamicThing __instance)
         {
-            Debug.Log($" Statiopedia PageTitle: {Stationpedia.Instance.PageTitle.text} ");
+            if (__instance is FertilizedEgg fertilizedEgg)
+            {
+                __result.Description = getTooltipText(fertilizedEgg);
+            }
+            return __result;
         }
-    }*/
+
+        private static string getTooltipText(FertilizedEgg fertilizedEgg)
+        {
+            string text = "";
+            if (fertilizedEgg.HasAtmosphere == true && fertilizedEgg.WorldAtmosphere.PressureGasses >= 50f && fertilizedEgg.WorldAtmosphere.PressureGasses < 120.5f && fertilizedEgg.WorldAtmosphere.Temperature >= 309.15f && fertilizedEgg.WorldAtmosphere.Temperature < 311.65f)
+            {
+                if (fertilizedEgg.ParentSlot != null && fertilizedEgg.ParentSlot.Occupant)
+                {
+                    //Good enviroment, but inside a Slot.
+                    return text;
+                }
+                if (fertilizedEgg.HatchTime >= 2400f)
+                    text = string.Format("The Egg <color=green>is hatching</color>\n");
+                else
+                    text = string.Format("The Egg <color=green>is almost hatching </color>\nThe chick <color=green>is trying to pip the shell</color>");
+            }
+            else
+            {
+                text = string.Format("The Egg <color=red>is not hatching</color>\n");
+                if (fertilizedEgg.HasAtmosphere == false)
+                {
+                    text += string.Format("The Egg <color=red>needs an atmosphere</color>\n");
+                }
+                else
+                {
+                    if (fertilizedEgg.WorldAtmosphere.PressureGasses < 50f)
+                        text += string.Format("The Egg <color=red>is in a low pressure environment</color> (P < 50kpa)\n");
+                    else if (fertilizedEgg.WorldAtmosphere.PressureGasses >= 120.5f)
+                        text += string.Format("The Egg <color=red>is in a high pressure environment</color> (P > 120kpa)\n");
+                    if (fertilizedEgg.WorldAtmosphere.Temperature < 309.15f)
+                        text += string.Format("The Egg temperature <color=red>is too cold</color> (T < 36°C)\n");
+                    else if (fertilizedEgg.WorldAtmosphere.Temperature >= 311.65f)
+                        text += string.Format("The Egg temperature <color=red>is too hot</color> (T > 38°C)\n");
+                }
+            }           
+            return text;
+        }
+    }
 }
