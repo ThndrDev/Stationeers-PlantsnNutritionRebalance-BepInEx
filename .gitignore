@@ -43,3 +43,15 @@ obj/Release/netstandard2.0/stationeers-PlantsnNutritionRebalance.AssemblyInfoInp
 obj/Release/netstandard2.0/stationeers-PlantsnNutritionRebalance.assets.cache
 *.dll
 *.zip
+obj/Debug/netstandard2.0/stationeers-PlantsnNutritionRebalance.GeneratedMSBuildEditorConfig.editorconfig
+.vs/ProjectEvaluation/stationeers-plantsnnutritionrebalance.metadata.v6.1
+.vs/ProjectEvaluation/stationeers-plantsnnutritionrebalance.projects.v6.1
+.vs/stationeers-PlantsnNutritionRebalance/DesignTimeBuild/.dtbcache.v2
+.vs/stationeers-PlantsnNutritionRebalance/FileContentIndex/0394e895-6e22-4e2f-bb58-79d5292aa5c0.vsidx
+.vs/stationeers-PlantsnNutritionRebalance/FileContentIndex/af028c38-1ee6-4104-9456-5303968d685d.vsidx
+.vs/stationeers-PlantsnNutritionRebalance/FileContentIndex/read.lock
+.vs/stationeers-PlantsnNutritionRebalance/FileContentIndex/1e41d5f3-7ef0-4fde-9ec7-41df2b362243.vsidx
+.vs/stationeers-PlantsnNutritionRebalance/FileContentIndex/513c235a-6d8a-4358-b650-489a2a8055d0.vsidx
+*.vsidx
+*.v2
+.vs/stationeers-PlantsnNutritionRebalance/v17/.suo
