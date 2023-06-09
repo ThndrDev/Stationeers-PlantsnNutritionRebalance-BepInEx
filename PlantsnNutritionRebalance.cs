@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition", "0.9.1.0")]    
+    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition", "0.9.2.0")]    
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -143,9 +143,6 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 Debug.Log("Plants and Nutrition - Successfully applied growth stage modifications to plants.");
             }
-
-
-
         }
     }
 }

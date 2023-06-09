@@ -22,6 +22,7 @@ namespace PlantsnNutritionRebalance.Scripts
             __result *= 566.67f; //increase most plants water consumtpion from 6E-05f to 0.0034f with max consumption limited to this value.
             if (__result > 0.0034f)
                 __result = 0.0034f;
+            Debug.Log($"Water consumption: {__result}");
             //TODO: Transfer the water consumption boost to the prefab load, so it also shows the correct modded values in Stationpedia.
         }
     }
@@ -322,7 +323,7 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             if (__instance is FertilizedEgg fertilizedEgg)
             {
-                __result.Description = getTooltipText(fertilizedEgg);
+                __result.Extended = getTooltipText(fertilizedEgg);
             }
             return __result;
         }
