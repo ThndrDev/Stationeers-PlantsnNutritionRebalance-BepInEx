@@ -13,7 +13,7 @@ After every Mod update, you will also need to redownload the release manually an
 # Instructions
 
 * If you don't have BepInEx installed, download the x64 version available at https://github.com/BepInEx/BepInEx/releases/tag/v5.4.21 and follow the BepInEx installation instructions but basically you will need to:
-     - Drop it inside Stationeers folder
+     - Drop and unpack it inside Stationeers folder
      - Start the game once to finish installing BepInEx and check if he created the folders called \Stationeers\BepInEx\plugins, if yes, the BepInEx installation is completed.
 * Download the lastest release from https://github.com/ThndrDev/Stationeers-PlantsnNutritionRebalance-BepInEx/releases/ page.
 * Unpack it inside the folder \BepInEx\plugins
