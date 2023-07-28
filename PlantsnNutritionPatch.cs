@@ -6,10 +6,57 @@ using UnityEngine;
 using Assets.Scripts.Objects.Items;
 using Assets.Scripts.Serialization;
 using Assets.Scripts.Objects;
-
+using Assets.Scripts.Atmospherics;
+using System.Reflection;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
+    // Make plants transpirate some of the water they drink:
+    [HarmonyPatch(typeof(Plant))]
+    public class PlantPatch
+    {
+        [HarmonyPatch("TakePlantDrink")]
+        [UsedImplicitly]
+        [HarmonyPostfix]
+        public static void TakePlantDrinkPatch(Plant __instance, ref float __result)
+        {
+            if (PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage == 0)
+                return;
+            else
+            {
+                GasMixture gasMixture = GasMixtureHelper.Create();
+                gasMixture.Add(new Mole(Chemistry.GasType.Water, (__result/100)* PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage, 0f));
+                gasMixture.AddEnergy(__instance.ParentTray.WaterAtmosphere.Temperature * gasMixture.HeatCapacity);
+                //Debug.Log($"Water amount = {__result}  Water Temperature: {__instance.ParentTray.WaterAtmosphere.Temperature}  Heat Capacity: {gasMixture.HeatCapacity}");
+                __instance.BreathingAtmosphere.Add(gasMixture);
+            }
+        }
+    }
+
+    // Patch the atmosphere fog:
+    [HarmonyPatch(typeof(AtmosphericFog))]
+    public class AtmosphericFogPatch
+    {
+        [HarmonyPatch("get_IsValid")]
+        [UsedImplicitly]
+        [HarmonyPrefix]
+        public static bool PatchAtmosphericFog(AtmosphericFog __instance, ref bool __result)
+        {
+            if (PlantsnNutritionRebalancePlugin.AtmosphereFogThreshold == 0f)
+                return true; //user don't want to change the Fog Threshold, so keep the Vanilla method
+            else
+            { 
+                // Get the private Atmosphere property using reflection
+                var atmosphereProp = typeof(AtmosphericFog).GetProperty("Atmosphere", BindingFlags.NonPublic | BindingFlags.Instance);
+                // Get the value of the Atmosphere property for this instance of AtmosphericFog
+                var atmosphere = (Atmosphere)atmosphereProp.GetValue(__instance);
+                // Change the AtmosphereFog Moles threshold:
+                __result = atmosphere != null && atmosphere.GasMixture.TotalMolesLiquids > PlantsnNutritionRebalancePlugin.AtmosphereFogThreshold && atmosphere.Mode == AtmosphereHelper.AtmosphereMode.World;
+                return false; // then skip the vanilla method
+            }
+        }
+    }
+
     // Adjusts the water consumption of plants:
     [HarmonyPatch(typeof(PlantLifeRequirements))]
     public class PlantLifeRequirementsPatch
@@ -19,11 +66,12 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         public static void WaterPerTickPatch(ref float __result)
         {
-            __result *= 566.67f; //increase most plants water consumtpion from 6E-05f to 0.0034f with max consumption limited to this value.
-            if (__result > 0.0034f)
-                __result = 0.0034f;
-            Debug.Log($"Water consumption: {__result}");
-            //TODO: Transfer the water consumption boost to the prefab load, so it also shows the correct modded values in Stationpedia.
+            if (PlantsnNutritionRebalancePlugin.ChangePlantsWaterConsumption)
+            {
+                __result *= PlantsnNutritionRebalancePlugin.PlantWaterConsumptionMultiplier;
+                if (__result > PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit)
+                    __result = PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit;
+            }
         }
     }
 
@@ -42,11 +90,11 @@ namespace PlantsnNutritionRebalance.Scripts
                 case 1.5f: //stationeers difficulty, water will last 2 and half days
                     ____hydrationLossPerTick = 0.0019446f;
                     break;
-                case 1f: //normal difficulty, 85% water usage of stationeers difficulty
-                    ____hydrationLossPerTick = 0.00165291f;
+                case 1f: //normal difficulty, full water will last for 4 and half days 
+                    ____hydrationLossPerTick = 0.00165291f; // THAT'S WRONG, NEEDS TO BE FIXED
                     break;
-                case 0.5f: //easy difficulty, 70% water usage of stationeers difficulty, should be easy enough
-                    ____hydrationLossPerTick = 0.00136122f;
+                case 0.5f: //easy difficulty, full water will last for 6 days and half days
+                    ____hydrationLossPerTick = 0.00136122f; // THAT'S WRONG, NEEDS TO BE FIXED
                     break;
                 case 0f: //user disabled water consumption directly on world config
                     ____hydrationLossPerTick = 0f;
@@ -61,9 +109,6 @@ namespace PlantsnNutritionRebalance.Scripts
             __instance.CriticalNutrition = 400f;
             __instance.WarningHydration = 10.5f;
             __instance.CriticalHydration = 5.25f;
-            // Fix for the character nutrition if it's bigger than 4000 (due to the 20% reduction of maxnutrition made in v0.9)
-            if (__instance.Nutrition > 4000f)
-                __instance.Nutrition *= 0.8f;
         }
 
 
@@ -127,34 +172,41 @@ namespace PlantsnNutritionRebalance.Scripts
     }
 
     // Calculates the Food and Nutrition to give to the player based on the dayspast in the save, so we don't reward a character who dies with 100% stats
-    [HarmonyPatch(typeof(Entity))]
-    public static class OnLifeCreatedPatch
-    {
-        [HarmonyPatch("OnLifeCreated")]
-        [HarmonyPostfix]
-        [UsedImplicitly]
-        private static void RespawnPatch(Entity __instance)
+        [HarmonyPatch(typeof(Entity))]
+        public static class OnLifeCreatedPatch
         {
-            float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f;
-            float Foodslice = __instance.MaxNutritionStorage / 200f;
-            float Hydrationslice = Human.MaxHydrationStorage / 200f;
-            float Hydrationtogive;
-            if (Dayspastnorm <= 195)
+            [HarmonyPatch("OnLifeCreated")]
+            [HarmonyPostfix]
+            [UsedImplicitly]
+            private static void RespawnPatch(Entity __instance)
             {
-                // Calculate the food for respawn acordingly to the days past and SunOrbit
-                __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
-                Hydrationtogive = (200f - Dayspastnorm) * Hydrationslice;
+                /*
+                //WIP: fix the respawn quantities to be in line with what should be consumed for each water and tirsthy difficulty, not yet finished.
+                float NormalizedHungerDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate - 1.5f) / (0.5f - 1.5f));
+                float MaxHungerDays = Mathf.LerpUnclamped(12f, 8f, NormalizedHungerDifficulty);
+                float NormalizedHydrationDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate - 1.5f) / (0.5f - 1.5f));
+                float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);*/
+
+                float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f; 
+                float Foodslice = __instance.MaxNutritionStorage / 200f;
+                float Hydrationslice = Human.MaxHydrationStorage / 200f;
+                float Hydrationtogive;
+                if (Dayspastnorm <= 195)
+                {
+                    // Calculate the food for respawn acordingly to the days past and SunOrbit
+                    __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
+                    Hydrationtogive = (200f - Dayspastnorm) * Hydrationslice;
+                }
+                else
+                {
+                    // give minimal food and water, so a respawned character have some time to eat and drink.
+                    __instance.Nutrition = Foodslice * 3f;
+                    Hydrationtogive = Hydrationslice * 5f;
+                }
+                Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
+                //TODO: Make it to calculate the food and hydration based also on the difficulty setting
             }
-            else
-            {
-                // give minimal food and water, so a respawned character have some time to eat and drink.
-                __instance.Nutrition = Foodslice * 3f;
-                Hydrationtogive = Hydrationslice * 5f;
-            }
-            Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
-            //TODO: Make it to calculate the food and hydration based also on the difficulty setting
         }
-    }
 
     // Update food Nutrition Values
     [HarmonyPatch(typeof(Food))]
@@ -170,6 +222,7 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 case "Tomato Soup":
                     __instance.NutritionValue = 135f;
+                    //__instance.RootParentHuman.Hydrate(21f);
                     break;
                 case "Corn Soup":
                     __instance.NutritionValue = 223f;

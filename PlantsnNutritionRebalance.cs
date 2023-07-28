@@ -1,14 +1,16 @@
-﻿using BepInEx;
+﻿using System.Reflection;
+using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
 using Assets.Scripts.Objects;
 using Assets.Scripts.Objects.Items;
 using System.Collections.Generic;
-
+using Assets.Scripts.Genetics;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts", "Plants and Nutrition", "0.9.2.0")]    
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.0.0.0")]    
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -21,10 +23,70 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             PlantsnNutritionRebalancePlugin.Instance = this;
             Log("Hello World");
+            Handleconfig();
             var harmony = new Harmony("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts");
             harmony.PatchAll();
             Prefab.OnPrefabsLoaded += ApplyPatchesWhenPrefabsLoaded;
             Log("Patch succeeded");
+        }
+
+        private ConfigEntry<bool> configChangePlantsWaterConsumption;
+        private ConfigEntry<float> configPlantWaterConsumptionMultiplier;
+        private ConfigEntry<float> configPlantWaterConsumptionLimit;
+        private ConfigEntry<int> configPlantWaterTranspirationPercentage;
+        private ConfigEntry<float> configAtmosphereFogThreshold;
+
+        public static bool ChangePlantsWaterConsumption;
+        public static float PlantWaterConsumptionMultiplier;
+        public static float PlantWaterConsumptionLimit;
+        public static int PlantWaterTranspirationPercentage;
+        public static float AtmosphereFogThreshold;
+
+        private void Handleconfig() // Create and manage the configuration file parameters
+        {
+            configChangePlantsWaterConsumption = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
+                 "ChangePlantsWaterConsumption",  // The key of the configuration option in the configuration file
+                 true, // The default value
+                 "If True, the mod will multiply the water consumption of the plants by the ConsumptionMultiplier amount choosed below.\n" +
+                 "If False the mod will use the Vanilla water consumption on plants."); // Description of the option to show in the config file
+
+            ChangePlantsWaterConsumption = configChangePlantsWaterConsumption.Value;
+
+            configPlantWaterConsumptionMultiplier = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
+                 "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
+                 500f, // The default value
+                 "If the option to change the water consumption is true, by how much it will multiply the water consumption of plants? \n" +
+                 "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols\n" +
+                 "That means, in vanilla, 1 single stack of ice will keep a plant alive for more than 23148 hours of gameplay! That's why the suggested value here\n" +
+                 "is 500, it increases the plants drinks to ~0.003 moles of water per tick. With this, 1 ice water stack will keep a plant alive for 46 hours of gameplay,\n" +
+                 "or 20 plants for 2 hours, enough to make the plant water management meaningful.\n"); // Description of the option to show in the config file
+
+            PlantWaterConsumptionMultiplier = configPlantWaterConsumptionMultiplier.Value;
+
+            configPlantWaterConsumptionLimit = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
+                 "PlantWaterConsumptionLimit",  // The key of the configuration option in the configuration file
+                 0.004f, // The default value
+                 "Limit the max consumption of water per tick a plant can have. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks\n" +
+                 "considerably more water than the other plants."); // Description of the option to show in the config file
+
+            PlantWaterConsumptionLimit = configPlantWaterConsumptionLimit.Value;
+
+            configPlantWaterTranspirationPercentage = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
+                 "PlantWaterTranspirationPercentage",  // The key of the configuration option in the configuration file
+                 25, // The default value
+                 "This value set the percentage of the water consumed by plants that should be transpirated back to the atmosphere.\n" +
+                 "Can be set between 0 to 100 (integer values only). Set to 0 to disable water transpiration."); // Description of the option to show in the config file
+
+            PlantWaterTranspirationPercentage = configPlantWaterTranspirationPercentage.Value;
+
+            configAtmosphereFogThreshold = Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
+                 "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
+                 0.7f, // The default value
+                 "This value set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any\n" +
+                 "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog\n" +
+                 "visualization for *ALL* liquids in the atmosphere, not just water. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
+
+            AtmosphereFogThreshold = configAtmosphereFogThreshold.Value;
         }
 
         private void ApplyPatchesWhenPrefabsLoaded()
@@ -126,7 +188,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     }
                 }
 
-                // Apply the changes to the plants
+                // Apply the changes to the growthstages of the plants
                 foreach (var keyValuePair in plantStages)
                 {
                     if (plantDict.TryGetValue(keyValuePair.Key, out Plant plant))
