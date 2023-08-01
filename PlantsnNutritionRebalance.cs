@@ -10,7 +10,7 @@ using Assets.Scripts.Genetics;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.0.0.0")]    
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "0.9.5.0")]    
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -30,63 +30,54 @@ namespace PlantsnNutritionRebalance.Scripts
             Log("Patch succeeded");
         }
 
-        private ConfigEntry<bool> configChangePlantsWaterConsumption;
         private ConfigEntry<float> configPlantWaterConsumptionMultiplier;
         private ConfigEntry<float> configPlantWaterConsumptionLimit;
-        private ConfigEntry<int> configPlantWaterTranspirationPercentage;
+        private ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private ConfigEntry<float> configAtmosphereFogThreshold;
 
-        public static bool ChangePlantsWaterConsumption;
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
-        public static int PlantWaterTranspirationPercentage;
+        public static float PlantWaterTranspirationPercentage;
         public static float AtmosphereFogThreshold;
 
         private void Handleconfig() // Create and manage the configuration file parameters
         {
-            configChangePlantsWaterConsumption = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
-                 "ChangePlantsWaterConsumption",  // The key of the configuration option in the configuration file
-                 true, // The default value
-                 "If True, the mod will multiply the water consumption of the plants by the ConsumptionMultiplier amount choosed below.\n" +
-                 "If False the mod will use the Vanilla water consumption on plants."); // Description of the option to show in the config file
-
-            ChangePlantsWaterConsumption = configChangePlantsWaterConsumption.Value;
-
             configPlantWaterConsumptionMultiplier = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
                  500f, // The default value
-                 "If the option to change the water consumption is true, by how much it will multiply the water consumption of plants? \n" +
+                 "By how much this mod should multiply the water consumption of plants?\n" +
                  "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols\n" +
                  "That means, in vanilla, 1 single stack of ice will keep a plant alive for more than 23148 hours of gameplay! That's why the suggested value here\n" +
                  "is 500, it increases the plants drinks to ~0.003 moles of water per tick. With this, 1 ice water stack will keep a plant alive for 46 hours of gameplay,\n" +
-                 "or 20 plants for 2 hours, enough to make the plant water management meaningful.\n"); // Description of the option to show in the config file
+                 "or 20 plants for 2 hours, enough to make the water management meaningful.\n" +
+                 "Set this option to 1 to keep the vanilla water consumption on plants"); // Description of the option to show in the config file
 
-            PlantWaterConsumptionMultiplier = configPlantWaterConsumptionMultiplier.Value;
+            PlantWaterConsumptionMultiplier = Mathf.Clamp(configPlantWaterConsumptionMultiplier.Value, 1f, 100000f);
 
             configPlantWaterConsumptionLimit = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionLimit",  // The key of the configuration option in the configuration file
                  0.004f, // The default value
-                 "Limit the max consumption of water per tick a plant can have. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks\n" +
-                 "considerably more water than the other plants."); // Description of the option to show in the config file
+                 "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks\n" +
+                 "considerably more water than the other plants. Should be set to a positive float value"); // Description of the option to show in the config file
 
-            PlantWaterConsumptionLimit = configPlantWaterConsumptionLimit.Value;
+            PlantWaterConsumptionLimit = Mathf.Clamp(configPlantWaterConsumptionLimit.Value, 0.000001f, 100000f);
 
             configPlantWaterTranspirationPercentage = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterTranspirationPercentage",  // The key of the configuration option in the configuration file
-                 25, // The default value
+                 25f, // The default value
                  "This value set the percentage of the water consumed by plants that should be transpirated back to the atmosphere.\n" +
-                 "Can be set between 0 to 100 (integer values only). Set to 0 to disable water transpiration."); // Description of the option to show in the config file
+                 "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration."); // Description of the option to show in the config file
 
-            PlantWaterTranspirationPercentage = configPlantWaterTranspirationPercentage.Value;
+            PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);            
 
             configAtmosphereFogThreshold = Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
                  "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
-                 0.7f, // The default value
+                 5f, // The default value
                  "This value set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any\n" +
                  "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog\n" +
-                 "visualization for *ALL* liquids in the atmosphere, not just water. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
+                 "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
 
-            AtmosphereFogThreshold = configAtmosphereFogThreshold.Value;
+            AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
         }
 
         private void ApplyPatchesWhenPrefabsLoaded()

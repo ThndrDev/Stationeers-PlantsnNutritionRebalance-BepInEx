@@ -27,7 +27,6 @@ namespace PlantsnNutritionRebalance.Scripts
                 GasMixture gasMixture = GasMixtureHelper.Create();
                 gasMixture.Add(new Mole(Chemistry.GasType.Water, (__result/100)* PlantsnNutritionRebalancePlugin.PlantWaterTranspirationPercentage, 0f));
                 gasMixture.AddEnergy(__instance.ParentTray.WaterAtmosphere.Temperature * gasMixture.HeatCapacity);
-                //Debug.Log($"Water amount = {__result}  Water Temperature: {__instance.ParentTray.WaterAtmosphere.Temperature}  Heat Capacity: {gasMixture.HeatCapacity}");
                 __instance.BreathingAtmosphere.Add(gasMixture);
             }
         }
@@ -66,12 +65,9 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         public static void WaterPerTickPatch(ref float __result)
         {
-            if (PlantsnNutritionRebalancePlugin.ChangePlantsWaterConsumption)
-            {
-                __result *= PlantsnNutritionRebalancePlugin.PlantWaterConsumptionMultiplier;
-                if (__result > PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit)
-                    __result = PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit;
-            }
+            __result *= PlantsnNutritionRebalancePlugin.PlantWaterConsumptionMultiplier;
+            if (__result > PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit)
+                __result = PlantsnNutritionRebalancePlugin.PlantWaterConsumptionLimit;
         }
     }
 
@@ -87,21 +83,21 @@ namespace PlantsnNutritionRebalance.Scripts
             ___MaxHydrationStorage = 42f;
             switch (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)
             {
-                case 1.5f: //stationeers difficulty, water will last 2 and half days
+                case 1.5f: //stationeers difficulty, full water will last 100 game minutes (2 and a half days)
                     ____hydrationLossPerTick = 0.0019446f;
                     break;
-                case 1f: //normal difficulty, full water will last for 4 and half days 
-                    ____hydrationLossPerTick = 0.00165291f; // THAT'S WRONG, NEEDS TO BE FIXED
+                case 1f: //normal difficulty, full water should last ~160 game minutes (4 days in sun/orbit 2)
+                    ____hydrationLossPerTick = 0.001798755f;
                     break;
-                case 0.5f: //easy difficulty, full water will last for 6 days and half days
-                    ____hydrationLossPerTick = 0.00136122f; // THAT'S WRONG, NEEDS TO BE FIXED
+                case 0.5f: //easy difficulty, full water should last ~220 game minutes
+                    ____hydrationLossPerTick = 0.0017258325f;
                     break;
                 case 0f: //user disabled water consumption directly on world config
                     ____hydrationLossPerTick = 0f;
                     break;
                 default: // if it's none of the above, will try to calculate hydrationLossPerTick based on DifficultySetting.HydrationRate:
-                    float a = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
-                    ____hydrationLossPerTick = Mathf.Lerp(0.00106953f, 0.00281967f, a);
+                    float a = Mathf.InverseLerp(0.0001f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
+                    ____hydrationLossPerTick = Mathf.Lerp(0.001507065f, 0.002382135f, a);
                     break;
             }
             // Nutrition/hydration warnings:
@@ -142,7 +138,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 case 0f: //user disabled food consumption directly on world config
                     NutritionLossPerTick = 0f;
                     break;
-                default: // if it's none of the above, will try to calculate an hydrationLossPerTick based on DifficultySetting.HungerRate, examples:
+                default: // if it's none of the above, will try to calculate NutritionLossPerTick based on DifficultySetting.HungerRate, examples:
                          // Difficulty in 3 should give 0.208334f, will last 4 game days 
                          // Difficulty in 2.25 should give 0.1562505f, will last 6 game days
                          // Difficulty in 0.001 should give 0.055555f, will last 14 days
@@ -180,12 +176,16 @@ namespace PlantsnNutritionRebalance.Scripts
             [UsedImplicitly]
             private static void RespawnPatch(Entity __instance)
             {
-                /*
                 //WIP: fix the respawn quantities to be in line with what should be consumed for each water and tirsthy difficulty, not yet finished.
-                float NormalizedHungerDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate - 1.5f) / (0.5f - 1.5f));
-                float MaxHungerDays = Mathf.LerpUnclamped(12f, 8f, NormalizedHungerDifficulty);
+                /*float NormalizedHungerDifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);                
+                float MaxHungerDays = Mathf.LerpUnclamped(13.6f, 4f, NormalizedHungerDifficulty);
+                MaxHungerDays *= Settings.CurrentData.SunOrbitPeriod;
+                Debug.Log($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
+
                 float NormalizedHydrationDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate - 1.5f) / (0.5f - 1.5f));
-                float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);*/
+                float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);
+                MaxHydrationDays *= Settings.CurrentData.SunOrbitPeriod;
+                Debug.Log($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/                            
 
                 float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f; 
                 float Foodslice = __instance.MaxNutritionStorage / 200f;
