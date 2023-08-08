@@ -7,10 +7,13 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Objects.Items;
 using System.Collections.Generic;
 using Assets.Scripts.Genetics;
+using Assets.Scripts.Objects.Structures;
+using System.Collections;
+using System;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "0.9.5.0")]    
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "0.9.5.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -34,6 +37,114 @@ namespace PlantsnNutritionRebalance.Scripts
         private ConfigEntry<float> configPlantWaterConsumptionLimit;
         private ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private ConfigEntry<float> configAtmosphereFogThreshold;
+
+        //------------------------------ foods----------------------------------------------
+        private ConfigEntry<bool> configFoods;
+        private ConfigEntry<float> configTomatoSoup;
+        private ConfigEntry<float> configCornSoup;
+        private ConfigEntry<float> configCannedRicePudding;
+        private ConfigEntry<float> configPumpkinSoup;
+        private ConfigEntry<float> configPumpkinPie;
+        private ConfigEntry<float> configBakedPotato;
+        private ConfigEntry<float> configFrenchFries;
+        private ConfigEntry<float> configCannedFrenchFries;
+        private ConfigEntry<float> configMilk;
+        private ConfigEntry<float> configCannedCondensedMilk;
+        private ConfigEntry<float> configMuffin;
+        private ConfigEntry<float> configBreadLoaf;
+        private ConfigEntry<float> configCerealBar;
+        private ConfigEntry<float> configCannedPowderedEggs;
+        private ConfigEntry<float> configCannedEdamame;
+        private ConfigEntry<float> configCondensedMilk;
+        private ConfigEntry<float> configCookedSoybean;
+        private ConfigEntry<float> configCookedRice;
+        private ConfigEntry<float> configCookedCorn;
+        private ConfigEntry<float> configCookedPumpkin;
+        private ConfigEntry<float> configPowderedEggs;
+        private ConfigEntry<float> configCookedTomato;
+
+        private ConfigEntry<float> configTomatoSoupES;
+        private ConfigEntry<float> configCornSoupES;
+        private ConfigEntry<float> configCannedRicePuddingES;
+        private ConfigEntry<float> configPumpkinSoupES;
+        private ConfigEntry<float> configPumpkinPieES;
+        private ConfigEntry<float> configBakedPotatoES;
+        private ConfigEntry<float> configFrenchFriesES;
+        private ConfigEntry<float> configCannedFrenchFriesES;
+        private ConfigEntry<float> configMilkES;
+        private ConfigEntry<float> configCannedCondensedMilkES;
+        private ConfigEntry<float> configMuffinES;
+        private ConfigEntry<float> configBreadLoafES;
+        private ConfigEntry<float> configCerealBarES;
+        private ConfigEntry<float> configCannedPowderedEggsES;
+        private ConfigEntry<float> configCannedEdamameES;
+        private ConfigEntry<float> configCondensedMilkES;
+        private ConfigEntry<float> configCookedSoybeanES;
+        private ConfigEntry<float> configCookedRiceES;
+        private ConfigEntry<float> configCookedCornES;
+        private ConfigEntry<float> configCookedPumpkinES;
+        private ConfigEntry<float> configPowderedEggsES;
+        private ConfigEntry<float> configCookedTomatoES;
+        private ConfigEntry<float> configmaxDaysHunger;
+        private ConfigEntry<float> configmaxfoodPlayer;
+
+        public static Dictionary<String, System.Object> fConfigsFood = new Dictionary<string, object>();
+
+        public static Dictionary<String, System.Object> fTomatoSoup = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCornSoup = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCannedRicePudding = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fPumpkinSoup = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fPumpkinPie = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fBakedPotato = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fFrenchFries = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCannedFrenchFries = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fMilk = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCannedCondensedMilk = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fMuffin = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fBreadLoaf = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCerealBar = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCannedPowderedEggs = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCannedEdamame = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCondensedMilk = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCookedSoybean = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCookedRice = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCookedCorn = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCookedPumpkin = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fPowderedEggs = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCookedTomato = new Dictionary<string, object>();
+
+        //plants
+        private ConfigEntry<bool> configPlants;
+        private ConfigEntry<float> configWheat;
+        private ConfigEntry<float> configCorn;
+        private ConfigEntry<float> configFern;
+        private ConfigEntry<float> configMushroom;
+        private ConfigEntry<float> configPotato;
+        private ConfigEntry<float> configPumpkin;
+        private ConfigEntry<float> configRice;
+        private ConfigEntry<float> configSoybean;
+        private ConfigEntry<float> configTomato;
+
+        public static Dictionary<String, System.Object> fWheat = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fCorn = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fFern = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fMushroom = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fPotato = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fPumpkin = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fRice = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fSoybean = new Dictionary<string, object>();
+        public static Dictionary<String, System.Object> fTomato = new Dictionary<string, object>();
+
+        //decay
+        /* not implemented
+        private ConfigEntry<bool> configDecay;
+        private ConfigEntry<float> DecayFactor;
+        public static Dictionary<String, System.Object> fDecayFactor = new Dictionary<string, object>();
+        */
+
+
+
+        // ---------------------------------- foods ---------------------------------------
 
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
@@ -68,7 +179,7 @@ namespace PlantsnNutritionRebalance.Scripts
                  "This value set the percentage of the water consumed by plants that should be transpirated back to the atmosphere.\n" +
                  "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration."); // Description of the option to show in the config file
 
-            PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);            
+            PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);
 
             configAtmosphereFogThreshold = Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
                  "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
@@ -78,6 +189,183 @@ namespace PlantsnNutritionRebalance.Scripts
                  "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
 
             AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
+
+            //------------------------------------ food config-------------------------------------------
+
+            configmaxDaysHunger = Config.Bind("3 - Foods Configuration", "Max days Hungred", 0.055555f, "Values between 0.000001f and 0.208334f \n 0.208334f = 4days and 0.055555f = 14days\n closer to 0f greater hunger time \n predefined values by game difficulty when HungerRate is at 0.5f = 12 game days, 1f = 10 game days, 1.5f = 8 game days");
+            configmaxfoodPlayer = Config.Bind("3 - Foods Configuration", "Max stomach", 4000f, "Value defines how much more food you can eat.\n with 4000 you need to eat on average to fill the bar \n 4 Canned Edamame or 8 Cooked Rice ");
+
+            fConfigsFood.Add("MDH", configmaxDaysHunger.Value);
+            fConfigsFood.Add("MF", configmaxfoodPlayer.Value);
+
+            configFoods = configPlants = Config.Bind("3 - Foods Configuration", "Enable food config", true, "Enable food config");
+
+            configTomatoSoup = Config.Bind("3 - Foods Configuration", "Tomato Soup", 135f, "Amount of food nutrition");
+            configTomatoSoupES = Config.Bind("3 - Foods Configuration", "Tomato Soup", 0.04f, "speed factor when eating the food");
+
+            configCornSoup = Config.Bind("3 - Foods Configuration", "Corn Soup", 223f, "Amount of food nutrition");
+            configCornSoupES = Config.Bind("3 - Foods Configuration", "Eat speed Corn Soup", 0.04f, "d");
+
+            configCannedRicePudding = Config.Bind("3 - Foods Configuration", "Canned Rice Pudding", 220f, "Amount of food nutrition");
+            configCannedRicePuddingES = Config.Bind("3 - Foods Configuration", "Eat speed Canned Rice Pudding", 0.04f, "Eat speed Corn Soup");
+
+            configPumpkinSoup = Config.Bind("3 - Foods Configuration", "Pumpkin Soup", 270f, "Amount of food nutrition");
+            configPumpkinSoupES = Config.Bind("3 - Foods Configuration", "Eat speed Pumpkin Soup", 0.04f, "Eat speed Corn Soup");
+
+            configPumpkinPie = Config.Bind("3 - Foods Configuration", "Pumpkin Pie", 800f, "Amount of food nutrition");
+            configPumpkinPieES = Config.Bind("3 - Foods Configuration", "Eat speed Pumpkin Pie", 0.02f, "Eat speed Corn Soup");
+
+            configBakedPotato = Config.Bind("3 - Foods Configuration", "Baked Potato", 45f, "Amount of food nutrition");
+            configBakedPotatoES = Config.Bind("3 - Foods Configuration", "Eat speed Baked Potato", 0.015f, "Eat speed Corn Soup");
+
+            configFrenchFries = Config.Bind("3 - Foods Configuration", "French Fries", 85f, "Amount of food nutrition");
+            configFrenchFriesES = Config.Bind("3 - Foods Configuration", "Eat speed French Fries", 0.02f, "Eat speed Corn Soup");
+
+            configCannedFrenchFries = Config.Bind("3 - Foods Configuration", "Canned French Fries", 150f, "Amount of food nutrition");
+            configCannedFrenchFriesES = Config.Bind("3 - Foods Configuration", "Eat speed Canned French Fries", 0.04f, "Eat speed Corn Soup");
+
+            configMilk = Config.Bind("3 - Foods Configuration", "Milk", 2.3f, "Amount of food nutrition");
+            configMilkES = Config.Bind("3 - Foods Configuration", "Eat speed Milk", 0.015f, "Eat speed Corn Soup");
+
+            configCannedCondensedMilk = Config.Bind("3 - Foods Configuration", "Canned Condensed Milk", 400f, "Amount of food nutrition");
+            configCannedCondensedMilkES = Config.Bind("3 - Foods Configuration", "Eat speed Canned Condensed Milk", 0.04f, "Eat speed Corn Soup");
+
+            configMuffin = Config.Bind("3 - Foods Configuration", "Muffin", 570f, "Amount of food nutrition");
+            configMuffinES = Config.Bind("3 - Foods Configuration", "Eat speed Muffin", 0.02f, "Eat speed Corn Soup");
+
+            configBreadLoaf = Config.Bind("3 - Foods Configuration", "Bread Loaf", 290f, "Amount of food nutrition");
+            configBreadLoafES = Config.Bind("3 - Foods Configuration", "Eat speed Bread Loaf", 0.02f, "Eat speed Corn Soup");
+
+            configCerealBar = Config.Bind("3 - Foods Configuration", "Cereal Bar", 110f, "Amount of food nutrition");
+            configCerealBarES = Config.Bind("3 - Foods Configuration", "Eat speed Cereal Bar", 0.04f, "Eat speed Corn Soup");
+
+            configCannedPowderedEggs = Config.Bind("3 - Foods Configuration", "Canned Powdered Eggs", 550f, "Amount of food nutrition");
+            configCannedPowderedEggsES = Config.Bind("3 - Foods Configuration", "Eat speed Canned Powdered Eggs", 0.04f, "Eat speed Corn Soup");
+
+            configCannedEdamame = Config.Bind("3 - Foods Configuration", "Canned Edamame", 100f, "Amount of food nutrition");
+            configCannedEdamameES = Config.Bind("3 - Foods Configuration", "Eat speed Canned Edamame", 0.04f, "Eat speed Corn Soup");
+
+            configCondensedMilk = Config.Bind("3 - Foods Configuration", "Condensed Milk", 235f, "Amount of food nutrition");
+            configCondensedMilkES = Config.Bind("3 - Foods Configuration", "Eat speed Condensed Milk", 0.015f, "Eat speed Corn Soup");
+
+            configCookedSoybean = Config.Bind("3 - Foods Configuration", "Cooked Soybean", 38f, "Amount of food nutrition");
+            configCookedSoybeanES = Config.Bind("3 - Foods Configuration", "Eat speed Cooked Soybean", 0.015f, "Eat speed Corn Soup");
+
+            configCookedRice = Config.Bind("3 - Foods Configuration", "Cooked Rice", 50f, "Amount of food nutrition");
+            configCookedRiceES = Config.Bind("3 - Foods Configuration", "Eat speed Cooked Rice", 0.015f, "Eat speed Corn Soup");
+
+            configCookedCorn = Config.Bind("3 - Foods Configuration", "Cooked Corn", 52f, "Amount of food nutrition");
+            configCookedCornES = Config.Bind("3 - Foods Configuration", "Eat speed Cooked Corn", 0.015f, "Eat speed Corn Soup");
+
+            configCookedPumpkin = Config.Bind("3 - Foods Configuration", "Cooked Pumpkin", 60f, "Amount of food nutrition");
+            configCookedPumpkinES = Config.Bind("3 - Foods Configuration", "Eat speed Cooked Pumpkin", 0.015f, "Eat speed Corn Soup");
+
+            configPowderedEggs = Config.Bind("3 - Foods Configuration", "Powdered Eggs", 330f, "Amount of food nutrition");
+            configPowderedEggsES = Config.Bind("3 - Foods Configuration", "Eat speed Powdered Eggs", 0.015f, "Eat speed Corn Soup");
+
+            configCookedTomato = Config.Bind("3 - Foods Configuration", "Cooked Tomato", 30f, "Amount of food nutrition");
+            configCookedTomatoES = Config.Bind("3 - Foods Configuration", "Eat speed Cooked Tomato", 0.015f, "Eat speed Corn Soup");
+
+            fTomatoSoup.Add("NUTV", configTomatoSoup.Value);
+            fTomatoSoup.Add("SEAT", configTomatoSoupES.Value);
+
+            fCornSoup.Add("NUTV", configCornSoup.Value);
+            fCornSoup.Add("SEAT", configCornSoupES.Value);
+
+            fCannedRicePudding.Add("NUTV", configCannedRicePudding.Value);
+            fCannedRicePudding.Add("SEAT", configCannedRicePuddingES.Value);
+
+            fPumpkinSoup.Add("NUTV", configPumpkinSoup.Value);
+            fPumpkinSoup.Add("SEAT", configPumpkinSoupES.Value);
+
+            fPumpkinPie.Add("NUTV", configPumpkinPie.Value);
+            fPumpkinPie.Add("SEAT", configPumpkinPieES.Value);
+
+            fBakedPotato.Add("NUTV", configBakedPotato.Value);
+            fBakedPotato.Add("SEAT", configBakedPotatoES.Value);
+
+            fFrenchFries.Add("NUTV", configFrenchFries.Value);
+            fFrenchFries.Add("SEAT", configFrenchFriesES.Value);
+
+            fCannedFrenchFries.Add("NUTV", configCannedFrenchFries.Value);
+            fCannedFrenchFries.Add("SEAT", configCannedFrenchFriesES.Value);
+
+            fMilk.Add("NUTV", configMilk.Value);
+            fMilk.Add("SEAT", configMilkES.Value);
+
+            fCannedCondensedMilk.Add("NUTV", configCannedCondensedMilk.Value);
+            fCannedCondensedMilk.Add("SEAT", configCannedCondensedMilkES.Value);
+
+            fMuffin.Add("NUTV", configMuffin.Value);
+            fMuffin.Add("SEAT", configMuffinES.Value);
+
+            fBreadLoaf.Add("NUTV", configBreadLoaf.Value);
+            fBreadLoaf.Add("SEAT", configBreadLoafES.Value);
+
+            fCerealBar.Add("NUTV", configCerealBar.Value);
+            fCerealBar.Add("SEAT", configCerealBarES.Value);
+
+            fCannedPowderedEggs.Add("NUTV", configCannedPowderedEggs.Value);
+            fCannedPowderedEggs.Add("SEAT", configCannedPowderedEggsES.Value);
+
+            fCannedEdamame.Add("NUTV", configCannedEdamame.Value);
+            fCannedEdamame.Add("SEAT", configCannedEdamameES.Value);
+
+            fCondensedMilk.Add("NUTV", configCondensedMilk.Value);
+            fCondensedMilk.Add("SEAT", configCondensedMilkES.Value);
+
+            fCookedSoybean.Add("NUTV", configCookedSoybean.Value);
+            fCookedSoybean.Add("SEAT", configCookedSoybeanES.Value);
+
+            fCookedRice.Add("NUTV", configCookedRice.Value);
+            fCookedRice.Add("SEAT", configCookedRiceES.Value);
+
+            fCookedCorn.Add("NUTV", configCookedCorn.Value);
+            fCookedCorn.Add("SEAT", configCookedCornES.Value);
+
+            fCookedPumpkin.Add("NUTV", configCookedPumpkin.Value);
+            fCookedPumpkin.Add("SEAT", configCookedPumpkinES.Value);
+
+            fPowderedEggs.Add("NUTV", configPowderedEggs.Value);
+            fPowderedEggs.Add("SEAT", configPowderedEggsES.Value);
+
+            fCookedTomato.Add("NUTV", configCookedTomato.Value);
+            fCookedTomato.Add("SEAT", configCookedTomatoES.Value);
+
+            //plants
+            configPlants = Config.Bind("3 - Foods Configuration", "Enable plant config", false, "Enable plant config");
+            configWheat = Config.Bind("3 - Foods Configuration", "Wheat", 2f, "Amount of food nutrition");
+            configCorn = Config.Bind("3 - Foods Configuration", "Corn", 2f, "Amount of food nutrition");
+            configFern = Config.Bind("3 - Foods Configuration", "Fern", 2f, "Amount of food nutrition");
+            configMushroom = Config.Bind("3 - Foods Configuration", "Mushroom", 2f, "Amount of food nutrition");
+            configPotato = Config.Bind("3 - Foods Configuration", "Potato", 2f, "Amount of food nutrition");
+            configPumpkin = Config.Bind("3 - Foods Configuration", "Pumpkin", 2f, "Amount of food nutrition");
+            configRice = Config.Bind("3 - Foods Configuration", "Rice", 2f, "Amount of food nutrition");
+            configSoybean = Config.Bind("3 - Foods Configuration", "Soybean", 2f, "Amount of food nutrition");
+            configTomato = Config.Bind("3 - Foods Configuration", "Tomato", 2f, "Amount of food nutrition");
+
+            fConfigsFood.Add("PCE", configPlants.Value);
+            fWheat.Add("NUTV", configWheat.Value);
+            fCorn.Add("NUTV", configCorn.Value);
+            fFern.Add("NUTV", configFern.Value);
+            fMushroom.Add("NUTV", configMushroom.Value);
+            fPotato.Add("NUTV", configPotato.Value);
+            fPumpkin.Add("NUTV", configPumpkin.Value);
+            fRice.Add("NUTV", configRice.Value);
+            fSoybean.Add("NUTV", configSoybean.Value);
+            fTomato.Add("NUTV", configTomato.Value);
+            fConfigsFood.Add("FCE", configFoods.Value);
+
+            //decay
+            /* not implemented
+            configDecay = Config.Bind("3 - Foods Configuration", "Enable Decay foods config", false, "Enable Decay foods config (beta)");
+            DecayFactor = Config.Bind("3 - Foods Configuration", "Debuff of Decay rate", 25.0f, "Debuff factor of Decay rate in porcentage, value 0 - 100");
+
+            fConfigsFood.Add("DCE", configDecay.Value);
+            fDecayFactor.Add("GDF", DecayFactor.Value);
+            */
+
+//------------------------------------ food congif-------------------------------------------
         }
 
         private void ApplyPatchesWhenPrefabsLoaded()
