@@ -185,12 +185,12 @@ namespace PlantsnNutritionRebalance.Scripts
             /*float NormalizedHungerDifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);                
             float MaxHungerDays = Mathf.LerpUnclamped(13.6f, 4f, NormalizedHungerDifficulty);
             MaxHungerDays *= Settings.CurrentData.SunOrbitPeriod;
-            Debug.Log($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
+            PlantsnNutritionRebalancePlugin.LogDebug($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
 
             float NormalizedHydrationDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate - 1.5f) / (0.5f - 1.5f));
             float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);
             MaxHydrationDays *= Settings.CurrentData.SunOrbitPeriod;
-            Debug.Log($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/
+            PlantsnNutritionRebalancePlugin.LogDebug($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/
 
             float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f;
             float Foodslice = __instance.MaxNutritionStorage / 200f;
@@ -217,7 +217,8 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         public static float getFood(String __instance)
         {
-            Debug.Log("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
+
+            PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
             if (typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")) != null)
             {
                 return float.Parse(((Dictionary<String, Object>)typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")).GetValue(PlantsnNutritionRebalancePlugin.Instance))["NUTV"].ToString());
@@ -227,7 +228,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         public static float getFoodEatSpeed(String __instance)
         {
-            Debug.Log("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
+            PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
             if (typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")) != null)
             {
                 return float.Parse(((Dictionary<String, Object>)typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")).GetValue(PlantsnNutritionRebalancePlugin.Instance))["SEAT"].ToString());
@@ -252,19 +253,18 @@ namespace PlantsnNutritionRebalance.Scripts
                 float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
                 if (tes >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
                 {
-                    Debug.Log("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + tes);
+                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + tes);
                     __instance.EatSpeed = tes;
                 }
                 if (tf >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
                 {
-                    Debug.Log("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + tf);
+                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + tf);
                     __instance.NutritionValue = tf;
                 }
             }
             catch (Exception ex)
             {
-                Debug.Log(ex);
-                Debug.LogException(ex);
+                PlantsnNutritionRebalancePlugin.LogErro(ex);
             }
         }
     }
@@ -284,19 +284,18 @@ namespace PlantsnNutritionRebalance.Scripts
                 float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
                 if (tes >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
                 {
-                    Debug.Log("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + tes);
+                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + tes);
                     __instance.EatSpeed = tes;
                 }
                 if (tf >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
                 {
-                    Debug.Log("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + tf);
+                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + tf);
                     __instance.NutritionValue = tf;
                 }
             }
             catch (Exception ex)
             {
-                Debug.Log(ex);
-                Debug.LogException(ex);
+                PlantsnNutritionRebalancePlugin.LogErro(ex);
             }
         }
     }
@@ -314,14 +313,13 @@ namespace PlantsnNutritionRebalance.Scripts
                 float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
                 if (tf >= 0f && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["PCE"].ToString()))
                 {
-                    Debug.Log("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + tf);
+                    PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + tf);
                     __instance.NutritionValue = tf;
                 }
             }
             catch (Exception ex)
             {
-                Debug.Log(ex);
-                Debug.LogException(ex);
+                PlantsnNutritionRebalancePlugin.LogErro(ex);
             }
         }
     }
@@ -339,20 +337,20 @@ namespace PlantsnNutritionRebalance.Scripts
             if (food != null && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
             {
                 food.NutritionValue = FoodsValuesPatch.getFood(food.DisplayName);
-                Debug.Log("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + food.NutritionValue);
+                PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + food.NutritionValue);
             }
             StackableFood stackableFood = prefab as StackableFood;
             if (stackableFood != null && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["FCE"].ToString()))
             {
                 stackableFood.NutritionValue = FoodsValuesPatch.getFood(stackableFood.DisplayName);
-                Debug.Log("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + stackableFood.NutritionValue);
+                PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + stackableFood.NutritionValue);
             }
 
             Plant Plantfood = prefab as Plant;
             if (Plantfood != null && bool.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["PCE"].ToString()))
             {
                 Plantfood.NutritionValue = FoodsValuesPatch.getFood(Plantfood.DisplayName);
-                Debug.Log("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + Plantfood.NutritionValue);
+                PlantsnNutritionRebalancePlugin.LogDebug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + Plantfood.NutritionValue);
             }
             return true;
         }

@@ -10,6 +10,8 @@ using Assets.Scripts.Genetics;
 using Assets.Scripts.Objects.Structures;
 using System.Collections;
 using System;
+using BepInEx.Logging;
+using JetBrains.Annotations;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -17,26 +19,67 @@ namespace PlantsnNutritionRebalance.Scripts
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
-        public void Log(string line)
+
+        private static String loglevel = "INFO";
+
+        private enum Logs
         {
-            Debug.Log("[PlantsnNutritionRebalance]: " + line);
+            DEBUG = 1,
+            ERROR = 2,
+            INFO = 0,
+        }
+
+        public static void LogInfo(string line)
+        {
+            Debug.Log((int)Enum.Parse(typeof(Logs), loglevel));
+            if (((int) Enum.Parse(typeof(Logs), loglevel)) >= 0 || Debug.isDebugBuild) {
+                Debug.Log("[PlantsnNutritionRebalance]: " + line);
+            }
+        }
+
+        public static void LogDebug(string line)
+        {
+            if (((int) Enum.Parse(typeof(Logs), loglevel)) >= 1 || Debug.isDebugBuild ) {
+                Debug.Log("[PlantsnNutritionRebalance]: " + line);
+            }
+        }
+
+        public static void LogWarning(string line)
+        {
+            Debug.LogWarning("[PlantsnNutritionRebalance]: " + line);
+        }
+
+        public static void LogErro(string line)
+        {
+            if (((int)Enum.Parse(typeof(Logs), loglevel)) >= 2 )
+            {
+                Debug.LogError("[PlantsnNutritionRebalance]: " + line);
+            }
+        }
+
+        public static void LogErro(Exception line)
+        {
+                Debug.LogError("[PlantsnNutritionRebalance]: Exception :");
+                Debug.LogException(line);
         }
 
         private void Awake()
         {
             PlantsnNutritionRebalancePlugin.Instance = this;
-            Log("Hello World");
+            LogInfo("Start Patch");
             Handleconfig();
             var harmony = new Harmony("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts");
             harmony.PatchAll();
             Prefab.OnPrefabsLoaded += ApplyPatchesWhenPrefabsLoaded;
-            Log("Patch succeeded");
+            LogInfo("Patch succeeded");
         }
 
         private ConfigEntry<float> configPlantWaterConsumptionMultiplier;
         private ConfigEntry<float> configPlantWaterConsumptionLimit;
         private ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private ConfigEntry<float> configAtmosphereFogThreshold;
+
+        private Dictionary<String, System.Object>  configs =  new Dictionary<string, object>();
 
         //------------------------------ foods----------------------------------------------
         private ConfigEntry<bool> configFoods;
@@ -153,6 +196,10 @@ namespace PlantsnNutritionRebalance.Scripts
 
         private void Handleconfig() // Create and manage the configuration file parameters
         {
+            configs.Add("LogEnabled",Config.Bind("0 - General configuration", "Log Level", "info", "Enable or disable logs. values can be debug , info or error"));
+            loglevel = (configs["LogEnabled"] as ConfigEntry<String>).Value.ToUpper();
+            //Debug.unityLogger.logEnabled = (configs["LogEnabled"] as ConfigEntry<bool>).Value || Debug.isDebugBuild; desabled all logs 
+
             configPlantWaterConsumptionMultiplier = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
                  500f, // The default value
@@ -201,7 +248,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configFoods = configPlants = Config.Bind("3 - Foods Configuration", "Enable food config", true, "Enable food config");
 
             configTomatoSoup = Config.Bind("3 - Foods Configuration", "Tomato Soup", 135f, "Amount of food nutrition");
-            configTomatoSoupES = Config.Bind("3 - Foods Configuration", "Tomato Soup", 0.04f, "speed factor when eating the food");
+            configTomatoSoupES = Config.Bind("3 - Foods Configuration", "Eat speed Tomato Soup", 0.04f, "speed factor when eating the food");
 
             configCornSoup = Config.Bind("3 - Foods Configuration", "Corn Soup", 223f, "Amount of food nutrition");
             configCornSoupES = Config.Bind("3 - Foods Configuration", "Eat speed Corn Soup", 0.04f, "d");
@@ -370,7 +417,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         private void ApplyPatchesWhenPrefabsLoaded()
         {
-            Log("Applying plants patches after prefabs are loaded");
+            LogInfo("Applying plants patches after prefabs are loaded");
             PlantGrowStagePatch.PatchPrefabs();
         }
 
