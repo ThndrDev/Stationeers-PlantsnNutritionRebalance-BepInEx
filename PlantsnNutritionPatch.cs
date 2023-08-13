@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using Object = System.Object;
 using System.Security.Cryptography;
+using Assets.Scripts.Networking;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -173,13 +174,13 @@ namespace PlantsnNutritionRebalance.Scripts
     }
 
     // Calculates the Food and Nutrition to give to the player based on the dayspast in the save, so we don't reward a character who dies with 100% stats
-    [HarmonyPatch(typeof(Entity))]
+    [HarmonyPatch(typeof(Human))]
     public static class OnLifeCreatedPatch
     {
         [HarmonyPatch("OnLifeCreated")]
         [HarmonyPostfix]
         [UsedImplicitly]
-        private static void RespawnPatch(Entity __instance)
+        private static void RespawnPatch(Human __instance,ref bool isRespawn)
         {
             //WIP: fix the respawn quantities to be in line with what should be consumed for each water and tirsthy difficulty, not yet finished.
             /*float NormalizedHungerDifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);                
@@ -187,16 +188,25 @@ namespace PlantsnNutritionRebalance.Scripts
             MaxHungerDays *= Settings.CurrentData.SunOrbitPeriod;
             PlantsnNutritionRebalancePlugin.LogDebug($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
 
+
+
             float NormalizedHydrationDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate - 1.5f) / (0.5f - 1.5f));
             float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);
             MaxHydrationDays *= Settings.CurrentData.SunOrbitPeriod;
             PlantsnNutritionRebalancePlugin.LogDebug($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/
 
-            float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * 10f;
-            float Foodslice = __instance.MaxNutritionStorage / 200f;
+            float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["DDM"].ToString());
+
+            float Foodslice = __instance.MaxNutritionStorage / 200f; 
             float Hydrationslice = Human.MaxHydrationStorage / 200f;
             float Hydrationtogive;
-            if (Dayspastnorm <= 195)
+
+            if (!isRespawn) 
+            {
+              __instance.Nutrition = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Foodslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString());
+              Hydrationtogive = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Hydrationslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHE"].ToString());
+            }
+            else if(Dayspastnorm <= 195)
             {
                 // Calculate the food for respawn acordingly to the days past and SunOrbit
                 __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
@@ -212,6 +222,9 @@ namespace PlantsnNutritionRebalance.Scripts
             //TODO: Make it to calculate the food and hydration based also on the difficulty setting
         }
     }
+
+
+
 
     public static class FoodsValuesPatch
     {

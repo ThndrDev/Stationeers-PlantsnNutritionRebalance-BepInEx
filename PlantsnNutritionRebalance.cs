@@ -131,6 +131,10 @@ namespace PlantsnNutritionRebalance.Scripts
         private ConfigEntry<float> configmaxDaysHunger;
         private ConfigEntry<float> configmaxfoodPlayer;
 
+        private ConfigEntry<float> ddm;
+        private ConfigEntry<float> mfe;
+        private ConfigEntry<float> mhe;
+
         public static Dictionary<String, System.Object> fConfigsFood = new Dictionary<string, object>();
 
         public static Dictionary<String, System.Object> fTomatoSoup = new Dictionary<string, object>();
@@ -241,9 +245,17 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configmaxDaysHunger = Config.Bind("3 - Foods Configuration", "Max days Hungred", 0.055555f, "Values between 0.000001f and 0.208334f \n 0.208334f = 4days and 0.055555f = 14days\n closer to 0f greater hunger time \n predefined values by game difficulty when HungerRate is at 0.5f = 12 game days, 1f = 10 game days, 1.5f = 8 game days");
             configmaxfoodPlayer = Config.Bind("3 - Foods Configuration", "Max stomach", 4000f, "Value defines how much more food you can eat.\n with 4000 you need to eat on average to fill the bar \n 4 Canned Edamame or 8 Cooked Rice ");
+            mfe = Config.Bind("3 - Foods Configuration", "food Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and [Max stomach]. \n 0 disable this configuration and put like the death system. ");
+            mhe = Config.Bind("3 - Foods Configuration", "Hidration Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and 42. \n 0 disable this configuration and put like the death system. ");
+
+            ddm = Config.Bind("3 - Foods Configuration", "Days Death multiplier", 10f, "Sets the initial game difficulty multiplier.\n Defines the proportion of drop in days of food in case you die. \n The default is 10 which gives 20 game days. ");
+
 
             fConfigsFood.Add("MDH", configmaxDaysHunger.Value);
             fConfigsFood.Add("MF", configmaxfoodPlayer.Value);
+            fConfigsFood.Add("DDM", ddm.Value);
+            fConfigsFood.Add("MFE", mfe.Value);
+            fConfigsFood.Add("MHE", mhe.Value);
 
             configFoods = configPlants = Config.Bind("3 - Foods Configuration", "Enable food config", true, "Enable food config");
 
