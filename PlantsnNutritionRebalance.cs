@@ -134,6 +134,8 @@ namespace PlantsnNutritionRebalance.Scripts
         private ConfigEntry<float> ddm;
         private ConfigEntry<float> mfe;
         private ConfigEntry<float> mhe;
+        private ConfigEntry<float> mfd;
+        private ConfigEntry<float> mhd;
 
         public static Dictionary<String, System.Object> fConfigsFood = new Dictionary<string, object>();
 
@@ -248,6 +250,10 @@ namespace PlantsnNutritionRebalance.Scripts
             mfe = Config.Bind("3 - Foods Configuration", "food Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and [Max stomach]. \n 0 disable this configuration and put like the death system. ");
             mhe = Config.Bind("3 - Foods Configuration", "Hidration Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and 42. \n 0 disable this configuration and put like the death system. ");
 
+            mfd = Config.Bind("3 - Foods Configuration", "Min food die", 0f, "Sets the initial game difficulty how much food minimum you get when you die.\n values between 0 and 1. \n minimmun 1%, 0 disable this function and come with predefination in mod. ");
+            mhd = Config.Bind("3 - Foods Configuration", "Min Hidration die", 0f, "Sets the initial game difficulty how much Hidration minimum you get when you die.\n values between 0 and 1. \n minimmun 1%, 0 disable this function and come with predefination in mod. ");
+
+
             ddm = Config.Bind("3 - Foods Configuration", "Days Death multiplier", 10f, "Sets the initial game difficulty multiplier.\n Defines the proportion of drop in days of food in case you die. \n The default is 10 which gives 20 game days. ");
 
 
@@ -256,6 +262,8 @@ namespace PlantsnNutritionRebalance.Scripts
             fConfigsFood.Add("DDM", ddm.Value);
             fConfigsFood.Add("MFE", mfe.Value);
             fConfigsFood.Add("MHE", mhe.Value);
+            fConfigsFood.Add("MFD", mfd.Value);
+            fConfigsFood.Add("MHD", mhd.Value);
 
             configFoods = configPlants = Config.Bind("3 - Foods Configuration", "Enable food config", true, "Enable food config");
 

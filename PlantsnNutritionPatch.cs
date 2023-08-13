@@ -8,12 +8,9 @@ using Assets.Scripts.Serialization;
 using Assets.Scripts.Objects;
 using Assets.Scripts.Atmospherics;
 using System.Reflection;
-using SimpleSpritePacker;
 using System;
 using System.Collections.Generic;
 using Object = System.Object;
-using System.Security.Cryptography;
-using Assets.Scripts.Networking;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -201,22 +198,27 @@ namespace PlantsnNutritionRebalance.Scripts
             float Hydrationslice = Human.MaxHydrationStorage / 200f;
             float Hydrationtogive;
 
+            PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch Dayspastnorm ---> " + Dayspastnorm);
+
             if (!isRespawn) 
             {
               __instance.Nutrition = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Foodslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString());
-              Hydrationtogive = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Hydrationslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHE"].ToString());
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
+                Hydrationtogive = float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Hydrationslice : float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHE"].ToString());
             }
             else if(Dayspastnorm <= 195)
             {
                 // Calculate the food for respawn acordingly to the days past and SunOrbit
                 __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
                 Hydrationtogive = (200f - Dayspastnorm) * Hydrationslice;
             }
             else
             {
                 // give minimal food and water, so a respawned character have some time to eat and drink.
-                __instance.Nutrition = Foodslice * 3f;
-                Hydrationtogive = Hydrationslice * 5f;
+                __instance.Nutrition = Math.Max(Foodslice * 3f, (__instance.MaxNutritionStorage * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFD"].ToString())) );
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
+                Hydrationtogive = Math.Max(Hydrationslice * 5f, (Human.MaxHydrationStorage * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHD"].ToString())) );
             }
             Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
             //TODO: Make it to calculate the food and hydration based also on the difficulty setting
