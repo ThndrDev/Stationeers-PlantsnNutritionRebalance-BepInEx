@@ -217,7 +217,7 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 // give minimal food and water, so a respawned character have some time to eat and drink.
                 __instance.Nutrition = Math.Max(Foodslice * 3f, (__instance.MaxNutritionStorage * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MFD"].ToString())) );
-                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
+                PlantsnNutritionRebalancePlugin.LogDebug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition); 
                 Hydrationtogive = Math.Max(Hydrationslice * 5f, (Human.MaxHydrationStorage * float.Parse(PlantsnNutritionRebalancePlugin.fConfigsFood["MHD"].ToString())) );
             }
             Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);

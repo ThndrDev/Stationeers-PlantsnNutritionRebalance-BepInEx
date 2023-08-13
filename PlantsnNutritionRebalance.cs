@@ -249,7 +249,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configmaxfoodPlayer = Config.Bind("3 - Foods Configuration", "Max stomach", 4000f, "Value defines how much more food you can eat.\n with 4000 you need to eat on average to fill the bar \n 4 Canned Edamame or 8 Cooked Rice ");
             mfe = Config.Bind("3 - Foods Configuration", "food Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and [Max stomach]. \n 0 disable this configuration and put like the death system. ");
             mhe = Config.Bind("3 - Foods Configuration", "Hidration Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and 42. \n 0 disable this configuration and put like the death system. ");
-
+            
             mfd = Config.Bind("3 - Foods Configuration", "Min food die", 0f, "Sets the initial game difficulty how much food minimum you get when you die.\n values between 0 and 1. \n minimmun 1%, 0 disable this function and come with predefination in mod. ");
             mhd = Config.Bind("3 - Foods Configuration", "Min Hidration die", 0f, "Sets the initial game difficulty how much Hidration minimum you get when you die.\n values between 0 and 1. \n minimmun 1%, 0 disable this function and come with predefination in mod. ");
 
