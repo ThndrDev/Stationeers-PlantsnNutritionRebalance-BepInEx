@@ -24,10 +24,10 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             PlantsnNutritionRebalancePlugin.Instance = this;
             ModLog.Info("Start Patch");
-            ConfigFile.HandleConfig(this);
+            ConfigFile.HandleConfig(this);     // read (or create) the configuration file parameters
             var harmony = new Harmony("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts");
-            harmony.PatchAll();
-            Prefab.OnPrefabsLoaded += ApplyPatchesWhenPrefabsLoaded;
+            harmony.PatchAll();   // Apply harmony patches
+            Prefab.OnPrefabsLoaded += ApplyPatchesWhenPrefabsLoaded; // Change the plants growthstages in the prefab
             ModLog.Info("Patch succeeded");
         }
 

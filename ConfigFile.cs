@@ -17,6 +17,7 @@ namespace PlantsnNutritionRebalance.Scripts
 {
     internal class ConfigFile
     {
+        private static ConfigEntry<int> configLogLevel;
         private static ConfigEntry<float> configPlantWaterConsumptionMultiplier;
         private static ConfigEntry<float> configPlantWaterConsumptionLimit;
         private static ConfigEntry<float> configPlantWaterTranspirationPercentage;
@@ -134,7 +135,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static Dictionary<String, System.Object> fDecayFactor = new Dictionary<string, object>();
         */
 
-
+        public static int LogLevel;
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
         public static float PlantWaterTranspirationPercentage;
@@ -142,9 +143,12 @@ namespace PlantsnNutritionRebalance.Scripts
  
         public static void HandleConfig(PlantsnNutritionRebalancePlugin PnN) // Create and manage the configuration file parameters
         {
- //           configs.Add("LogEnabled", Config.Bind("0 - General configuration", "Log Level", "info", "Enable or disable logs. values can be debug , info or error"));
-  //          ModLog.loglevel = (configs["LogEnabled"] as ConfigEntry<String>).Value.ToUpper();
-            //Debug.unityLogger.logEnabled = (configs["LogEnabled"] as ConfigEntry<bool>).Value || Debug.isDebugBuild; desabled all logs 
+            configLogLevel = PnN.Config.Bind("0 - General configuration",
+                 "Log Level",
+                 0, 
+                 "Set the log level of the mod. Values can be 0 for errors only (default), 1 for informational logs or 2 for debug logs.\n" +
+                 "Logs can be find inside %appdata%\\..\\localLow\\rocketwerkz\\rocketstation");
+            LogLevel = configLogLevel.Value;
 
             configPlantWaterConsumptionMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
