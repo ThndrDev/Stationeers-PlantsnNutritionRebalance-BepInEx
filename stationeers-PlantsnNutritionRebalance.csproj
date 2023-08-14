@@ -7,32 +7,32 @@
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Harmony">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\BepInEx\core\BepInEx.Harmony.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\BepInEx\core\BepInEx.Harmony.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\rocketstation_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
 
     <Reference Include="0Harmony">
-      <HintPath>G:\SteamLibrary\steamapps\common\Stationeers\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>j:\SteamLibrary\steamapps\common\Stationeers\BepInEx\core\0Harmony.dll</HintPath>
     </Reference>
  
   </ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="xcopy /Y /F &quot;$(TargetPath)&quot; &quot;G:\SteamLibrary\steamapps\common\Stationeers\BepInEx\plugins&quot;" />
+		<Exec Command="xcopy /Y /F &quot;$(TargetPath)&quot; &quot;j:\SteamLibrary\steamapps\common\Stationeers\BepInEx\plugins&quot;" />
 	</Target>
 
 	<PropertyGroup>
