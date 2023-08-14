@@ -20,58 +20,15 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         public static PlantsnNutritionRebalancePlugin Instance;
 
-        private static String loglevel = "INFO";
-
-        private enum Logs
-        {
-            DEBUG = 1,
-            ERROR = 2,
-            INFO = 0,
-        }
-
-        public static void LogInfo(string line)
-        {
-            Debug.Log((int)Enum.Parse(typeof(Logs), loglevel));
-            if (((int) Enum.Parse(typeof(Logs), loglevel)) >= 0 || Debug.isDebugBuild) {
-                Debug.Log("[PlantsnNutritionRebalance]: " + line);
-            }
-        }
-
-        public static void LogDebug(string line)
-        {
-            if (((int) Enum.Parse(typeof(Logs), loglevel)) >= 1 || Debug.isDebugBuild ) {
-                Debug.Log("[PlantsnNutritionRebalance]: " + line);
-            }
-        }
-
-        public static void LogWarning(string line)
-        {
-            Debug.LogWarning("[PlantsnNutritionRebalance]: " + line);
-        }
-
-        public static void LogErro(string line)
-        {
-            if (((int)Enum.Parse(typeof(Logs), loglevel)) >= 2 )
-            {
-                Debug.LogError("[PlantsnNutritionRebalance]: " + line);
-            }
-        }
-
-        public static void LogErro(Exception line)
-        {
-                Debug.LogError("[PlantsnNutritionRebalance]: Exception :");
-                Debug.LogException(line);
-        }
-
         private void Awake()
         {
             PlantsnNutritionRebalancePlugin.Instance = this;
-            LogInfo("Start Patch");
+            ModLog.Info("Start Patch");
             Handleconfig();
             var harmony = new Harmony("net.ThndrDev.stationeers.PlantsnNutritionRebalance.Scripts");
             harmony.PatchAll();
             Prefab.OnPrefabsLoaded += ApplyPatchesWhenPrefabsLoaded;
-            LogInfo("Patch succeeded");
+            ModLog.Info("Patch succeeded");
         }
 
         private ConfigEntry<float> configPlantWaterConsumptionMultiplier;
@@ -203,7 +160,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private void Handleconfig() // Create and manage the configuration file parameters
         {
             configs.Add("LogEnabled",Config.Bind("0 - General configuration", "Log Level", "info", "Enable or disable logs. values can be debug , info or error"));
-            loglevel = (configs["LogEnabled"] as ConfigEntry<String>).Value.ToUpper();
+            ModLog.loglevel = (configs["LogEnabled"] as ConfigEntry<String>).Value.ToUpper();
             //Debug.unityLogger.logEnabled = (configs["LogEnabled"] as ConfigEntry<bool>).Value || Debug.isDebugBuild; desabled all logs 
 
             configPlantWaterConsumptionMultiplier = Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
@@ -437,7 +394,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         private void ApplyPatchesWhenPrefabsLoaded()
         {
-            LogInfo("Applying plants patches after prefabs are loaded");
+            ModLog.Info("Applying plants patches after prefabs are loaded");
             PlantGrowStagePatch.PatchPrefabs();
         }
 
