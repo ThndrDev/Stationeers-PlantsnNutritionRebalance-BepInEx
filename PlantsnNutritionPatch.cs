@@ -75,7 +75,7 @@ namespace PlantsnNutritionRebalance.Scripts
     }
 
     [HarmonyPatch(typeof(Human))]
-    public static class HumanNutritionHydrationPatch
+    public static class HumanPatches
     {
         // Adjusts the Human hydration based on the world difficulty and the warning/critical alerts
         [HarmonyPatch("Awake")]
@@ -83,7 +83,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [UsedImplicitly]
         static public void HydrationAndWarningsPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ____hydrationLossPerTick)
         {
-            ___MaxHydrationStorage = 42f;
+            ___MaxHydrationStorage = ConfigFile.MaxHydrationStorage;
             switch (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)
             {
                 case 1.5f: //stationeers difficulty, full water will last 100 game minutes (2 and a half days)
@@ -104,10 +104,10 @@ namespace PlantsnNutritionRebalance.Scripts
                     break;
             }
             // Nutrition/hydration warnings:
-            __instance.WarningNutrition = 800f;
-            __instance.CriticalNutrition = 400f;
-            __instance.WarningHydration = 10.5f;
-            __instance.CriticalHydration = 5.25f;
+            __instance.WarningNutrition = (ConfigFile.MaxNutritionStorage / 100) * ConfigFile.WarningNutrition;
+            __instance.CriticalNutrition = (ConfigFile.MaxNutritionStorage / 100) * ConfigFile.CriticalNutrition;
+            __instance.WarningHydration = (ConfigFile.MaxHydrationStorage / 100) * ConfigFile.WarningHydration;
+            __instance.CriticalHydration = (ConfigFile.MaxHydrationStorage / 100) * ConfigFile.CriticalHydration;
         }
 
 
@@ -117,10 +117,11 @@ namespace PlantsnNutritionRebalance.Scripts
         static public void MaxNutritionPatch(ref float __result)
         {
             // Adjusts the max food of the character:
-            __result = float.Parse(ConfigFile.fConfigsFood["MF"].ToString());
+            __result = ConfigFile.MaxNutritionStorage;
         }
 
         // Adjusts the HungerRate based on the world difficulty and changes the damage system for Starvation
+        static float LastNutritionLossPerTick = 0.083333f;
         [HarmonyPatch("LifeNutrition")]
         [HarmonyPrefix]
         [UsedImplicitly]
@@ -146,11 +147,13 @@ namespace PlantsnNutritionRebalance.Scripts
                          // Difficulty in 2.25 should give 0.1562505f, will last 6 game days
                          // Difficulty in 0.001 should give 0.055555f, will last 14 days
                     float hungerdifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);
-                    NutritionLossPerTick = Mathf.Lerp(float.Parse(ConfigFile.fConfigsFood["MDH"].ToString()), 0.208334f, hungerdifficulty);
+                    NutritionLossPerTick = Mathf.Lerp(0.055555f, 0.208334f, hungerdifficulty);
                     break;
             }
+            LastNutritionLossPerTick = NutritionLossPerTick;
+
             // Complete rewrite of base method Human.LifeNutrition
-            float num = NutritionLossPerTick * (__instance.OrganBrain.IsOnline ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.LifeFunctionLoggedOut);
+            float num = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick * (__instance.OrganBrain.IsOnline ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.LifeFunctionLoggedOut);
             __instance.Nutrition -= num;
             // Entity.LifeNutrition
             if (__instance.IsArtificial)
@@ -168,60 +171,60 @@ namespace PlantsnNutritionRebalance.Scripts
             }
             return false;
         }
-    }
 
-    // Calculates the Food and Nutrition to give to the player based on the dayspast in the save, so we don't reward a character who dies with 100% stats
-    [HarmonyPatch(typeof(Human))]
-    public static class OnLifeCreatedPatch
-    {
+        // Calculates the Food and Nutrition to give to the player based on the dayspast in the save, so we don't reward a character who dies with 100% stats
         [HarmonyPatch("OnLifeCreated")]
         [HarmonyPostfix]
         [UsedImplicitly]
-        private static void RespawnPatch(Human __instance,ref bool isRespawn)
+        private static void RespawnPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ____hydrationLossPerTick, ref bool isRespawn)
         {
-            //WIP: fix the respawn quantities to be in line with what should be consumed for each water and tirsthy difficulty, not yet finished.
-            /*float NormalizedHungerDifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);                
-            float MaxHungerDays = Mathf.LerpUnclamped(13.6f, 4f, NormalizedHungerDifficulty);
-            MaxHungerDays *= Settings.CurrentData.SunOrbitPeriod;
-            ModLog.Debug($"NormalizedHungerDifficulty: {NormalizedHungerDifficulty} MaxHungerDays: {MaxHungerDays}");
-
-
-
-            float NormalizedHydrationDifficulty = ((WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate - 1.5f) / (0.5f - 1.5f));
-            float MaxHydrationDays = Mathf.LerpUnclamped(5f, 2.5f, NormalizedHydrationDifficulty);
-            MaxHydrationDays *= Settings.CurrentData.SunOrbitPeriod;
-            ModLog.Debug($"NormalizedHydrationDifficulty: {NormalizedHydrationDifficulty} MaxHydrationDays: {MaxHydrationDays}");*/
-
-            float Dayspastnorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod * float.Parse(ConfigFile.fConfigsFood["DDM"].ToString());
-
-            float Foodslice = __instance.MaxNutritionStorage / 200f; 
-            float Hydrationslice = Human.MaxHydrationStorage / 200f;
-            float Hydrationtogive;
-
-            ModLog.Debug("OnLifeCreatedPatch: RespawnPatch Dayspastnorm ---> " + Dayspastnorm);
-
-            if (!isRespawn) 
+            if (ConfigFile.EnableRespawnPenaltyLogic)
             {
-              __instance.Nutrition = float.Parse(ConfigFile.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Foodslice : float.Parse(ConfigFile.fConfigsFood["MFE"].ToString());
-                ModLog.Debug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
-                Hydrationtogive = float.Parse(ConfigFile.fConfigsFood["MFE"].ToString()) == 0 ? (200f - Dayspastnorm) * Hydrationslice : float.Parse(ConfigFile.fConfigsFood["MHE"].ToString());
+                // First, get how long in days the max nutrition should last with the current configuration parameters
+                int NormalizedMaxHungerDays = Mathf.RoundToInt(ConfigFile.MaxNutritionStorage / LastNutritionLossPerTick / 2 / 60 / (20 * Settings.CurrentData.SunOrbitPeriod));
+                // Then, calculate a nutrition slice for each day
+                float NutritionSlicePerDay = ConfigFile.MaxNutritionStorage / NormalizedMaxHungerDays;
+                // Get the normalized days
+                float DaysPastNorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod;
+
+                // If the character is a new player joining and not a old character who died, and the configfile is set to modify the amount of food to give to the new player
+                // apply the desired amount of food for the new character
+                if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
+                {
+                    __instance.Nutrition = ConfigFile.CustomNewPlayerRespawnNutrition;
+                    ModLog.Debug("RespawnPatch: Nutrition given because CustomNewPlayerRespawn is true and a new player joined ---> " + __instance.Nutrition);
+                }
+                // If it's a respawn and the DaysPastNorm is lower than the NormalizedMaxHungerDays, that means we should calculate the amount of food to give to the respawning character
+                else if (DaysPastNorm < NormalizedMaxHungerDays)
+                {
+                    __instance.Nutrition = NutritionSlicePerDay * (NormalizedMaxHungerDays - DaysPastNorm);
+                    ModLog.Info("RespawnPatch: Nutrition given for an player who died and are respawning ---> " + __instance.Nutrition);
+                }
+                //if DaysPastNorm is equal or bigger than NormalizedMaxHungerDays, that means we should give a minimal amount of food, just enough for the character to go eat something
+                else
+                {
+                    __instance.Nutrition = ConfigFile.MaxNutritionStorage / 100;
+                }
+                // Now do the same logic, but for Hydration:
+                int NormalizedMaxHydrationDays = Mathf.RoundToInt(___MaxHydrationStorage / (____hydrationLossPerTick + ____hydrationLossPerTick * 0.7f)  / 2 / 60 / (20 * Settings.CurrentData.SunOrbitPeriod));
+                float HydrationSlicePerDay = ConfigFile.MaxHydrationStorage / NormalizedMaxHydrationDays;
+                float HydrationToGive;
+                if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
+                {
+                    HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
+                    ModLog.Debug("RespawnPatch: Hydration given because CustomNewPlayerRespawn is true and a new player joined ---> " + __instance.Nutrition);
+                }
+                else if (DaysPastNorm < NormalizedMaxHydrationDays)
+                {
+                    HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - DaysPastNorm);
+                    ModLog.Info("RespawnPatch: Hydration given because a player who died are respawning ---> " + HydrationToGive);
+                }
+                //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of water, just enough for the character to go drink something
+                else
+                {
+                    __instance.Nutrition = ConfigFile.MaxNutritionStorage / 100;
+                }
             }
-            else if(Dayspastnorm <= 195)
-            {
-                // Calculate the food for respawn acordingly to the days past and SunOrbit
-                __instance.Nutrition = (200f - Dayspastnorm) * Foodslice;
-                ModLog.Debug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition);
-                Hydrationtogive = (200f - Dayspastnorm) * Hydrationslice;
-            }
-            else
-            {
-                // give minimal food and water, so a respawned character have some time to eat and drink.
-                __instance.Nutrition = Math.Max(Foodslice * 3f, (__instance.MaxNutritionStorage * float.Parse(ConfigFile.fConfigsFood["MFD"].ToString())) );
-                ModLog.Debug("OnLifeCreatedPatch: RespawnPatch __instance.Nutrition ---> " + __instance.Nutrition); 
-                Hydrationtogive = Math.Max(Hydrationslice * 5f, (Human.MaxHydrationStorage * float.Parse(ConfigFile.fConfigsFood["MHD"].ToString())) );
-            }
-            Traverse.Create(__instance).Property("Hydration").SetValue(Hydrationtogive);
-            //TODO: Make it to calculate the food and hydration based also on the difficulty setting
         }
     }
 

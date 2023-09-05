@@ -23,7 +23,17 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private static ConfigEntry<float> configAtmosphereFogThreshold;
 
-        private Dictionary<String, System.Object> configs = new Dictionary<string, object>();
+        private static ConfigEntry<float> configNutritionLossMultiplier;
+        private static ConfigEntry<float> configMaxNutritionStorage;
+        private static ConfigEntry<float> configMaxHydrationStorage;
+        private static ConfigEntry<float> configWarningNutrition;
+        private static ConfigEntry<float> configCriticalNutrition;
+        private static ConfigEntry<float> configWarningHydration;
+        private static ConfigEntry<float> configCriticalHydration;
+        private static ConfigEntry<bool> configEnableRespawnPenaltyLogic;
+        private static ConfigEntry<bool> configCustomNewPlayerRespawn;
+        private static ConfigEntry<float> configCustomNewPlayerRespawnNutrition;
+        private static ConfigEntry<float> configCustomNewPlayerRespawnHydration;       
 
         //------------------------------ foods----------------------------------------------
         private static ConfigEntry<bool> configFoods;
@@ -73,7 +83,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configPowderedEggsES;
         private static ConfigEntry<float> configCookedTomatoES;
         private static ConfigEntry<float> configmaxDaysHunger;
-        private static ConfigEntry<float> configmaxfoodPlayer;
+        
 
         private static ConfigEntry<float> ddm;
         private static ConfigEntry<float> mfe;
@@ -140,14 +150,25 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float PlantWaterConsumptionLimit;
         public static float PlantWaterTranspirationPercentage;
         public static float AtmosphereFogThreshold;
- 
+        public static float NutritionLossMultiplier;
+        public static float MaxNutritionStorage;
+        public static float MaxHydrationStorage;
+        public static float WarningNutrition;
+        public static float CriticalNutrition;
+        public static float WarningHydration;
+        public static float CriticalHydration;
+        public static bool EnableRespawnPenaltyLogic;
+        public static bool CustomNewPlayerRespawn;
+        public static float CustomNewPlayerRespawnNutrition;
+        public static float CustomNewPlayerRespawnHydration;
+
         public static void HandleConfig(PlantsnNutritionRebalancePlugin PnN) // Create and manage the configuration file parameters
         {
             configLogLevel = PnN.Config.Bind("0 - General configuration",
                  "Log Level",
                  0, 
                  "Set the log level of the mod. Values can be 0 for errors only (default), 1 for informational logs or 2 for debug logs.\n" +
-                 "Logs can be find inside %appdata%\\..\\localLow\\rocketwerkz\\rocketstation");
+                 "Logs can be found inside %appdata%\\..\\localLow\\rocketwerkz\\rocketstation\\player.log file");
             LogLevel = configLogLevel.Value;
 
             configPlantWaterConsumptionMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
@@ -187,10 +208,102 @@ namespace PlantsnNutritionRebalance.Scripts
 
             AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
 
-            //------------------------------------ food config-------------------------------------------
+            configNutritionLossMultiplier = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "NutritionLossMultiplier", // The key of the configuration option in the configuration file
+                1f,
+                "This value is a multiplier for the nutrition loss per tick of the character.\n" +
+                "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 wich will give you ~8 days of hunger. If you change this value for 2,\n" +
+                "your hunger will last only 4 days or if you set this value for 0.5, your character full hunger will last for 16 days on Stationeers Difficulty.\n" +
+                "You'll want to change this option mainly if you also change the max nutrition of the character.\n" +
+                "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive.");
 
-            configmaxDaysHunger = PnN.Config.Bind("3 - Foods Configuration", "Max days Hungred", 0.055555f, "Values between 0.000001f and 0.208334f \n 0.208334f = 4days and 0.055555f = 14days\n closer to 0f greater hunger time \n predefined values by game difficulty when HungerRate is at 0.5f = 12 game days, 1f = 10 game days, 1.5f = 8 game days");
-            configmaxfoodPlayer = PnN.Config.Bind("3 - Foods Configuration", "Max stomach", 4000f, "Value defines how much more food you can eat.\n with 4000 you need to eat on average to fill the bar \n 4 Canned Edamame or 8 Cooked Rice ");
+            NutritionLossMultiplier = configNutritionLossMultiplier.Value;
+
+
+            configMaxNutritionStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "MaxNutritionStorage", // The key of the configuration option in the configuration file
+                4000f,
+                "This set the max amount of nutrition the character can store. If you change this value, it's highly advisable to start a new save or edit the character\n" +
+                "<Nutrition> tag directly into the save (world.xml file) to adjust your character nutrition value to be inside the max value you set here.\n" +
+                "This greatly affects the amount of filling each food gives and also how long your starting 100% nutrition will last. For example, if you change\n" +
+                "this to 2000, potatoes will fill 2% of your food (instead of 1%) but on Stationeers difficulty your character will get only 4 days worth of it's initial nutrition," +
+                "instead of 8 days.Your Nutrition will also appear to drop 2x faster (in percentage) because now your max nutrition is lower.");
+            MaxNutritionStorage = configMaxNutritionStorage.Value;
+
+            configMaxHydrationStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "MaxHydrationStorage", // The key of the configuration option in the configuration file
+                42f,
+                "This set the max amount of hydration the character can store. If you change this value, it's advisable to start a new save or edit the character\n" +
+                "<Hydration> tag directly into the save (world.xml file) to move your character hydration value to be inside the max value you set here.\n" +
+                "This greatly affects the amount of filling each water canister gives you and also how long your starting 100% hydration will last. For example, if you change\n" +
+                "this to 21, a full water canister will now fill 36% of your water (instead of 18%) but on Stationeers difficulty your character will get only 1¼ days worth of hydration." +
+                "Your Hydration will also appear to drop faster (in percentage) because now your max hydration is lower.");
+            MaxHydrationStorage = configMaxHydrationStorage.Value;
+
+            configWarningNutrition = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "WarningNutrition", // The key of the configuration option in the configuration file
+                20f,
+                "This sets after what percentage of hunger the \"Hunger Warning\" alert should show up. Values can be set between 0 and 50");
+            WarningNutrition = Mathf.Clamp(configWarningNutrition.Value, 0f, 50f);
+
+            configCriticalNutrition = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "CriticalNutrition", // The key of the configuration option in the configuration file
+                10f,
+                "This sets after what percentage of hunger the \"Hunger Critical\" alert should show up. Values can be set between 0 and 50");
+            CriticalNutrition = Mathf.Clamp(configCriticalNutrition.Value, 0f, 50f);
+
+            configWarningHydration = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "WarningHydration", // The key of the configuration option in the configuration file
+                25f,
+                "This sets after what percentage of hydration the \"Hydration Warning\" alert should show up. Values can be set between 0 and 50");
+            WarningHydration = Mathf.Clamp(configWarningHydration.Value, 0f, 50f);
+
+            configCriticalHydration = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
+                "CriticalHydration", // The key of the configuration option in the configuration file
+                12.5f,
+                "This sets after what percentage of hydration the \"Hydration Critical\" alert should show up. Values can be set between 0 and 50");
+            CriticalHydration = Mathf.Clamp(configCriticalHydration.Value, 0f, 50f);
+
+
+            configEnableRespawnPenaltyLogic = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
+                "EnableRespawnPenaltyLogic", // The key of the configuration option in the configuration file
+                true,
+                "This option enable or disable the respawn penalty logic of the mod. On Vanilla, players who die are rewarded with 100% nutrition/Hydration stats." +
+                "This issue is even proeminent with the Plants and Nutrition mod because the mod considerably increases the amount of Nutrition/Hydration a player " +
+                "can have.\n" +
+                "If this option is set to true, characters who die will respawn with nutrition and hydration proportional to the days past in the save. The mod will take into account" +
+                "the difficulty of the save, the maxNutritionStorage, the current day and other factors and try to \"Guess\" what your hydration/nutrition should be. For example, on a Normal" +
+                "difficulty save, default mod values and sun/orbit in 2, your character will have 10 days worth of food, and will loose 10% food each day. If you die on day 6, the mod " +
+                "will respawn the player with 40% food, because that's what your initial nutrition should approximately be. After day 10, dead characters will respawn with minimal food," +
+                "just enough to run to the pantry room to eat something.\n" +
+                "If set to false, the Vanilla behaviour will be kept so, after death, you will always respawn with full nutrition/hydration.");
+            EnableRespawnPenaltyLogic = configEnableRespawnPenaltyLogic.Value;
+
+            configCustomNewPlayerRespawn = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
+                "CustomNewPlayerRespawn", // The key of the configuration option in the configuration file
+                false,
+                "This option control if new players who never played on the save should join with nutrition/hydration proportional to the days past in the save or with custom food amounts set" +
+                "in CustomNewPlayerRespawnNutrition and CustomNewPlayerRespawnHydration. If set to false, when new players join, they will respawn with food proportional to the days past in the" +
+                "save. You'll want to enable this option mostly on dedicated servers where new players will join and start playing after the server is running for a long time, on saves where each" +
+                "player make separated bases, and you want them to join with full food but still penalize them if they die.\n" +
+                "This option only work if EnableRespawnPenaltyLogic is also true, otherwise everyone will always respawn with 100% nutrition/hydration.");
+            CustomNewPlayerRespawn = configCustomNewPlayerRespawn.Value;
+
+            configCustomNewPlayerRespawnNutrition = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
+                "CustomNewPlayerRespawnNutrition", // The key of the configuration option in the configuration file
+                100f,
+                "If CustomNewPlayerRespawn is true, this option set with how much nutrition, in percent, new players should join.");
+            CustomNewPlayerRespawnNutrition = configCustomNewPlayerRespawnNutrition.Value;
+
+            configCustomNewPlayerRespawnHydration = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
+                "CustomNewPlayerRespawnHydration", // The key of the configuration option in the configuration file
+                100f,
+                "If CustomNewPlayerRespawn is true, this option set with how much hydration, in percent, new players should join.");
+            CustomNewPlayerRespawnHydration = configCustomNewPlayerRespawnHydration.Value;
+
+
+
+
             mfe = PnN.Config.Bind("3 - Foods Configuration", "food Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and [Max stomach]. \n 0 disable this configuration and put like the death system. ");
             mhe = PnN.Config.Bind("3 - Foods Configuration", "Hidration Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and 42. \n 0 disable this configuration and put like the death system. ");
 
@@ -201,8 +314,7 @@ namespace PlantsnNutritionRebalance.Scripts
             ddm = PnN.Config.Bind("3 - Foods Configuration", "Days Death multiplier", 10f, "Sets the initial game difficulty multiplier.\n Defines the proportion of drop in days of food in case you die. \n The default is 10 which gives 20 game days. ");
 
 
-            fConfigsFood.Add("MDH", configmaxDaysHunger.Value);
-            fConfigsFood.Add("MF", configmaxfoodPlayer.Value);
+
             fConfigsFood.Add("DDM", ddm.Value);
             fConfigsFood.Add("MFE", mfe.Value);
             fConfigsFood.Add("MHE", mhe.Value);
