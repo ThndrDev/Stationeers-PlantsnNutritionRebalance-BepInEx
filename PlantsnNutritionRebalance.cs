@@ -15,7 +15,7 @@ using JetBrains.Annotations;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "0.9.5.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.0.0.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;

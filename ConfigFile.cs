@@ -1,28 +1,24 @@
-﻿using System.Reflection;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
-using Assets.Scripts.Objects;
-using Assets.Scripts.Objects.Items;
-using System.Collections.Generic;
-using Assets.Scripts.Genetics;
-using Assets.Scripts.Objects.Structures;
-using System.Collections;
-using System;
-using BepInEx.Logging;
-using JetBrains.Annotations;
+
 
 namespace PlantsnNutritionRebalance.Scripts
 {
     internal class ConfigFile
     {
         private static ConfigEntry<int> configLogLevel;
+        
+        //Plants
         private static ConfigEntry<float> configPlantWaterConsumptionMultiplier;
         private static ConfigEntry<float> configPlantWaterConsumptionLimit;
         private static ConfigEntry<float> configPlantWaterTranspirationPercentage;
+
+        //Fog
         private static ConfigEntry<float> configAtmosphereFogThreshold;
 
+        //Character
         private static ConfigEntry<float> configNutritionLossMultiplier;
         private static ConfigEntry<float> configMaxNutritionStorage;
         private static ConfigEntry<float> configMaxHydrationStorage;
@@ -33,91 +29,58 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<bool> configEnableRespawnPenaltyLogic;
         private static ConfigEntry<bool> configCustomNewPlayerRespawn;
         private static ConfigEntry<float> configCustomNewPlayerRespawnNutrition;
-        private static ConfigEntry<float> configCustomNewPlayerRespawnHydration;       
+        private static ConfigEntry<float> configCustomNewPlayerRespawnHydration;
+
+        //Foods
+        private static ConfigEntry<bool> configEnableFoodChanges;
 
         //------------------------------ foods----------------------------------------------
-        private static ConfigEntry<bool> configFoods;
-        private static ConfigEntry<float> configTomatoSoup;
-        private static ConfigEntry<float> configCornSoup;
-        private static ConfigEntry<float> configCannedRicePudding;
-        private static ConfigEntry<float> configPumpkinSoup;
-        private static ConfigEntry<float> configPumpkinPie;
-        private static ConfigEntry<float> configBakedPotato;
-        private static ConfigEntry<float> configFrenchFries;
-        private static ConfigEntry<float> configCannedFrenchFries;
-        private static ConfigEntry<float> configMilk;
-        private static ConfigEntry<float> configCannedCondensedMilk;
-        private static ConfigEntry<float> configMuffin;
-        private static ConfigEntry<float> configBreadLoaf;
-        private static ConfigEntry<float> configCerealBar;
-        private static ConfigEntry<float> configCannedPowderedEggs;
-        private static ConfigEntry<float> configCannedEdamame;
-        private static ConfigEntry<float> configCondensedMilk;
-        private static ConfigEntry<float> configCookedSoybean;
-        private static ConfigEntry<float> configCookedRice;
-        private static ConfigEntry<float> configCookedCorn;
-        private static ConfigEntry<float> configCookedPumpkin;
-        private static ConfigEntry<float> configPowderedEggs;
-        private static ConfigEntry<float> configCookedTomato;
+        private static ConfigEntry<float> configTomatoSoupNutrition;
+        private static ConfigEntry<float> configCornSoupNutrition;
+        private static ConfigEntry<float> configCannedRicePuddingNutrition;
+        private static ConfigEntry<float> configPumpkinSoupNutrition;
+        private static ConfigEntry<float> configPumpkinPieNutrition;
+        private static ConfigEntry<float> configBakedPotatoNutrition;
+        private static ConfigEntry<float> configFrenchFriesNutrition;
+        private static ConfigEntry<float> configCannedFrenchFriesNutrition;
+        private static ConfigEntry<float> configMilkNutrition;
+        private static ConfigEntry<float> configCannedCondensedMilkNutrition;
+        private static ConfigEntry<float> configMuffinNutrition;
+        private static ConfigEntry<float> configBreadLoafNutrition;
+        private static ConfigEntry<float> configCerealBarNutrition;
+        private static ConfigEntry<float> configCannedPowderedEggsNutrition;
+        private static ConfigEntry<float> configCannedEdamameNutrition;
+        private static ConfigEntry<float> configCondensedMilkNutrition;
+        private static ConfigEntry<float> configCookedSoybeanNutrition;
+        private static ConfigEntry<float> configCookedRiceNutrition;
+        private static ConfigEntry<float> configCookedCornNutrition;
+        private static ConfigEntry<float> configCookedPumpkinNutrition;
+        private static ConfigEntry<float> configPowderedEggsNutrition;
+        private static ConfigEntry<float> configCookedTomatoNutrition;
 
-        private static ConfigEntry<float> configTomatoSoupES;
-        private static ConfigEntry<float> configCornSoupES;
-        private static ConfigEntry<float> configCannedRicePuddingES;
-        private static ConfigEntry<float> configPumpkinSoupES;
-        private static ConfigEntry<float> configPumpkinPieES;
-        private static ConfigEntry<float> configBakedPotatoES;
-        private static ConfigEntry<float> configFrenchFriesES;
-        private static ConfigEntry<float> configCannedFrenchFriesES;
-        private static ConfigEntry<float> configMilkES;
-        private static ConfigEntry<float> configCannedCondensedMilkES;
-        private static ConfigEntry<float> configMuffinES;
-        private static ConfigEntry<float> configBreadLoafES;
-        private static ConfigEntry<float> configCerealBarES;
-        private static ConfigEntry<float> configCannedPowderedEggsES;
-        private static ConfigEntry<float> configCannedEdamameES;
-        private static ConfigEntry<float> configCondensedMilkES;
-        private static ConfigEntry<float> configCookedSoybeanES;
-        private static ConfigEntry<float> configCookedRiceES;
-        private static ConfigEntry<float> configCookedCornES;
-        private static ConfigEntry<float> configCookedPumpkinES;
-        private static ConfigEntry<float> configPowderedEggsES;
-        private static ConfigEntry<float> configCookedTomatoES;
-        private static ConfigEntry<float> configmaxDaysHunger;
-        
+        private static ConfigEntry<float> configTomatoSoupEatSpeed;
+        private static ConfigEntry<float> configCornSoupEatSpeed;
+        private static ConfigEntry<float> configCannedRicePuddingEatSpeed;
+        private static ConfigEntry<float> configPumpkinSoupEatSpeed;
+        private static ConfigEntry<float> configPumpkinPieEatSpeed;
+        private static ConfigEntry<float> configBakedPotatoEatSpeed;
+        private static ConfigEntry<float> configFrenchFriesEatSpeed;
+        private static ConfigEntry<float> configCannedFrenchFriesEatSpeed;
+        private static ConfigEntry<float> configMilkEatSpeed;
+        private static ConfigEntry<float> configCannedCondensedMilkEatSpeed;
+        private static ConfigEntry<float> configMuffinEatSpeed;
+        private static ConfigEntry<float> configBreadLoafEatSpeed;
+        private static ConfigEntry<float> configCerealBarEatSpeed;
+        private static ConfigEntry<float> configCannedPowderedEggsEatSpeed;
+        private static ConfigEntry<float> configCannedEdamameEatSpeed;
+        private static ConfigEntry<float> configCondensedMilkEatSpeed;
+        private static ConfigEntry<float> configCookedSoybeanEatSpeed;
+        private static ConfigEntry<float> configCookedRiceEatSpeed;
+        private static ConfigEntry<float> configCookedCornEatSpeed;
+        private static ConfigEntry<float> configCookedPumpkinEatSpeed;
+        private static ConfigEntry<float> configPowderedEggsEatSpeed;
+        private static ConfigEntry<float> configCookedTomatoEatSpeed;
 
-        private static ConfigEntry<float> ddm;
-        private static ConfigEntry<float> mfe;
-        private static ConfigEntry<float> mhe;
-        private static ConfigEntry<float> mfd;
-        private static ConfigEntry<float> mhd;
-
-        public static Dictionary<String, System.Object> fConfigsFood = new Dictionary<string, object>();
-
-        public static Dictionary<String, System.Object> fTomatoSoup = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCornSoup = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCannedRicePudding = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fPumpkinSoup = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fPumpkinPie = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fBakedPotato = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fFrenchFries = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCannedFrenchFries = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fMilk = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCannedCondensedMilk = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fMuffin = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fBreadLoaf = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCerealBar = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCannedPowderedEggs = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCannedEdamame = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCondensedMilk = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCookedSoybean = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCookedRice = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCookedCorn = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCookedPumpkin = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fPowderedEggs = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCookedTomato = new Dictionary<string, object>();
-
-        //plants
-        private static ConfigEntry<bool> configPlants;
         private static ConfigEntry<float> configWheat;
         private static ConfigEntry<float> configCorn;
         private static ConfigEntry<float> configFern;
@@ -127,23 +90,6 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configRice;
         private static ConfigEntry<float> configSoybean;
         private static ConfigEntry<float> configTomato;
-
-        public static Dictionary<String, System.Object> fWheat = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fCorn = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fFern = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fMushroom = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fPotato = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fPumpkin = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fRice = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fSoybean = new Dictionary<string, object>();
-        public static Dictionary<String, System.Object> fTomato = new Dictionary<string, object>();
-
-        //decay
-        /* not implemented
-        private ConfigEntry<bool> configDecay;
-        private ConfigEntry<float> DecayFactor;
-        public static Dictionary<String, System.Object> fDecayFactor = new Dictionary<string, object>();
-        */
 
         public static int LogLevel;
         public static float PlantWaterConsumptionMultiplier;
@@ -162,63 +108,122 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float CustomNewPlayerRespawnNutrition;
         public static float CustomNewPlayerRespawnHydration;
 
+        public static bool EnableFoodChanges;
+        
+        public static float TomatoSoupNutrition;
+        public static float TomatoSoupEatSpeed;
+        public static float CornSoupNutrition;
+        public static float CornSoupEatSpeed;
+        public static float CannedRicePuddingNutrition;
+        public static float CannedRicePuddingEatSpeed;
+        public static float PumpkinSoupNutrition;
+        public static float PumpkinSoupEatSpeed;
+        public static float PumpkinPieNutrition;
+        public static float PumpkinPieEatSpeed;
+        public static float BakedPotatoNutrition;
+        public static float BakedPotatoEatSpeed;
+        public static float FrenchFriesNutrition;
+        public static float FrenchFriesEatSpeed;
+        public static float CannedFrenchFriesNutrition;
+        public static float CannedFrenchFriesEatSpeed;
+        public static float MilkNutrition;
+        public static float MilkEatSpeed;
+        public static float CannedCondensedMilkNutrition;
+        public static float CannedCondensedMilkEatSpeed;
+        public static float MuffinNutrition;
+        public static float MuffinEatSpeed;
+        public static float BreadLoafNutrition;
+        public static float BreadLoafEatSpeed;
+        public static float CerealBarNutrition;
+        public static float CerealBarEatSpeed;
+        public static float CannedPowderedEggsNutrition;
+        public static float CannedPowderedEggsEatSpeed;
+        public static float CannedEdamameNutrition;
+        public static float CannedEdamameEatSpeed;
+        public static float CondensedMilkNutrition;
+        public static float CondensedMilkEatSpeed;
+        public static float CookedSoybeanNutrition;
+        public static float CookedSoybeanEatSpeed;
+        public static float CookedRiceNutrition;
+        public static float CookedRiceEatSpeed;
+        public static float CookedCornNutrition;
+        public static float CookedCornEatSpeed;
+        public static float CookedPumpkinNutrition;
+        public static float CookedPumpkinEatSpeed;
+        public static float PowderedEggsNutrition;
+        public static float PowderedEggsEatSpeed;
+        public static float CookedTomatoNutrition;
+        public static float CookedTomatoEatSpeed;
+
+
         public static void HandleConfig(PlantsnNutritionRebalancePlugin PnN) // Create and manage the configuration file parameters
         {
+            //Log Section
             configLogLevel = PnN.Config.Bind("0 - General configuration",
                  "Log Level",
                  0, 
                  "Set the log level of the mod. Values can be 0 for errors only (default), 1 for informational logs or 2 for debug logs.\n" +
-                 "Logs can be found inside %appdata%\\..\\localLow\\rocketwerkz\\rocketstation\\player.log file");
+                 "Mod logs can be found inside the player.log file in the path %appdata%\\..\\localLow\\rocketwerkz\\rocketstation\\" +
+                 "Warning, if you set this to a value different than 0, the log files can become very large after a extended amount of time playing," +
+                 "expecially when running this mod in a dedicated server.");
             LogLevel = configLogLevel.Value;
 
+            //Plants configuration section
             configPlantWaterConsumptionMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
-                 "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
+                 "Plant Water Consumption Multiplier",  // The key of the configuration option in the configuration file
                  500f, // The default value
                  "By how much this mod should multiply the water consumption of plants?\n" +
                  "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols\n" +
                  "That means, in vanilla, 1 single stack of ice will keep a plant alive for more than 23148 hours of gameplay! That's why the suggested value here\n" +
                  "is 500, it increases the plants drinks to ~0.003 moles of water per tick. With this, 1 ice water stack will keep a plant alive for 46 hours of gameplay,\n" +
                  "or 20 plants for 2 hours, enough to make the water management meaningful.\n" +
-                 "Set this option to 1 to keep the vanilla water consumption on plants"); // Description of the option to show in the config file
+                 "If you set this option to 1, you'll get the vanilla water consumption values on plants."); // Description of the option to show in the config file
 
             PlantWaterConsumptionMultiplier = Mathf.Clamp(configPlantWaterConsumptionMultiplier.Value, 1f, 100000f);
 
             configPlantWaterConsumptionLimit = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
-                 "PlantWaterConsumptionLimit",  // The key of the configuration option in the configuration file
+                 "Plant Water Consumption Limit",  // The key of the configuration option in the configuration file
                  0.004f, // The default value
                  "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks\n" +
-                 "considerably more water than the other plants. Should be set to a positive float value"); // Description of the option to show in the config file
+                 "considerably more water than the other plants. Should be set to a positive float value. If you change the PlantWaterConsumptionMultiplier, you'll probably want" +
+                 "to change this one too accordingly."); // Description of the option to show in the config file
 
             PlantWaterConsumptionLimit = Mathf.Clamp(configPlantWaterConsumptionLimit.Value, 0.000001f, 100000f);
 
             configPlantWaterTranspirationPercentage = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterTranspirationPercentage",  // The key of the configuration option in the configuration file
                  25f, // The default value
-                 "This value set the percentage of the water consumed by plants that should be transpirated back to the atmosphere.\n" +
+                 "Set the percentage of the water consumed by plants that should be transpirated back to the atmosphere.\n" +
                  "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration."); // Description of the option to show in the config file
 
             PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);
 
+
+            //Liquid Fog Section
             configAtmosphereFogThreshold = PnN.Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
                  "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
                  5f, // The default value
-                 "This value set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any\n" +
+                 "Set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any\n" +
                  "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog\n" +
                  "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
 
             AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
 
+
+            //Character configuration section
             configNutritionLossMultiplier = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "NutritionLossMultiplier", // The key of the configuration option in the configuration file
                 1f,
-                "This value is a multiplier for the nutrition loss per tick of the character.\n" +
+                "Multiplier for the nutrition loss per tick of the character. Can be set to a positive value between 0.1 and 10.\n" +
                 "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 wich will give you ~8 days of hunger. If you change this value for 2,\n" +
-                "your hunger will last only 4 days or if you set this value for 0.5, your character full hunger will last for 16 days on Stationeers Difficulty.\n" +
-                "You'll want to change this option mainly if you also change the max nutrition of the character.\n" +
-                "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive.");
+                "your hunger will last only 4 days and will have to eat 2x more each day. If you set this value for 0.5, your character full hunger will last for 16 days on Stationeers" +
+                "Difficulty and you'll have to eat 50% less calories each day.\n" +
+                "You'll want to change this option mainly if you also change the max nutrition storage of the character.\n" +
+                "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive. With default mod values you need ~15" +
+                "to feed each player on stationeers difficulty (~12 on medium and ~10 on easy). If you change this to 0.5, you'll need only 7 plants growing on Stationeers difficulty," +
+                "6 on normal or 5 on easy to feed each player.");
 
-            NutritionLossMultiplier = configNutritionLossMultiplier.Value;
-
+            NutritionLossMultiplier = Mathf.Clamp(configNutritionLossMultiplier.Value, 0.1f, 10f);
 
             configMaxNutritionStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "MaxNutritionStorage", // The key of the configuration option in the configuration file
@@ -227,8 +232,10 @@ namespace PlantsnNutritionRebalance.Scripts
                 "<Nutrition> tag directly into the save (world.xml file) to adjust your character nutrition value to be inside the max value you set here.\n" +
                 "This greatly affects the amount of filling each food gives and also how long your starting 100% nutrition will last. For example, if you change\n" +
                 "this to 2000, potatoes will fill 2% of your food (instead of 1%) but on Stationeers difficulty your character will get only 4 days worth of it's initial nutrition," +
-                "instead of 8 days.Your Nutrition will also appear to drop 2x faster (in percentage) because now your max nutrition is lower.");
-            MaxNutritionStorage = configMaxNutritionStorage.Value;
+                "instead of 8 days.Your Nutrition will also appear to drop 2x faster (in percentage) because now your max nutrition is lower. If you adjust this value, you can also adjust" +
+                "NutritionLossMultiplier to counter this effect but if you do so, it will considerably decrease the amount of plants you need to grow, making the food-plant cycle far easier.\n" +
+                "NOTE: When playing in MP, the host and the clients need to have the same value here, or the hunger percentage will not show up properly.");
+            MaxNutritionStorage = Mathf.Clamp(configMaxNutritionStorage.Value, 1f, 1000000f);
 
             configMaxHydrationStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "MaxHydrationStorage", // The key of the configuration option in the configuration file
@@ -237,8 +244,9 @@ namespace PlantsnNutritionRebalance.Scripts
                 "<Hydration> tag directly into the save (world.xml file) to move your character hydration value to be inside the max value you set here.\n" +
                 "This greatly affects the amount of filling each water canister gives you and also how long your starting 100% hydration will last. For example, if you change\n" +
                 "this to 21, a full water canister will now fill 36% of your water (instead of 18%) but on Stationeers difficulty your character will get only 1¼ days worth of hydration." +
-                "Your Hydration will also appear to drop faster (in percentage) because now your max hydration is lower.");
-            MaxHydrationStorage = configMaxHydrationStorage.Value;
+                "Your Hydration will also appear to drop faster (in percentage) because now your max hydration is lower.\n" +
+                "NOTE: When playing in MP, the host and the clients need to have the same value here, or the hydration percentage will not show up properly.");
+            MaxHydrationStorage = Mathf.Clamp(configMaxHydrationStorage.Value, 1f, 1000000f);
 
             configWarningNutrition = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "WarningNutrition", // The key of the configuration option in the configuration file
@@ -264,7 +272,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 "This sets after what percentage of hydration the \"Hydration Critical\" alert should show up. Values can be set between 0 and 50");
             CriticalHydration = Mathf.Clamp(configCriticalHydration.Value, 0f, 50f);
 
-
+            //Character Respawn Section
             configEnableRespawnPenaltyLogic = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
                 "EnableRespawnPenaltyLogic", // The key of the configuration option in the configuration file
                 true,
@@ -292,192 +300,293 @@ namespace PlantsnNutritionRebalance.Scripts
             configCustomNewPlayerRespawnNutrition = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
                 "CustomNewPlayerRespawnNutrition", // The key of the configuration option in the configuration file
                 100f,
-                "If CustomNewPlayerRespawn is true, this option set with how much nutrition, in percent, new players should join.");
-            CustomNewPlayerRespawnNutrition = configCustomNewPlayerRespawnNutrition.Value;
+                "If CustomNewPlayerRespawn is true, this option set with how much nutrition, in percent, new players should join. Values can be set between 0 and 100");
+            CustomNewPlayerRespawnNutrition = Mathf.Clamp(configCustomNewPlayerRespawnNutrition.Value, 0f, 100f);
 
             configCustomNewPlayerRespawnHydration = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
                 "CustomNewPlayerRespawnHydration", // The key of the configuration option in the configuration file
                 100f,
-                "If CustomNewPlayerRespawn is true, this option set with how much hydration, in percent, new players should join.");
-            CustomNewPlayerRespawnHydration = configCustomNewPlayerRespawnHydration.Value;
+                "If CustomNewPlayerRespawn is true, this option set with how much hydration, in percent, new players should join. Values can be set between 0 and 100");
+            CustomNewPlayerRespawnHydration = Mathf.Clamp(configCustomNewPlayerRespawnHydration.Value, 0f, 100f);
 
+            //Food Section
+            configEnableFoodChanges = PnN.Config.Bind("5 - Foods Configuration", // The section under which the option is shown 
+                "EnableFoodChanges", // The key of the configuration option in the configuration file
+                true,
+                "This option enable or disable the changes of the Nutrition amount of foods and the Eat time. If set to true, the nutrition and eat time of foods will be" +
+                "changed to the values set for each food below. If set to false, the vanilla nutrition values for foods will be kept with all it's oddities like overpowered " +
+                "tomato soup and Pumpkin pie not really worth the trouble making.");
+            EnableFoodChanges = configEnableFoodChanges.Value;
 
+            configTomatoSoupNutrition = PnN.Config.Bind("5 - Foods Configuration", 
+                "TomatoSoupNutrition", 
+                135f, 
+                "Amount of Nutrition given by eating Tomato Soup. Needs to be a positive value between 1 and 10000.\nNOTE: Before changing the nutrition each food gives, you should" +
+                "remember that, by changing this nutrition amount, you'll probably break the nutrition balance between the plant needed to make this food and other plants. For example," +
+                "if you choose to double the nutrition given by Tomato Soup, you'll need half of the amount of tomato plants growing in your greenhouse to feed each player compared to " +
+                "other plants/foods. So if you decide to change this food nutrition, you'll should change all foods to retain the nutritional balance of plants.\n" +
+                "The default values of food nutrition used in this mod aims to create the need for ~15 plants growing continuoulsy to feed each player so, before changing any " +
+                "food values, it's strongly advisable to test the new values in the mod spreadsheet available at <spreadsheetlink> to check how the change will impact the balance and" +
+                "the amount of plants you need to grow continuoulsy.");
+            TomatoSoupNutrition = Mathf.Clamp(configTomatoSoupNutrition.Value, 1f, 10000f);
 
+            configTomatoSoupEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "TomatoSoupEatSpeed", 
+                0.04f,
+                "Time to eat each nutrition of Tomato Soup. Needs to be a positive value between 0.001 and 10");
+            TomatoSoupEatSpeed = Mathf.Clamp(configTomatoSoupEatSpeed.Value, 0.001f, 10f);
 
-            mfe = PnN.Config.Bind("3 - Foods Configuration", "food Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and [Max stomach]. \n 0 disable this configuration and put like the death system. ");
-            mhe = PnN.Config.Bind("3 - Foods Configuration", "Hidration Enter", 0f, "Sets the initial game difficulty multiplier(how much food you`ll strated).\n values between 0 and 42. \n 0 disable this configuration and put like the death system. ");
+            configCornSoupNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CornSoupNutrition", 
+                223f,
+                "Amount of Nutrition given by eating Corn Soup. Needs to be a positive value between 1 and 10000.");
+            CornSoupNutrition = Mathf.Clamp(configCornSoupNutrition.Value, 1f, 10000f);
 
-            mfd = PnN.Config.Bind("3 - Foods Configuration", "Min food die", 0f, "Sets the initial game difficulty how much food minimum you get when you die.\n values between 0 and 1. \n minimmun 1%, 0 disable this function and come with predefination in mod. ");
-            mhd = PnN.Config.Bind("3 - Foods Configuration", "Min Hidration die", 0f, "Sets the initial game difficulty how much Hidration minimum you get when you die.\n values between 0 and 1. \n minimmun 1%, 0 disable this function and come with predefination in mod. ");
+            configCornSoupEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CornSoupEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Corn Soup. Needs to be a positive value between 0.001 and 10.");
+            CornSoupEatSpeed = Mathf.Clamp(configCornSoupEatSpeed.Value, 0.001f, 10f);
 
+            configCannedRicePuddingNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedRicePuddingNutrition",
+                220f,
+                "Amount of Nutrition given by eating Canned Rice Pudding. Needs to be a positive value between 1 and 10000.");
+            CannedRicePuddingNutrition = Mathf.Clamp(configCannedRicePuddingNutrition.Value, 1f, 10000f);
 
-            ddm = PnN.Config.Bind("3 - Foods Configuration", "Days Death multiplier", 10f, "Sets the initial game difficulty multiplier.\n Defines the proportion of drop in days of food in case you die. \n The default is 10 which gives 20 game days. ");
+            configCannedRicePuddingEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedRicePuddingEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Canned Rice Pudding. Needs to be a positive value between 0.001 and 10.");
+            CannedRicePuddingEatSpeed = Mathf.Clamp(configCannedRicePuddingEatSpeed.Value, 0.001f, 10f);
 
+            configPumpkinSoupNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinSoupNutrition",
+                270f,
+                "Amount of Nutrition given by eating Pumpkin Soup. Needs to be a positive value between 1 and 10000.");
+            PumpkinSoupNutrition = Mathf.Clamp(configPumpkinSoupNutrition.Value, 1f, 10000f);
 
+            configPumpkinSoupEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinSoupEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Canned Pumpkin Soup. Needs to be a positive value between 0.001 and 10.");
+            PumpkinSoupEatSpeed = Mathf.Clamp(configPumpkinSoupEatSpeed.Value, 0.001f, 10f);
 
-            fConfigsFood.Add("DDM", ddm.Value);
-            fConfigsFood.Add("MFE", mfe.Value);
-            fConfigsFood.Add("MHE", mhe.Value);
-            fConfigsFood.Add("MFD", mfd.Value);
-            fConfigsFood.Add("MHD", mhd.Value);
+            configPumpkinPieNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinPieNutrition",
+                800f,
+                "Amount of Nutrition given by eating Pumpkin Pie. Needs to be a positive value between 1 and 10000.");
+            PumpkinPieNutrition = Mathf.Clamp(configPumpkinPieNutrition.Value, 1f, 10000f);
 
-            configFoods = configPlants = PnN.Config.Bind("3 - Foods Configuration", "Enable food config", true, "Enable food config");
+            configPumpkinPieEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinPieEatSpeed",
+                0.02f,
+                "Time to eat each nutrition of Pumpkin Pie. Needs to be a positive value between 0.001 and 10.");
+            PumpkinPieEatSpeed = Mathf.Clamp(configPumpkinPieEatSpeed.Value, 0.001f, 10f);
 
-            configTomatoSoup = PnN.Config.Bind("3 - Foods Configuration", "Tomato Soup", 135f, "Amount of food nutrition");
-            configTomatoSoupES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Tomato Soup", 0.04f, "speed factor when eating the food");
+            configBakedPotatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "BakedPotatoNutrition",
+                45f,
+                "Amount of Nutrition given by eating Baked Potato. Needs to be a positive value between 1 and 10000.");
+            BakedPotatoNutrition = Mathf.Clamp(configBakedPotatoNutrition.Value, 1f, 10000f);
 
-            configCornSoup = PnN.Config.Bind("3 - Foods Configuration", "Corn Soup", 223f, "Amount of food nutrition");
-            configCornSoupES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Corn Soup", 0.04f, "d");
+            configBakedPotatoEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "BakedPotatoEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of a Baked Potato. Needs to be a positive value between 0.001 and 10.");
+            BakedPotatoEatSpeed = Mathf.Clamp(configBakedPotatoEatSpeed.Value, 0.001f, 10f);
 
-            configCannedRicePudding = PnN.Config.Bind("3 - Foods Configuration", "Canned Rice Pudding", 220f, "Amount of food nutrition");
-            configCannedRicePuddingES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Canned Rice Pudding", 0.04f, "Eat speed Corn Soup");
+            configFrenchFriesNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "FrenchFriesNutrition",
+                85f,
+                "Amount of Nutrition given by eating French Fries. Needs to be a positive value between 1 and 10000.");
+            FrenchFriesNutrition = Mathf.Clamp(configFrenchFriesNutrition.Value, 1f, 10000f);
 
-            configPumpkinSoup = PnN.Config.Bind("3 - Foods Configuration", "Pumpkin Soup", 270f, "Amount of food nutrition");
-            configPumpkinSoupES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Pumpkin Soup", 0.04f, "Eat speed Corn Soup");
+            configFrenchFriesEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "FrenchFriesEatSpeed",
+                0.02f,
+                "Time to eat each nutrition of a French Fries. Needs to be a positive value between 0.001 and 10.");
+            FrenchFriesEatSpeed = Mathf.Clamp(configFrenchFriesEatSpeed.Value, 0.001f, 10f);
 
-            configPumpkinPie = PnN.Config.Bind("3 - Foods Configuration", "Pumpkin Pie", 800f, "Amount of food nutrition");
-            configPumpkinPieES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Pumpkin Pie", 0.02f, "Eat speed Corn Soup");
+            configCannedFrenchFriesNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedFrenchFriesNutrition",
+                150f,
+                "Amount of Nutrition given by eating Canned French Fries. Needs to be a positive value between 1 and 10000.");
+            CannedFrenchFriesNutrition = Mathf.Clamp(configCannedFrenchFriesNutrition.Value, 1f, 10000f);
 
-            configBakedPotato = PnN.Config.Bind("3 - Foods Configuration", "Baked Potato", 45f, "Amount of food nutrition");
-            configBakedPotatoES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Baked Potato", 0.015f, "Eat speed Corn Soup");
+            configCannedFrenchFriesEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedFrenchFriesEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Canned French Fries. Needs to be a positive value between 0.001 and 10.");
+            CannedFrenchFriesEatSpeed = Mathf.Clamp(configCannedFrenchFriesEatSpeed.Value, 0.001f, 10f);
 
-            configFrenchFries = PnN.Config.Bind("3 - Foods Configuration", "French Fries", 85f, "Amount of food nutrition");
-            configFrenchFriesES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed French Fries", 0.02f, "Eat speed Corn Soup");
+            configMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "MilkNutrition",
+                2.3f,
+                "Amount of Nutrition given by eating Milk. Needs to be a positive value between 1 and 10000.");
+            MilkNutrition = Mathf.Clamp(configMilkNutrition.Value, 1f, 10000f);
 
-            configCannedFrenchFries = PnN.Config.Bind("3 - Foods Configuration", "Canned French Fries", 150f, "Amount of food nutrition");
-            configCannedFrenchFriesES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Canned French Fries", 0.04f, "Eat speed Corn Soup");
+            configMilkEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "MilkEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Milk. Needs to be a positive value between 0.001 and 10.");
+            MilkEatSpeed = Mathf.Clamp(configMilkEatSpeed.Value, 0.001f, 10f);
 
-            configMilk = PnN.Config.Bind("3 - Foods Configuration", "Milk", 2.3f, "Amount of food nutrition");
-            configMilkES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Milk", 0.015f, "Eat speed Corn Soup");
+            configCannedCondensedMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedCondensedMilkNutrition",
+                400f,
+                "Amount of Nutrition given by eating Canned Condensed Milk. Needs to be a positive value between 1 and 10000.");
+            CannedCondensedMilkNutrition = Mathf.Clamp(configCannedCondensedMilkNutrition.Value, 1f, 10000f);
 
-            configCannedCondensedMilk = PnN.Config.Bind("3 - Foods Configuration", "Canned Condensed Milk", 400f, "Amount of food nutrition");
-            configCannedCondensedMilkES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Canned Condensed Milk", 0.04f, "Eat speed Corn Soup");
+            configCannedCondensedMilkEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedCondensedMilkEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Canned Condensed Milk. Needs to be a positive value between 0.001 and 10.");
+            CannedCondensedMilkEatSpeed = Mathf.Clamp(configCannedCondensedMilkEatSpeed.Value, 0.001f, 10f);
 
-            configMuffin = PnN.Config.Bind("3 - Foods Configuration", "Muffin", 570f, "Amount of food nutrition");
-            configMuffinES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Muffin", 0.02f, "Eat speed Corn Soup");
+            configMuffinNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "MuffinNutrition",
+                570f,
+                "Amount of Nutrition given by eating a Muffin. Needs to be a positive value between 1 and 10000.");
+            MuffinNutrition = Mathf.Clamp(configMuffinNutrition.Value, 1f, 10000f);
 
-            configBreadLoaf = PnN.Config.Bind("3 - Foods Configuration", "Bread Loaf", 290f, "Amount of food nutrition");
-            configBreadLoafES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Bread Loaf", 0.02f, "Eat speed Corn Soup");
+            configMuffinEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "MuffinEatSpeed",
+                0.02f,
+                "Time to eat each nutrition of a Muffin. Needs to be a positive value between 0.001 and 10.");
+            MuffinEatSpeed = Mathf.Clamp(configMuffinEatSpeed.Value, 0.001f, 10f);
 
-            configCerealBar = PnN.Config.Bind("3 - Foods Configuration", "Cereal Bar", 110f, "Amount of food nutrition");
-            configCerealBarES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Cereal Bar", 0.04f, "Eat speed Corn Soup");
+            configBreadLoafNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "BreadLoafNutrition",
+                290f,
+                "Amount of Nutrition given by eating a Bread Loaf. Needs to be a positive value between 1 and 10000.");
+            BreadLoafNutrition = Mathf.Clamp(configBreadLoafNutrition.Value, 1f, 10000f);
 
-            configCannedPowderedEggs = PnN.Config.Bind("3 - Foods Configuration", "Canned Powdered Eggs", 550f, "Amount of food nutrition");
-            configCannedPowderedEggsES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Canned Powdered Eggs", 0.04f, "Eat speed Corn Soup");
+            configBreadLoafEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "BreadLoafEatSpeed",
+                0.02f,
+                "Time to eat each nutrition of a Bread Loaf. Needs to be a positive value between 0.001 and 10.");
+            BreadLoafEatSpeed = Mathf.Clamp(configBreadLoafEatSpeed.Value, 0.001f, 10f);
 
-            configCannedEdamame = PnN.Config.Bind("3 - Foods Configuration", "Canned Edamame", 100f, "Amount of food nutrition");
-            configCannedEdamameES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Canned Edamame", 0.04f, "Eat speed Corn Soup");
+            configCerealBarNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CerealBarNutrition",
+                110f,
+                "Amount of Nutrition given by eating a Cereal Bar. Needs to be a positive value between 1 and 10000.");
+            CerealBarNutrition = Mathf.Clamp(configCerealBarNutrition.Value, 1f, 10000f);
 
-            configCondensedMilk = PnN.Config.Bind("3 - Foods Configuration", "Condensed Milk", 235f, "Amount of food nutrition");
-            configCondensedMilkES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Condensed Milk", 0.015f, "Eat speed Corn Soup");
+            configCerealBarEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CerealBarEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of a Cereal Bar. Needs to be a positive value between 0.001 and 10.");
+            CerealBarEatSpeed = Mathf.Clamp(configCerealBarEatSpeed.Value, 0.001f, 10f);
 
-            configCookedSoybean = PnN.Config.Bind("3 - Foods Configuration", "Cooked Soybean", 38f, "Amount of food nutrition");
-            configCookedSoybeanES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Cooked Soybean", 0.015f, "Eat speed Corn Soup");
+            configCannedPowderedEggsNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedPowderedEggsNutrition",
+                550f,
+                "Amount of Nutrition given by eating Canned Powdered Eggs. Needs to be a positive value between 1 and 10000.");
+            CannedPowderedEggsNutrition = Mathf.Clamp(configCannedPowderedEggsNutrition.Value, 1f, 10000f);
 
-            configCookedRice = PnN.Config.Bind("3 - Foods Configuration", "Cooked Rice", 50f, "Amount of food nutrition");
-            configCookedRiceES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Cooked Rice", 0.015f, "Eat speed Corn Soup");
+            configCannedPowderedEggsEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedPowderedEggsEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Canned Powdered Eggs. Needs to be a positive value between 0.001 and 10.");
+            CannedPowderedEggsEatSpeed = Mathf.Clamp(configCannedPowderedEggsEatSpeed.Value, 0.001f, 10f);
 
-            configCookedCorn = PnN.Config.Bind("3 - Foods Configuration", "Cooked Corn", 52f, "Amount of food nutrition");
-            configCookedCornES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Cooked Corn", 0.015f, "Eat speed Corn Soup");
+            configCannedEdamameNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedEdamameNutrition",
+                100f,
+                "Amount of Nutrition given by eating Canned Edamame. Needs to be a positive value between 1 and 10000.");
+            CannedEdamameNutrition = Mathf.Clamp(configCannedEdamameNutrition.Value, 1f, 10000f);
 
-            configCookedPumpkin = PnN.Config.Bind("3 - Foods Configuration", "Cooked Pumpkin", 60f, "Amount of food nutrition");
-            configCookedPumpkinES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Cooked Pumpkin", 0.015f, "Eat speed Corn Soup");
+            configCannedEdamameEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedEdamameEatSpeed",
+                0.04f,
+                "Time to eat each nutrition of Canned Edamame. Needs to be a positive value between 0.001 and 10.");
+            CannedEdamameEatSpeed = Mathf.Clamp(configCannedEdamameEatSpeed.Value, 0.001f, 10f);
 
-            configPowderedEggs = PnN.Config.Bind("3 - Foods Configuration", "Powdered Eggs", 330f, "Amount of food nutrition");
-            configPowderedEggsES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Powdered Eggs", 0.015f, "Eat speed Corn Soup");
+            configCondensedMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CondensedMilkNutrition",
+                235f,
+                "Amount of Nutrition given by eating Condensed Milk. Needs to be a positive value between 1 and 10000.");
+            CondensedMilkNutrition = Mathf.Clamp(configCondensedMilkNutrition.Value, 1f, 10000f);
 
-            configCookedTomato = PnN.Config.Bind("3 - Foods Configuration", "Cooked Tomato", 30f, "Amount of food nutrition");
-            configCookedTomatoES = PnN.Config.Bind("3 - Foods Configuration", "Eat speed Cooked Tomato", 0.015f, "Eat speed Corn Soup");
+            configCondensedMilkEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CondensedMilkEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Condensed Milk. Needs to be a positive value between 0.001 and 10.");
+            CondensedMilkEatSpeed = Mathf.Clamp(configCondensedMilkEatSpeed.Value, 0.001f, 10f);
 
-            fTomatoSoup.Add("NUTV", configTomatoSoup.Value);
-            fTomatoSoup.Add("SEAT", configTomatoSoupES.Value);
+            configCookedSoybeanNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedSoybeanNutrition",
+                38f,
+                "Amount of Nutrition given by eating Cooked Soybean. Needs to be a positive value between 1 and 10000.");
+            CookedSoybeanNutrition = Mathf.Clamp(configCookedSoybeanNutrition.Value, 1f, 10000f);
 
-            fCornSoup.Add("NUTV", configCornSoup.Value);
-            fCornSoup.Add("SEAT", configCornSoupES.Value);
+            configCookedSoybeanEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedSoybeanEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Cooked Soybean. Needs to be a positive value between 0.001 and 10.");
+            CookedSoybeanEatSpeed = Mathf.Clamp(configCookedSoybeanEatSpeed.Value, 0.001f, 10f);
 
-            fCannedRicePudding.Add("NUTV", configCannedRicePudding.Value);
-            fCannedRicePudding.Add("SEAT", configCannedRicePuddingES.Value);
+            configCookedRiceNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedRiceNutrition",
+                50f,
+                "Amount of Nutrition given by eating Cooked Rice. Needs to be a positive value between 1 and 10000.");
+            CookedRiceNutrition = Mathf.Clamp(configCookedRiceNutrition.Value, 1f, 10000f);
 
-            fPumpkinSoup.Add("NUTV", configPumpkinSoup.Value);
-            fPumpkinSoup.Add("SEAT", configPumpkinSoupES.Value);
+            configCookedRiceEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedRiceEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Cooked Rice. Needs to be a positive value between 0.001 and 10.");
+            CookedRiceEatSpeed = Mathf.Clamp(configCookedRiceEatSpeed.Value, 0.001f, 10f);
 
-            fPumpkinPie.Add("NUTV", configPumpkinPie.Value);
-            fPumpkinPie.Add("SEAT", configPumpkinPieES.Value);
+            configCookedCornNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedCornNutrition",
+                52f,
+                "Amount of Nutrition given by eating Cooked Corn. Needs to be a positive value between 1 and 10000.");
+            CookedCornNutrition = Mathf.Clamp(configCookedCornNutrition.Value, 1f, 10000f);
 
-            fBakedPotato.Add("NUTV", configBakedPotato.Value);
-            fBakedPotato.Add("SEAT", configBakedPotatoES.Value);
+            configCookedCornEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedCornEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Cooked Corn. Needs to be a positive value between 0.001 and 10.");
+            CookedCornEatSpeed = Mathf.Clamp(configCookedCornEatSpeed.Value, 0.001f, 10f);
 
-            fFrenchFries.Add("NUTV", configFrenchFries.Value);
-            fFrenchFries.Add("SEAT", configFrenchFriesES.Value);
+            configCookedPumpkinNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedPumpkinNutrition",
+                60f,
+                "Amount of Nutrition given by eating Cooked Pumpkin. Needs to be a positive value between 1 and 10000.");
+            CookedPumpkinNutrition = Mathf.Clamp(configCookedPumpkinNutrition.Value, 1f, 10000f);
 
-            fCannedFrenchFries.Add("NUTV", configCannedFrenchFries.Value);
-            fCannedFrenchFries.Add("SEAT", configCannedFrenchFriesES.Value);
+            configCookedPumpkinEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedPumpkinEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Cooked Pumpkin. Needs to be a positive value between 0.001 and 10.");
+            CookedPumpkinEatSpeed = Mathf.Clamp(configCookedPumpkinEatSpeed.Value, 0.001f, 10f);
 
-            fMilk.Add("NUTV", configMilk.Value);
-            fMilk.Add("SEAT", configMilkES.Value);
+            configPowderedEggsNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "PowderedEggsNutrition",
+                330f,
+                "Amount of Nutrition given by eating Powdered Eggs. Needs to be a positive value between 1 and 10000.");
+            PowderedEggsNutrition = Mathf.Clamp(configPowderedEggsNutrition.Value, 1f, 10000f);
 
-            fCannedCondensedMilk.Add("NUTV", configCannedCondensedMilk.Value);
-            fCannedCondensedMilk.Add("SEAT", configCannedCondensedMilkES.Value);
+            configPowderedEggsEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "PowderedEggsEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Powdered Eggs. Needs to be a positive value between 0.001 and 10.");
+            PowderedEggsEatSpeed = Mathf.Clamp(configPowderedEggsEatSpeed.Value, 0.001f, 10f);
 
-            fMuffin.Add("NUTV", configMuffin.Value);
-            fMuffin.Add("SEAT", configMuffinES.Value);
+            configCookedTomatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedTomatoNutrition",
+                30f,
+                "Amount of Nutrition given by eating Cooked Tomato. Needs to be a positive value between 1 and 10000.");
+            CookedTomatoNutrition = Mathf.Clamp(configCookedTomatoNutrition.Value, 1f, 10000f);
 
-            fBreadLoaf.Add("NUTV", configBreadLoaf.Value);
-            fBreadLoaf.Add("SEAT", configBreadLoafES.Value);
-
-            fCerealBar.Add("NUTV", configCerealBar.Value);
-            fCerealBar.Add("SEAT", configCerealBarES.Value);
-
-            fCannedPowderedEggs.Add("NUTV", configCannedPowderedEggs.Value);
-            fCannedPowderedEggs.Add("SEAT", configCannedPowderedEggsES.Value);
-
-            fCannedEdamame.Add("NUTV", configCannedEdamame.Value);
-            fCannedEdamame.Add("SEAT", configCannedEdamameES.Value);
-
-            fCondensedMilk.Add("NUTV", configCondensedMilk.Value);
-            fCondensedMilk.Add("SEAT", configCondensedMilkES.Value);
-
-            fCookedSoybean.Add("NUTV", configCookedSoybean.Value);
-            fCookedSoybean.Add("SEAT", configCookedSoybeanES.Value);
-
-            fCookedRice.Add("NUTV", configCookedRice.Value);
-            fCookedRice.Add("SEAT", configCookedRiceES.Value);
-
-            fCookedCorn.Add("NUTV", configCookedCorn.Value);
-            fCookedCorn.Add("SEAT", configCookedCornES.Value);
-
-            fCookedPumpkin.Add("NUTV", configCookedPumpkin.Value);
-            fCookedPumpkin.Add("SEAT", configCookedPumpkinES.Value);
-
-            fPowderedEggs.Add("NUTV", configPowderedEggs.Value);
-            fPowderedEggs.Add("SEAT", configPowderedEggsES.Value);
-
-            fCookedTomato.Add("NUTV", configCookedTomato.Value);
-            fCookedTomato.Add("SEAT", configCookedTomatoES.Value);
-
-            //plants
-            configPlants = PnN.Config.Bind("3 - Foods Configuration", "Enable plant config", false, "Enable plant config");
-            configWheat = PnN.Config.Bind("3 - Foods Configuration", "Wheat", 2f, "Amount of food nutrition");
-            configCorn = PnN.Config.Bind("3 - Foods Configuration", "Corn", 2f, "Amount of food nutrition");
-            configFern = PnN.Config.Bind("3 - Foods Configuration", "Fern", 2f, "Amount of food nutrition");
-            configMushroom = PnN.Config.Bind("3 - Foods Configuration", "Mushroom", 2f, "Amount of food nutrition");
-            configPotato = PnN.Config.Bind("3 - Foods Configuration", "Potato", 2f, "Amount of food nutrition");
-            configPumpkin = PnN.Config.Bind("3 - Foods Configuration", "Pumpkin", 2f, "Amount of food nutrition");
-            configRice = PnN.Config.Bind("3 - Foods Configuration", "Rice", 2f, "Amount of food nutrition");
-            configSoybean = PnN.Config.Bind("3 - Foods Configuration", "Soybean", 2f, "Amount of food nutrition");
-            configTomato = PnN.Config.Bind("3 - Foods Configuration", "Tomato", 2f, "Amount of food nutrition");
-
-            fConfigsFood.Add("PCE", configPlants.Value);
-            fWheat.Add("NUTV", configWheat.Value);
-            fCorn.Add("NUTV", configCorn.Value);
-            fFern.Add("NUTV", configFern.Value);
-            fMushroom.Add("NUTV", configMushroom.Value);
-            fPotato.Add("NUTV", configPotato.Value);
-            fPumpkin.Add("NUTV", configPumpkin.Value);
-            fRice.Add("NUTV", configRice.Value);
-            fSoybean.Add("NUTV", configSoybean.Value);
-            fTomato.Add("NUTV", configTomato.Value);
-            fConfigsFood.Add("FCE", configFoods.Value);
+            configCookedTomatoEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedTomatoEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Cooked Tomato. Needs to be a positive value between 0.001 and 10.");
+            CookedTomatoEatSpeed = Mathf.Clamp(configCookedTomatoEatSpeed.Value, 0.001f, 10f);
 
             //decay
             /* not implemented

@@ -11,6 +11,7 @@ using System.Reflection;
 using System;
 using System.Collections.Generic;
 using Object = System.Object;
+using SimpleSpritePacker;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -219,7 +220,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - DaysPastNorm);
                     ModLog.Info("RespawnPatch: Hydration given because a player who died are respawning ---> " + HydrationToGive);
                 }
-                //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of water, just enough for the character to go drink something
+                //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
                 else
                 {
                     __instance.Nutrition = ConfigFile.MaxNutritionStorage / 100;
@@ -228,28 +229,24 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-
-
-
     public static class FoodsValuesPatch
     {
-        public static float getFood(String __instance)
+        public static float getFoodNutrition(String FoodDisplayName)
         {
-
-            ModLog.Debug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
-            if (typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")) != null)
+            ModLog.Debug("FoodsValuesPatch: Trying to get Nutrition value for the food: " + FoodDisplayName);
+            if (typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition") != null)
             {
-                return float.Parse(((Dictionary<String, Object>)typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")).GetValue(PlantsnNutritionRebalancePlugin.Instance))["NUTV"].ToString());
+                return (float)typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition").GetValue(null);
             }
             return -1f;
         }
 
-        public static float getFoodEatSpeed(String __instance)
+        public static float getFoodEatSpeed(String FoodDisplayName)
         {
-            ModLog.Debug("FoodsValuesPatch: getFood---> " + "f" + __instance.Trim().Replace(" ", ""));
-            if (typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")) != null)
-            {
-                return float.Parse(((Dictionary<String, Object>)typeof(PlantsnNutritionRebalancePlugin).GetField("f" + __instance.Trim().Replace(" ", "")).GetValue(PlantsnNutritionRebalancePlugin.Instance))["SEAT"].ToString());
+            ModLog.Debug("FoodsValuesPatch: Trying to get EatSpeed value for the food/plant: " + FoodDisplayName );
+            if (typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName + "EatSpeed") != null)
+            {                
+                return (float)typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName.Trim().Replace(" ", "") + "EatSpeed").GetValue(null);
             }
             return -1f;
         }
@@ -265,24 +262,27 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         private static void PatchFoodNutrition(Food __instance)
         {
-            try
+            if (ConfigFile.EnableFoodChanges)
             {
-                float tes = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
-                float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
-                if (tes >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
+                try
                 {
-                    ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + tes);
-                    __instance.EatSpeed = tes;
+                    float EatSpeed = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
+                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
+                    if (EatSpeed >= 0f)
+                    {
+                        ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + EatSpeed);
+                        __instance.EatSpeed = EatSpeed;
+                    }
+                    if (NutritionValue >= 0f)
+                    {
+                        ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + NutritionValue);
+                        __instance.NutritionValue = NutritionValue;
+                    }
                 }
-                if (tf >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
+                catch (Exception ex)
                 {
-                    ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + tf);
-                    __instance.NutritionValue = tf;
+                    ModLog.Error(ex);
                 }
-            }
-            catch (Exception ex)
-            {
-                ModLog.Error(ex);
             }
         }
     }
@@ -296,24 +296,27 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         private static void PatchStackableNutrition(StackableFood __instance)
         {
-            try
+            if (ConfigFile.EnableFoodChanges)
             {
-                float tes = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
-                float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
-                if (tes >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
+                try
                 {
-                    ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + tes);
-                    __instance.EatSpeed = tes;
+                    float EatSpeed = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
+                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
+                    if (EatSpeed >= 0f)
+                    {
+                        ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + EatSpeed);
+                        __instance.EatSpeed = EatSpeed;
+                    }
+                    if (NutritionValue >= 0f)
+                    {
+                        ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + NutritionValue);
+                        __instance.NutritionValue = NutritionValue;
+                    }
                 }
-                if (tf >= 0f && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
+                catch (Exception ex)
                 {
-                    ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + tf);
-                    __instance.NutritionValue = tf;
+                    ModLog.Error(ex);
                 }
-            }
-            catch (Exception ex)
-            {
-                ModLog.Error(ex);
             }
         }
     }
@@ -326,18 +329,21 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         private static void PatchPlantNutrition(Plant __instance)
         {
-            try
+            if (ConfigFile.EnableFoodChanges)
             {
-                float tf = FoodsValuesPatch.getFood(__instance.DisplayName);
-                if (tf >= 0f && bool.Parse(ConfigFile.fConfigsFood["PCE"].ToString()))
+                try
                 {
-                    ModLog.Debug("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + tf);
-                    __instance.NutritionValue = tf;
+                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
+                    if (NutritionValue >= 0f)
+                    {
+                        ModLog.Debug("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + NutritionValue);
+                        __instance.NutritionValue = NutritionValue;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                ModLog.Error(ex);
+                catch (Exception ex)
+                {
+                    ModLog.Error(ex);
+                }
             }
         }
     }
@@ -351,26 +357,46 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         private static bool AddNutrition(ref Thing prefab, ref StationpediaPage page)
         {
-            Food food = prefab as Food;
-            if (food != null && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
+            if (ConfigFile.EnableFoodChanges)
             {
-                food.NutritionValue = FoodsValuesPatch.getFood(food.DisplayName);
-                ModLog.Debug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + food.NutritionValue);
-            }
-            StackableFood stackableFood = prefab as StackableFood;
-            if (stackableFood != null && bool.Parse(ConfigFile.fConfigsFood["FCE"].ToString()))
-            {
-                stackableFood.NutritionValue = FoodsValuesPatch.getFood(stackableFood.DisplayName);
-                ModLog.Debug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + stackableFood.NutritionValue);
-            }
+                Food food = prefab as Food;
+                if (food != null)
+                {
+                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(food.DisplayName);
+                    if (NutritionValue >= 0f)
+                    {
+                        food.NutritionValue = NutritionValue;
+                        ModLog.Debug("Stationpedia-AddNutrition: Changed nutritional value of food: " + prefab.DisplayName + " to: " + NutritionValue);
+                    }
 
-            Plant Plantfood = prefab as Plant;
-            if (Plantfood != null && bool.Parse(ConfigFile.fConfigsFood["PCE"].ToString()))
-            {
-                Plantfood.NutritionValue = FoodsValuesPatch.getFood(Plantfood.DisplayName);
-                ModLog.Debug("FoodsValuesPatch: AddNutrition ---> " + prefab.DisplayName + " nut value: " + Plantfood.NutritionValue);
+                }
+                StackableFood stackableFood = prefab as StackableFood;
+                if (stackableFood != null)
+                {
+                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(stackableFood.DisplayName);
+                    if (NutritionValue >= 0f)
+                    {
+                        stackableFood.NutritionValue = NutritionValue;
+                        ModLog.Debug("Stationpedia-AddNutrition: Changed nutritional value of stackableFood: " + prefab.DisplayName + " to: " + NutritionValue);
+                    }
+                }
+
+                Plant Plantfood = prefab as Plant;
+                if (Plantfood != null)
+                {
+                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(Plantfood.DisplayName);
+                    if (NutritionValue >= 0f)
+                    {
+                        Plantfood.NutritionValue = NutritionValue;
+                        ModLog.Debug("Stationpedia-AddNutrition: Changed nutritional value of stackableFood: " + prefab.DisplayName + " to: " + NutritionValue);
+                    }
+                }
+                return true;
             }
-            return true;
+            else
+            {
+                return false; 
+            }
         }
     }
 
