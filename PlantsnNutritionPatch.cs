@@ -207,23 +207,24 @@ namespace PlantsnNutritionRebalance.Scripts
                     __instance.Nutrition = ConfigFile.MaxNutritionStorage / 100;
                 }
                 // Now do the same logic, but for Hydration:
-                int NormalizedMaxHydrationDays = Mathf.RoundToInt(___MaxHydrationStorage / (____hydrationLossPerTick + ____hydrationLossPerTick * 0.7f)  / 2 / 60 / (20 * Settings.CurrentData.SunOrbitPeriod));
+                //0.001798755  --  0,003237759
+                int NormalizedMaxHydrationDays = Mathf.RoundToInt(___MaxHydrationStorage / ((____hydrationLossPerTick + ____hydrationLossPerTick * 0.2f)* WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)  / 2 / 60 / (20 * Settings.CurrentData.SunOrbitPeriod));
                 float HydrationSlicePerDay = ConfigFile.MaxHydrationStorage / NormalizedMaxHydrationDays;
                 float HydrationToGive;
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
-                    ModLog.Debug("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined ---> " + __instance.Nutrition);
+                    ModLog.Debug("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 else if (DaysPastNorm < NormalizedMaxHydrationDays)
                 {
                     HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - DaysPastNorm);
-                    ModLog.Info("Human-OnLifeCreated: Hydration given because a player who died are respawning ---> " + HydrationToGive);
+                    ModLog.Info("Human-OnLifeCreated: Hydration given because a player who died are respawning: " + HydrationToGive);
                 }
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
                 else
                 {
-                    HydrationToGive = ConfigFile.MaxHydrationStorage / 100;
+                    HydrationToGive = ConfigFile.MaxHydrationStorage / 100; //just give 1% water
                 }
                 Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);
             }
