@@ -193,13 +193,13 @@ namespace PlantsnNutritionRebalance.Scripts
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     __instance.Nutrition = ConfigFile.CustomNewPlayerRespawnNutrition;
-                    ModLog.Debug("RespawnPatch: Nutrition given because CustomNewPlayerRespawn is true and a new player joined ---> " + __instance.Nutrition);
+                    ModLog.Debug("Human-OnLifeCreated: Nutrition given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 // If it's a respawn and the DaysPastNorm is lower than the NormalizedMaxHungerDays, that means we should calculate the amount of food to give to the respawning character
                 else if (DaysPastNorm < NormalizedMaxHungerDays)
                 {
                     __instance.Nutrition = NutritionSlicePerDay * (NormalizedMaxHungerDays - DaysPastNorm);
-                    ModLog.Info("RespawnPatch: Nutrition given for an player who died and are respawning ---> " + __instance.Nutrition);
+                    ModLog.Info("Human-OnLifeCreated: Nutrition given for an player who died and are respawning: " + __instance.Nutrition);
                 }
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHungerDays, that means we should give a minimal amount of food, just enough for the character to go eat something
                 else
@@ -213,18 +213,19 @@ namespace PlantsnNutritionRebalance.Scripts
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
-                    ModLog.Debug("RespawnPatch: Hydration given because CustomNewPlayerRespawn is true and a new player joined ---> " + __instance.Nutrition);
+                    ModLog.Debug("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined ---> " + __instance.Nutrition);
                 }
                 else if (DaysPastNorm < NormalizedMaxHydrationDays)
                 {
                     HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - DaysPastNorm);
-                    ModLog.Info("RespawnPatch: Hydration given because a player who died are respawning ---> " + HydrationToGive);
+                    ModLog.Info("Human-OnLifeCreated: Hydration given because a player who died are respawning ---> " + HydrationToGive);
                 }
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
                 else
                 {
-                    __instance.Nutrition = ConfigFile.MaxNutritionStorage / 100;
+                    HydrationToGive = ConfigFile.MaxHydrationStorage / 100;
                 }
+                Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);
             }
         }
     }
@@ -233,20 +234,20 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         public static float getFoodNutrition(String FoodDisplayName)
         {
-            ModLog.Debug("FoodsValuesPatch: Trying to get Nutrition value for the food: " + FoodDisplayName);
-            if (typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition") != null)
+            ModLog.Debug("FoodsValuesPatch: Checking if there's a nutritional value set for: " + FoodDisplayName);
+            if (typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition") != null)
             {
-                return (float)typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition").GetValue(null);
+                return (float)typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition").GetValue(null);
             }
             return -1f;
         }
 
         public static float getFoodEatSpeed(String FoodDisplayName)
         {
-            ModLog.Debug("FoodsValuesPatch: Trying to get EatSpeed value for the food/plant: " + FoodDisplayName );
-            if (typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName + "EatSpeed") != null)
+            ModLog.Debug("FoodsValuesPatch: Checking if there's an EatSpeed value for: " + FoodDisplayName );
+            if (typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "EatSpeed") != null)
             {                
-                return (float)typeof(PlantsnNutritionRebalancePlugin).GetField(FoodDisplayName.Trim().Replace(" ", "") + "EatSpeed").GetValue(null);
+                return (float)typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "EatSpeed").GetValue(null);
             }
             return -1f;
         }
@@ -270,12 +271,12 @@ namespace PlantsnNutritionRebalance.Scripts
                     float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
                     if (EatSpeed >= 0f)
                     {
-                        ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> EatSpeed : " + EatSpeed);
+                        ModLog.Debug("Food-OnUseSecondary: Changing EatSpeed for food " + __instance.DisplayName + " From: "+ __instance.EatSpeed + " To: " + EatSpeed);
                         __instance.EatSpeed = EatSpeed;
                     }
                     if (NutritionValue >= 0f)
                     {
-                        ModLog.Debug("FoodsValuesPatch: PatchFoodNutrition ---> NutritionValue : " + NutritionValue);
+                        ModLog.Debug("Food-OnUseSecondary: Changing NutritionValue for food " + __instance.DisplayName + " From: " + __instance.NutritionValue + " To: " + NutritionValue);
                         __instance.NutritionValue = NutritionValue;
                     }
                 }
@@ -304,12 +305,12 @@ namespace PlantsnNutritionRebalance.Scripts
                     float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
                     if (EatSpeed >= 0f)
                     {
-                        ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> EatSpeed : " + EatSpeed);
+                        ModLog.Debug("StackableFood-OnUseSecondary: Changing EatSpeed for StackableFood " + __instance.DisplayName + " From: " + __instance.EatSpeed + " To: " + EatSpeed);
                         __instance.EatSpeed = EatSpeed;
                     }
                     if (NutritionValue >= 0f)
                     {
-                        ModLog.Debug("FoodsValuesPatch: PatchStackableNutrition ---> NutritionValue : " + NutritionValue);
+                        ModLog.Debug("StackableFood-OnUseSecondary: Changing NutritionValue for StackableFood " + __instance.DisplayName + " From: " + __instance.NutritionValue + " To: " + NutritionValue);
                         __instance.NutritionValue = NutritionValue;
                     }
                 }
@@ -336,7 +337,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
                     if (NutritionValue >= 0f)
                     {
-                        ModLog.Debug("FoodsValuesPatch: PatchPlantNutrition ---> NutritionValue : " + NutritionValue);
+                        ModLog.Debug("Plant-OnUseSecondary: Changing NutritionValue for Plant " + __instance.DisplayName + " From: " + __instance.NutritionValue + " To: " + NutritionValue);
                         __instance.NutritionValue = NutritionValue;
                     }
                 }
