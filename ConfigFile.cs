@@ -20,6 +20,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         //Character
         private static ConfigEntry<float> configNutritionLossMultiplier;
+        private static ConfigEntry<float> configHydrationLossMultiplier;
         private static ConfigEntry<float> configMaxNutritionStorage;
         private static ConfigEntry<float> configMaxHydrationStorage;
         private static ConfigEntry<float> configWarningNutrition;
@@ -107,6 +108,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float PlantWaterTranspirationPercentage;
         public static float AtmosphereFogThreshold;
         public static float NutritionLossMultiplier;
+        public static float HydrationLossMultiplier;
         public static float MaxNutritionStorage;
         public static float MaxHydrationStorage;
         public static float WarningNutrition;
@@ -188,7 +190,7 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             //Log Section
             configLogLevel = PnN.Config.Bind("0 - General configuration",
-                 "Log Level",
+                 "LogLevel",
                  0, 
                  "Set the log level of the mod. Values can be 0 for errors only (default), 1 for informational logs or 2 for debug logs." +
                  "Mod logs can be found inside the player.log file in the path %appdata%\\..\\localLow\\rocketwerkz\\rocketstation\\" +
@@ -198,7 +200,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
             //Plants configuration section
             configPlantWaterConsumptionMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
-                 "Plant Water Consumption Multiplier",  // The key of the configuration option in the configuration file
+                 "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
                  500f, // The default value
                  "By how much this mod should multiply the water consumption of plants?" +
                  "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols" +
@@ -210,7 +212,7 @@ namespace PlantsnNutritionRebalance.Scripts
             PlantWaterConsumptionMultiplier = Mathf.Clamp(configPlantWaterConsumptionMultiplier.Value, 1f, 100000f);
 
             configPlantWaterConsumptionLimit = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
-                 "Plant Water Consumption Limit",  // The key of the configuration option in the configuration file
+                 "PlantWaterConsumptionLimit",  // The key of the configuration option in the configuration file
                  0.004f, // The default value
                  "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks" +
                  "considerably more water than the other plants. Should be set to a positive float value. If you change the PlantWaterConsumptionMultiplier, you'll probably want" +
@@ -256,16 +258,13 @@ namespace PlantsnNutritionRebalance.Scripts
             configHydrationLossMultiplier = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "HydrationLossMultiplier", // The key of the configuration option in the configuration file
                 1f,
-                "Multiplier for the hydration loss per tick of the character. Can be set to a positive value between 0.1 and 10." +
-                "For example, on Stationeers difficulty, by default, you'll get a hydration loss of 0.104167 wich will give you ~8 days of hunger. If you change this value for 2," +
-                "your hunger will last only 4 days and will have to eat 2x more each day. If you set this value for 0.5, your character full hunger will last for 16 days on Stationeers" +
-                "Difficulty and you'll have to eat 50% less calories each day." +
-                "You'll want to change this option mainly if you also change the max nutrition storage of the character." +
-                "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive. With default mod values you need ~15" +
-                "to feed each player on stationeers difficulty (~12 on medium and ~10 on easy). If you change this to 0.5, you'll need only 7 plants growing on Stationeers difficulty," +
-                "6 on normal or 5 on easy to feed each player.");
+                "Multiplier for the hydration loss per tick of the character. Can be set to a positive value between 0.1 and 10. The water consumtpion logic in Stationeers" +
+                "is somewhat complex, it depends of the enviroment/suit temperature and other factors, so i don't really recommend changing this here, instead try to use the HydrationRate" +
+                "inside the worldsettings.xml file at the save folder whenever possible. If you want to disable water consumption, it's also better to do it in worldsettings.xml (Just set" +  
+                "the value to 0). If that is not enough for you and you still want to mess with this value for some reason, try to do it in small increments/decrements like 0.01 and" +
+                "check ingame because small changes in this value will cause a big impact in your character water consumption.");
 
-            NutritionLossMultiplier = Mathf.Clamp(configNutritionLossMultiplier.Value, 0.1f, 10f);
+            HydrationLossMultiplier = Mathf.Clamp(configHydrationLossMultiplier.Value, 0.1f, 10f);
 
             configMaxNutritionStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "MaxNutritionStorage", // The key of the configuration option in the configuration file

@@ -29,8 +29,9 @@ namespace PlantsnNutritionRebalance.Scripts
             else
             {
                 GasMixture gasMixture = GasMixtureHelper.Create();
-                gasMixture.Add(new Mole(Chemistry.GasType.Water, (__result / 100) * ConfigFile.PlantWaterTranspirationPercentage, 0f));
-                gasMixture.AddEnergy(__instance.ParentTray.WaterAtmosphere.Temperature * gasMixture.HeatCapacity);
+                float watertotranspirate = (__result / 100) * ConfigFile.PlantWaterTranspirationPercentage;
+                float waterenergy = watertotranspirate * Chemistry.SpecificHeat(Chemistry.GasType.Water) * __instance.ParentTray.WaterAtmosphere.Temperature;
+                gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspirate, waterenergy)), AtmosphereHelper.MatterState.All);
                 __instance.BreathingAtmosphere.Add(gasMixture);
             }
         }
@@ -85,25 +86,28 @@ namespace PlantsnNutritionRebalance.Scripts
         static public void HydrationAndWarningsPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ____hydrationLossPerTick)
         {
             ___MaxHydrationStorage = ConfigFile.MaxHydrationStorage;
+            float hydrationLoss;
             switch (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)
             {
                 case 1.5f: //stationeers difficulty, full water will last 100 game minutes (2 and a half days)
-                    ____hydrationLossPerTick = 0.0019446f;
+                    hydrationLoss = 0.0019446f;
                     break;
                 case 1f: //normal difficulty, full water should last ~160 game minutes (4 days in sun/orbit 2)
-                    ____hydrationLossPerTick = 0.001798755f;
+                    hydrationLoss = 0.001798755f;
                     break;
                 case 0.5f: //easy difficulty, full water should last ~220 game minutes
-                    ____hydrationLossPerTick = 0.0017258325f;
+                    hydrationLoss = 0.0017258325f;
                     break;
                 case 0f: //user disabled water consumption directly on world config
-                    ____hydrationLossPerTick = 0f;
+                    hydrationLoss = 0f;
                     break;
                 default: // if it's none of the above, will try to calculate hydrationLossPerTick based on DifficultySetting.HydrationRate:
                     float a = Mathf.InverseLerp(0.0001f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
-                    ____hydrationLossPerTick = Mathf.Lerp(0.001507065f, 0.002382135f, a);
+                    hydrationLoss = Mathf.Lerp(0.001507065f, 0.002382135f, a);
                     break;
             }
+            ____hydrationLossPerTick = ConfigFile.HydrationLossMultiplier * hydrationLoss;
+
             // Nutrition/hydration warnings:
             __instance.WarningNutrition = (ConfigFile.MaxNutritionStorage / 100) * ConfigFile.WarningNutrition;
             __instance.CriticalNutrition = (ConfigFile.MaxNutritionStorage / 100) * ConfigFile.CriticalNutrition;
@@ -151,7 +155,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     NutritionLossPerTick = Mathf.Lerp(0.055555f, 0.208334f, hungerdifficulty);
                     break;
             }
-            LastNutritionLossPerTick = NutritionLossPerTick;
+            LastNutritionLossPerTick = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick;
 
             // Complete rewrite of base method Human.LifeNutrition
             float num = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick * (__instance.OrganBrain.IsOnline ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.LifeFunctionLoggedOut);
