@@ -34,6 +34,7 @@ namespace PlantsnNutritionRebalance.Scripts
 
         //Foods
         private static ConfigEntry<bool> configEnableFoodChanges;
+        private static ConfigEntry<bool> configEnableFoodHydration;
 
         //------------------------------ foods----------------------------------------------
         private static ConfigEntry<float> configTomatoSoupNutrition;
@@ -82,6 +83,29 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configPowderedEggsEatSpeed;
         private static ConfigEntry<float> configCookedTomatoEatSpeed;
 
+        private static ConfigEntry<float> configTomatoSoupHydration;
+        private static ConfigEntry<float> configCornSoupHydration;
+        private static ConfigEntry<float> configCannedRicePuddingHydration;
+        private static ConfigEntry<float> configPumpkinSoupHydration;
+        private static ConfigEntry<float> configPumpkinPieHydration;
+        private static ConfigEntry<float> configBakedPotatoHydration;
+        private static ConfigEntry<float> configFrenchFriesHydration;
+        private static ConfigEntry<float> configCannedFrenchFriesHydration;
+        private static ConfigEntry<float> configMilkHydration;
+        private static ConfigEntry<float> configCannedCondensedMilkHydration;
+        private static ConfigEntry<float> configMuffinHydration;
+        private static ConfigEntry<float> configBreadLoafHydration;
+        private static ConfigEntry<float> configCerealBarHydration;
+        private static ConfigEntry<float> configCannedPowderedEggsHydration;
+        private static ConfigEntry<float> configCannedEdamameHydration;
+        private static ConfigEntry<float> configCondensedMilkHydration;
+        private static ConfigEntry<float> configCookedSoybeanHydration;
+        private static ConfigEntry<float> configCookedRiceHydration;
+        private static ConfigEntry<float> configCookedCornHydration;
+        private static ConfigEntry<float> configCookedPumpkinHydration;
+        private static ConfigEntry<float> configPowderedEggsHydration;
+        private static ConfigEntry<float> configCookedTomatoHydration;
+
         private static ConfigEntry<float> configWheatNutrition;
         private static ConfigEntry<float> configCornNutrition;
         private static ConfigEntry<float> configFernNutrition;
@@ -102,6 +126,16 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configSoybeanEatSpeed;
         private static ConfigEntry<float> configTomatoEatSpeed;
 
+        private static ConfigEntry<float> configWheatHydration;
+        private static ConfigEntry<float> configCornHydration;
+        private static ConfigEntry<float> configFernHydration;
+        private static ConfigEntry<float> configMushroomHydration;
+        private static ConfigEntry<float> configPotatoHydration;
+        private static ConfigEntry<float> configPumpkinHydration;
+        private static ConfigEntry<float> configRiceHydration;
+        private static ConfigEntry<float> configSoybeanHydration;
+        private static ConfigEntry<float> configTomatoHydration;
+
         public static int LogLevel;
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
@@ -121,70 +155,103 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float CustomNewPlayerRespawnHydration;
 
         public static bool EnableFoodChanges;
-        
-        public static float TomatoSoupNutrition;
-        public static float TomatoSoupEatSpeed;
-        public static float CornSoupNutrition;
-        public static float CornSoupEatSpeed;
-        public static float CannedRicePuddingNutrition;
-        public static float CannedRicePuddingEatSpeed;
-        public static float PumpkinSoupNutrition;
-        public static float PumpkinSoupEatSpeed;
-        public static float PumpkinPieNutrition;
-        public static float PumpkinPieEatSpeed;
-        public static float BakedPotatoNutrition;
-        public static float BakedPotatoEatSpeed;
-        public static float FrenchFriesNutrition;
-        public static float FrenchFriesEatSpeed;
-        public static float CannedFrenchFriesNutrition;
-        public static float CannedFrenchFriesEatSpeed;
-        public static float MilkNutrition;
-        public static float MilkEatSpeed;
-        public static float CannedCondensedMilkNutrition;
-        public static float CannedCondensedMilkEatSpeed;
-        public static float MuffinNutrition;
-        public static float MuffinEatSpeed;
-        public static float BreadLoafNutrition;
-        public static float BreadLoafEatSpeed;
-        public static float CerealBarNutrition;
-        public static float CerealBarEatSpeed;
-        public static float CannedPowderedEggsNutrition;
-        public static float CannedPowderedEggsEatSpeed;
-        public static float CannedEdamameNutrition;
-        public static float CannedEdamameEatSpeed;
-        public static float CondensedMilkNutrition;
-        public static float CondensedMilkEatSpeed;
-        public static float CookedSoybeanNutrition;
-        public static float CookedSoybeanEatSpeed;
-        public static float CookedRiceNutrition;
-        public static float CookedRiceEatSpeed;
-        public static float CookedCornNutrition;
-        public static float CookedCornEatSpeed;
-        public static float CookedPumpkinNutrition;
-        public static float CookedPumpkinEatSpeed;
-        public static float PowderedEggsNutrition;
-        public static float PowderedEggsEatSpeed;
-        public static float CookedTomatoNutrition;
-        public static float CookedTomatoEatSpeed;
+        public static bool EnableFoodHydration;
 
+        public static float TomatoSoupNutrition;
+        public static float CornSoupNutrition;
+        public static float CannedRicePuddingNutrition;
+        public static float PumpkinPieNutrition;
+        public static float PumpkinSoupNutrition;
+        public static float BakedPotatoNutrition;
+        public static float FrenchFriesNutrition;
+        public static float CannedFrenchFriesNutrition;
+        public static float MilkNutrition;
+        public static float CannedCondensedMilkNutrition;
+        public static float MuffinNutrition;
+        public static float BreadLoafNutrition;
+        public static float CerealBarNutrition;
+        public static float CannedPowderedEggsNutrition;
+        public static float CannedEdamameNutrition;
+        public static float CookedSoybeanNutrition;
+        public static float CondensedMilkNutrition;
+        public static float CookedRiceNutrition;
+        public static float CookedCornNutrition;
+        public static float CookedPumpkinNutrition;
+        public static float PowderedEggsNutrition;
+        public static float CookedTomatoNutrition;
         public static float WheatNutrition;
-        public static float WheatEatSpeed;
         public static float CornNutrition;
-        public static float CornEatSpeed;
         public static float FernNutrition;
-        public static float FernEatSpeed;
         public static float MushroomNutrition;
-        public static float MushroomEatSpeed;
         public static float PotatoNutrition;
-        public static float PotatoEatSpeed;
         public static float PumpkinNutrition;
-        public static float PumpkinEatSpeed;
         public static float RiceNutrition;
-        public static float RiceEatSpeed;
         public static float SoybeanNutrition;
-        public static float SoybeanEatSpeed;
         public static float TomatoNutrition;
+
+        public static float TomatoSoupEatSpeed;
+        public static float CornSoupEatSpeed;
+        public static float CannedRicePuddingEatSpeed;
+        public static float PumpkinSoupEatSpeed;
+        public static float PumpkinPieEatSpeed;
+        public static float BakedPotatoEatSpeed;
+        public static float FrenchFriesEatSpeed;
+        public static float CannedFrenchFriesEatSpeed;
+        public static float MilkEatSpeed;
+        public static float CannedCondensedMilkEatSpeed;
+        public static float MuffinEatSpeed;
+        public static float BreadLoafEatSpeed;
+        public static float CerealBarEatSpeed;
+        public static float CannedPowderedEggsEatSpeed;
+        public static float CannedEdamameEatSpeed;
+        public static float CondensedMilkEatSpeed;
+        public static float CookedSoybeanEatSpeed;
+        public static float CookedRiceEatSpeed;
+        public static float CookedCornEatSpeed;
+        public static float CookedPumpkinEatSpeed;
+        public static float PowderedEggsEatSpeed;
+        public static float CookedTomatoEatSpeed;
+        public static float WheatEatSpeed;
+        public static float CornEatSpeed;
+        public static float FernEatSpeed;
+        public static float MushroomEatSpeed;
+        public static float PotatoEatSpeed;
+        public static float PumpkinEatSpeed;
+        public static float RiceEatSpeed;
+        public static float SoybeanEatSpeed;
         public static float TomatoEatSpeed;
+
+        public static float TomatoSoupHydration;
+        public static float CornSoupHydration;
+        public static float CannedRicePuddingHydration;
+        public static float PumpkinPieHydration;
+        public static float PumpkinSoupHydration;
+        public static float BakedPotatoHydration;
+        public static float FrenchFriesHydration;
+        public static float CannedFrenchFriesHydration;
+        public static float MilkHydration;
+        public static float CannedCondensedMilkHydration;
+        public static float MuffinHydration;
+        public static float BreadLoafHydration;
+        public static float CerealBarHydration;
+        public static float CannedPowderedEggsHydration;
+        public static float CannedEdamameHydration;
+        public static float CookedSoybeanHydration;
+        public static float CondensedMilkHydration;
+        public static float CookedRiceHydration;
+        public static float CookedCornHydration;
+        public static float CookedPumpkinHydration;
+        public static float PowderedEggsHydration;
+        public static float CookedTomatoHydration;
+        public static float WheatHydration;
+        public static float CornHydration;
+        public static float FernHydration;
+        public static float MushroomHydration;
+        public static float PotatoHydration;
+        public static float PumpkinHydration;
+        public static float RiceHydration;
+        public static float SoybeanHydration;
+        public static float TomatoHydration;
 
         public static void HandleConfig(PlantsnNutritionRebalancePlugin PnN) // Create and manage the configuration file parameters
         {
@@ -359,6 +426,15 @@ namespace PlantsnNutritionRebalance.Scripts
                 "tomato soup and Pumpkin pie not really worth the trouble making.");
             EnableFoodChanges = configEnableFoodChanges.Value;
 
+            configEnableFoodHydration = PnN.Config.Bind("5 - Foods Configuration", // The section under which the option is shown 
+                "EnableFoodHydration", // The key of the configuration option in the configuration file
+                true,
+                "This option activate/deactivate the mod function to make some food give back hydration. If set to true, some foods will give/remove hydration. If set to false," +
+                "this system will be disabled and you'll get vanilla behaviour (foods gives only nutrition and no hydration). The extra hydration given is calculated based on " +
+                "the amount of nutrition eaten from the food. Note that if the hydration is full, the character will not gain any extra hydration. If the Hydration value is negative," +
+                " you'll loose hydration (think about French Fries full of salt).");
+            EnableFoodHydration = configEnableFoodHydration.Value;
+
             configTomatoSoupNutrition = PnN.Config.Bind("5 - Foods Configuration", 
                 "TomatoSoupNutrition", 
                 135f, 
@@ -377,6 +453,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Tomato Soup. Needs to be a positive value between 0.001 and 10");
             TomatoSoupEatSpeed = Mathf.Clamp(configTomatoSoupEatSpeed.Value, 0.001f, 10f);
 
+            configTomatoSoupHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "TomatoSoupHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            TomatoSoupHydration = Mathf.Clamp(configTomatoSoupHydration.Value, -1f, 1f);
+
             configCornSoupNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CornSoupNutrition", 
                 223f,
@@ -388,6 +474,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.04f,
                 "Time to eat each nutrition of Corn Soup. Needs to be a positive value between 0.001 and 10.");
             CornSoupEatSpeed = Mathf.Clamp(configCornSoupEatSpeed.Value, 0.001f, 10f);
+
+            configCornSoupHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CornSoupHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CornSoupHydration = Mathf.Clamp(configCornSoupHydration.Value, -1f, 1f);
 
             configCannedRicePuddingNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedRicePuddingNutrition",
@@ -401,6 +497,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Canned Rice Pudding. Needs to be a positive value between 0.001 and 10.");
             CannedRicePuddingEatSpeed = Mathf.Clamp(configCannedRicePuddingEatSpeed.Value, 0.001f, 10f);
 
+            configCannedRicePuddingHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedRicePuddingHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CannedRicePuddingHydration = Mathf.Clamp(configCannedRicePuddingHydration.Value, -1f, 1f);
+
             configPumpkinSoupNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinSoupNutrition",
                 270f,
@@ -412,6 +518,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.04f,
                 "Time to eat each nutrition of Canned Pumpkin Soup. Needs to be a positive value between 0.001 and 10.");
             PumpkinSoupEatSpeed = Mathf.Clamp(configPumpkinSoupEatSpeed.Value, 0.001f, 10f);
+
+            configPumpkinSoupHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinSoupHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            PumpkinSoupHydration = Mathf.Clamp(configPumpkinSoupHydration.Value, -1f, 1f);
 
             configPumpkinPieNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinPieNutrition",
@@ -425,6 +541,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Pumpkin Pie. Needs to be a positive value between 0.001 and 10.");
             PumpkinPieEatSpeed = Mathf.Clamp(configPumpkinPieEatSpeed.Value, 0.001f, 10f);
 
+            configPumpkinPieHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinPieHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            PumpkinPieHydration = Mathf.Clamp(configPumpkinPieHydration.Value, -1f, 1f);
+
             configBakedPotatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "BakedPotatoNutrition",
                 45f,
@@ -436,6 +562,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of a Baked Potato. Needs to be a positive value between 0.001 and 10.");
             BakedPotatoEatSpeed = Mathf.Clamp(configBakedPotatoEatSpeed.Value, 0.001f, 10f);
+
+            configBakedPotatoHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "BakedPotatoHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            BakedPotatoHydration = Mathf.Clamp(configBakedPotatoHydration.Value, -1f, 1f);
 
             configFrenchFriesNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "FrenchFriesNutrition",
@@ -449,6 +585,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of a French Fries. Needs to be a positive value between 0.001 and 10.");
             FrenchFriesEatSpeed = Mathf.Clamp(configFrenchFriesEatSpeed.Value, 0.001f, 10f);
 
+            configFrenchFriesHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "FrenchFriesHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            FrenchFriesHydration = Mathf.Clamp(configFrenchFriesHydration.Value, -1f, 1f);
+
             configCannedFrenchFriesNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedFrenchFriesNutrition",
                 150f,
@@ -460,6 +606,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.04f,
                 "Time to eat each nutrition of Canned French Fries. Needs to be a positive value between 0.001 and 10.");
             CannedFrenchFriesEatSpeed = Mathf.Clamp(configCannedFrenchFriesEatSpeed.Value, 0.001f, 10f);
+
+            configCannedFrenchFriesHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedFrenchFriesHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CannedFrenchFriesHydration = Mathf.Clamp(configCannedFrenchFriesHydration.Value, -1f, 1f);
 
             configMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "MilkNutrition",
@@ -473,6 +629,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Milk. Needs to be a positive value between 0.001 and 10.");
             MilkEatSpeed = Mathf.Clamp(configMilkEatSpeed.Value, 0.001f, 10f);
 
+            configMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "MilkHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            MilkHydration = Mathf.Clamp(configMilkHydration.Value, -1f, 1f);
+
             configCannedCondensedMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedCondensedMilkNutrition",
                 400f,
@@ -484,6 +650,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.04f,
                 "Time to eat each nutrition of Canned Condensed Milk. Needs to be a positive value between 0.001 and 10.");
             CannedCondensedMilkEatSpeed = Mathf.Clamp(configCannedCondensedMilkEatSpeed.Value, 0.001f, 10f);
+
+            configCannedCondensedMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedCondensedMilkHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CannedCondensedMilkHydration = Mathf.Clamp(configCannedCondensedMilkHydration.Value, -1f, 1f);
 
             configMuffinNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "MuffinNutrition",
@@ -497,6 +673,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of a Muffin. Needs to be a positive value between 0.001 and 10.");
             MuffinEatSpeed = Mathf.Clamp(configMuffinEatSpeed.Value, 0.001f, 10f);
 
+            configMuffinHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "MuffinHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            MuffinHydration = Mathf.Clamp(configMuffinHydration.Value, -1f, 1f);
+
             configBreadLoafNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "BreadLoafNutrition",
                 290f,
@@ -509,6 +695,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of a Bread Loaf. Needs to be a positive value between 0.001 and 10.");
             BreadLoafEatSpeed = Mathf.Clamp(configBreadLoafEatSpeed.Value, 0.001f, 10f);
 
+            configBreadLoafHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "BreadLoafHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            BreadLoafHydration = Mathf.Clamp(configBreadLoafHydration.Value, -1f, 1f);
+
             configCerealBarNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CerealBarNutrition",
                 110f,
@@ -520,6 +716,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.04f,
                 "Time to eat each nutrition of a Cereal Bar. Needs to be a positive value between 0.001 and 10.");
             CerealBarEatSpeed = Mathf.Clamp(configCerealBarEatSpeed.Value, 0.001f, 10f);
+
+            configCerealBarHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CerealBarHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CerealBarHydration = Mathf.Clamp(configCerealBarHydration.Value, -1f, 1f);
 
             configCannedPowderedEggsNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedPowderedEggsNutrition",
@@ -539,11 +745,31 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Amount of Nutrition given by eating Canned Edamame. Needs to be a positive value between 1 and 10000.");
             CannedEdamameNutrition = Mathf.Clamp(configCannedEdamameNutrition.Value, 1f, 10000f);
 
+            configCannedPowderedEggsHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedPowderedEggsHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CannedPowderedEggsHydration = Mathf.Clamp(configCannedPowderedEggsHydration.Value, -1f, 1f);
+
             configCannedEdamameEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedEdamameEatSpeed",
                 0.04f,
                 "Time to eat each nutrition of Canned Edamame. Needs to be a positive value between 0.001 and 10.");
             CannedEdamameEatSpeed = Mathf.Clamp(configCannedEdamameEatSpeed.Value, 0.001f, 10f);
+
+            configCannedEdamameHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedEdamameHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CannedEdamameHydration = Mathf.Clamp(configCannedEdamameHydration.Value, -1f, 1f);
 
             configCondensedMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CondensedMilkNutrition",
@@ -557,6 +783,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Condensed Milk. Needs to be a positive value between 0.001 and 10.");
             CondensedMilkEatSpeed = Mathf.Clamp(configCondensedMilkEatSpeed.Value, 0.001f, 10f);
 
+            configCannedCondensedMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedCondensedMilkHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CannedCondensedMilkHydration = Mathf.Clamp(configCannedCondensedMilkHydration.Value, -1f, 1f);
+
             configCookedSoybeanNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedSoybeanNutrition",
                 38f,
@@ -568,6 +804,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Cooked Soybean. Needs to be a positive value between 0.001 and 10.");
             CookedSoybeanEatSpeed = Mathf.Clamp(configCookedSoybeanEatSpeed.Value, 0.001f, 10f);
+
+            configCookedSoybeanHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedSoybeanHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CookedSoybeanHydration = Mathf.Clamp(configCookedSoybeanHydration.Value, -1f, 1f);
 
             configCookedRiceNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedRiceNutrition",
@@ -581,6 +827,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Cooked Rice. Needs to be a positive value between 0.001 and 10.");
             CookedRiceEatSpeed = Mathf.Clamp(configCookedRiceEatSpeed.Value, 0.001f, 10f);
 
+            configCookedRiceHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedRiceHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CookedRiceHydration = Mathf.Clamp(configCookedRiceHydration.Value, -1f, 1f);
+
             configCookedCornNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedCornNutrition",
                 52f,
@@ -592,6 +848,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Cooked Corn. Needs to be a positive value between 0.001 and 10.");
             CookedCornEatSpeed = Mathf.Clamp(configCookedCornEatSpeed.Value, 0.001f, 10f);
+
+            configCookedCornHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedCornHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CookedCornHydration = Mathf.Clamp(configCookedCornHydration.Value, -1f, 1f);
 
             configCookedPumpkinNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedPumpkinNutrition",
@@ -605,6 +871,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Cooked Pumpkin. Needs to be a positive value between 0.001 and 10.");
             CookedPumpkinEatSpeed = Mathf.Clamp(configCookedPumpkinEatSpeed.Value, 0.001f, 10f);
 
+            configCookedPumpkinHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedPumpkinHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CookedPumpkinHydration = Mathf.Clamp(configCookedPumpkinHydration.Value, -1f, 1f);
+
             configPowderedEggsNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PowderedEggsNutrition",
                 330f,
@@ -616,6 +892,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Powdered Eggs. Needs to be a positive value between 0.001 and 10.");
             PowderedEggsEatSpeed = Mathf.Clamp(configPowderedEggsEatSpeed.Value, 0.001f, 10f);
+
+            configPowderedEggsHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "PowderedEggsHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            PowderedEggsHydration = Mathf.Clamp(configPowderedEggsHydration.Value, -1f, 1f);
 
             configCookedTomatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedTomatoNutrition",
@@ -629,6 +915,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Cooked Tomato. Needs to be a positive value between 0.001 and 10.");
             CookedTomatoEatSpeed = Mathf.Clamp(configCookedTomatoEatSpeed.Value, 0.001f, 10f);
 
+            configCookedTomatoHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedTomatoHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CookedTomatoHydration = Mathf.Clamp(configCookedTomatoHydration.Value, -1f, 1f);
+
             configWheatNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "WheatNutrition",
                 5f,
@@ -640,6 +936,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Wheat. Needs to be a positive value between 0.001 and 10.");
             WheatEatSpeed = Mathf.Clamp(configWheatEatSpeed.Value, 0.001f, 10f);
+
+            configWheatHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "WheatHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            WheatHydration = Mathf.Clamp(configWheatHydration.Value, -1f, 1f);
 
             configCornNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CornNutrition",
@@ -653,6 +959,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Corn. Needs to be a positive value between 0.001 and 10.");
             CornEatSpeed = Mathf.Clamp(configCornEatSpeed.Value, 0.001f, 10f);
 
+            configCornHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CornHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            CornHydration = Mathf.Clamp(configCornHydration.Value, -1f, 1f);
+
             configFernNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "FernNutrition",
                 1f,
@@ -664,6 +980,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Fern. Needs to be a positive value between 0.001 and 10.");
             FernEatSpeed = Mathf.Clamp(configFernEatSpeed.Value, 0.001f, 10f);
+
+            configFernHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "FernHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            FernHydration = Mathf.Clamp(configFernHydration.Value, -1f, 1f);
 
             configMushroomNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "MushroomNutrition",
@@ -677,6 +1003,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Mushroom. Needs to be a positive value between 0.001 and 10.");
             MushroomEatSpeed = Mathf.Clamp(configMushroomEatSpeed.Value, 0.001f, 10f);
 
+            configMushroomHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "MushroomHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            MushroomHydration = Mathf.Clamp(configMushroomHydration.Value, -1f, 1f);
+
             configPotatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PotatoNutrition",
                 10f,
@@ -688,6 +1024,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Potato. Needs to be a positive value between 0.001 and 10.");
             PotatoEatSpeed = Mathf.Clamp(configPotatoEatSpeed.Value, 0.001f, 10f);
+
+            configPotatoHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "PotatoHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            PotatoHydration = Mathf.Clamp(configPotatoHydration.Value, -1f, 1f);
 
             configPumpkinNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinNutrition",
@@ -701,6 +1047,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Pumpkin. Needs to be a positive value between 0.001 and 10.");
             PumpkinEatSpeed = Mathf.Clamp(configPumpkinEatSpeed.Value, 0.001f, 10f);
 
+            configPumpkinHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "PumpkinHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            PumpkinHydration = Mathf.Clamp(configPumpkinHydration.Value, -1f, 1f);
+
             configRiceNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "RiceNutrition",
                 3f,
@@ -712,6 +1068,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 0.015f,
                 "Time to eat each nutrition of Rice. Needs to be a positive value between 0.001 and 10.");
             RiceEatSpeed = Mathf.Clamp(configRiceEatSpeed.Value, 0.001f, 10f);
+
+            configRiceHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "RiceHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            RiceHydration = Mathf.Clamp(configRiceHydration.Value, -1f, 1f);
 
             configSoybeanNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "SoybeanNutrition",
@@ -725,6 +1091,16 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Soybean. Needs to be a positive value between 0.001 and 10.");
             SoybeanEatSpeed = Mathf.Clamp(configSoybeanEatSpeed.Value, 0.001f, 10f);
 
+            configSoybeanHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "SoybeanHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            SoybeanHydration = Mathf.Clamp(configSoybeanHydration.Value, -1f, 1f);
+
             configTomatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "TomatoNutrition",
                 15f,
@@ -737,14 +1113,18 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Tomato. Needs to be a positive value between 0.001 and 10.");
             TomatoEatSpeed = Mathf.Clamp(configTomatoEatSpeed.Value, 0.001f, 10f);
 
-            //decay
-            /* not implemented
-            configDecay = PnN.Config.Bind("3 - Foods Configuration", "Enable Decay foods config", false, "Enable Decay foods config (beta)");
-            DecayFactor = PnN.Config.Bind("3 - Foods Configuration", "Debuff of Decay rate", 25.0f, "Debuff factor of Decay rate in porcentage, value 0 - 100");
+            configTomatoHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "TomatoHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
+                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "If it's negative, you'll loose hydration when eating the food.");
+            TomatoHydration = Mathf.Clamp(configTomatoHydration.Value, -1f, 1f);
 
-            fConfigsFood.Add("DCE", configDecay.Value);
-            fDecayFactor.Add("GDF", DecayFactor.Value);
-            */
+
+
         }
     }
 }

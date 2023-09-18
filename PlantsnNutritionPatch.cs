@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using Object = System.Object;
 using SimpleSpritePacker;
+using System.Security.Cryptography;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -197,7 +198,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     __instance.Nutrition = ConfigFile.CustomNewPlayerRespawnNutrition;
-                    ModLog.Debug("Human-OnLifeCreated: Nutrition given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
+                    ModLog.Info("Human-OnLifeCreated: Nutrition given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 // If it's a respawn and the DaysPastNorm is lower than the NormalizedMaxHungerDays, that means we should calculate the amount of food to give to the respawning character
                 else if (DaysPastNorm < NormalizedMaxHungerDays)
@@ -218,7 +219,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
-                    ModLog.Debug("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
+                    ModLog.Info("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 else if (DaysPastNorm < NormalizedMaxHydrationDays)
                 {
@@ -235,11 +236,11 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-    public static class FoodsValuesPatch
+    public static class FoodsValues
     {
         public static float getFoodNutrition(String FoodDisplayName)
         {
-            ModLog.Debug("FoodsValuesPatch: Checking if there's a nutritional value set for: " + FoodDisplayName);
+            ModLog.Info("FoodValues: Checking if there's a nutritional value set for: " + FoodDisplayName);
             if (typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition") != null)
             {
                 return (float)typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Nutrition").GetValue(null);
@@ -249,12 +250,22 @@ namespace PlantsnNutritionRebalance.Scripts
 
         public static float getFoodEatSpeed(String FoodDisplayName)
         {
-            ModLog.Debug("FoodsValuesPatch: Checking if there's an EatSpeed value for: " + FoodDisplayName );
+            ModLog.Info("FoodValues: Checking if there's an EatSpeed value for: " + FoodDisplayName );
             if (typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "EatSpeed") != null)
             {                
                 return (float)typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "EatSpeed").GetValue(null);
             }
             return -1f;
+        }
+
+        public static float getFoodHydration(String FoodDisplayName)
+        {
+            ModLog.Info("FoodValues: Checking if there's an Hydration value for: " + FoodDisplayName);
+            if (typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Hydration") != null)
+            {
+                return (float)typeof(ConfigFile).GetField(FoodDisplayName.Trim().Replace(" ", "") + "Hydration").GetValue(null);
+            }
+            return 0f;
         }
     }
 
@@ -272,8 +283,8 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 try
                 {
-                    float EatSpeed = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
-                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
+                    float EatSpeed = FoodsValues.getFoodEatSpeed(__instance.DisplayName);
+                    float NutritionValue = FoodsValues.getFoodNutrition(__instance.DisplayName);
                     if (EatSpeed >= 0f)
                     {
                         ModLog.Debug("Food-OnUseSecondary: Changing EatSpeed for food " + __instance.DisplayName + " From: "+ __instance.EatSpeed + " To: " + EatSpeed);
@@ -306,8 +317,8 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 try
                 {
-                    float EatSpeed = FoodsValuesPatch.getFoodEatSpeed(__instance.DisplayName);
-                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
+                    float EatSpeed = FoodsValues.getFoodEatSpeed(__instance.DisplayName);
+                    float NutritionValue = FoodsValues.getFoodNutrition(__instance.DisplayName);
                     if (EatSpeed >= 0f)
                     {
                         ModLog.Debug("StackableFood-OnUseSecondary: Changing EatSpeed for StackableFood " + __instance.DisplayName + " From: " + __instance.EatSpeed + " To: " + EatSpeed);
@@ -339,7 +350,7 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 try
                 {
-                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(__instance.DisplayName);
+                    float NutritionValue = FoodsValues.getFoodNutrition(__instance.DisplayName);
                     if (NutritionValue >= 0f)
                     {
                         ModLog.Debug("Plant-OnUseSecondary: Changing NutritionValue for Plant " + __instance.DisplayName + " From: " + __instance.NutritionValue + " To: " + NutritionValue);
@@ -368,7 +379,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 Food food = prefab as Food;
                 if (food != null)
                 {
-                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(food.DisplayName);
+                    float NutritionValue = FoodsValues.getFoodNutrition(food.DisplayName);
                     if (NutritionValue >= 0f)
                     {
                         food.NutritionValue = NutritionValue;
@@ -379,7 +390,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 StackableFood stackableFood = prefab as StackableFood;
                 if (stackableFood != null)
                 {
-                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(stackableFood.DisplayName);
+                    float NutritionValue = FoodsValues.getFoodNutrition(stackableFood.DisplayName);
                     if (NutritionValue >= 0f)
                     {
                         stackableFood.NutritionValue = NutritionValue;
@@ -390,7 +401,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 Plant Plantfood = prefab as Plant;
                 if (Plantfood != null)
                 {
-                    float NutritionValue = FoodsValuesPatch.getFoodNutrition(Plantfood.DisplayName);
+                    float NutritionValue = FoodsValues.getFoodNutrition(Plantfood.DisplayName);
                     if (NutritionValue >= 0f)
                     {
                         Plantfood.NutritionValue = NutritionValue;
@@ -406,7 +417,52 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-
+    //Hydrating by food
+    [HarmonyPatch(typeof(Item), "OnUseItem")] //Plants, Food and Eggs is different consumable Items
+    internal class HydratingFoodPatch
+    {
+        [HarmonyPrefix] //unnamed patching errors on game load
+        [UsedImplicitly]
+        private static void HydratingByConsumedQuantity(Item __instance, ref float nutritionquantity, ref Thing useOnThing)
+        {
+            if (ConfigFile.EnableFoodHydration)
+            {
+                if (__instance is INutrition)
+                {
+                    try
+                    {
+                        float hydrationValue = FoodsValues.getFoodHydration(__instance.DisplayName);                        
+                        Human human = useOnThing as Human;
+                        if (human && hydrationValue != 0f)
+                        {
+                            float hydrate = nutritionquantity * hydrationValue;
+                            if (hydrate > 0f)
+                            {
+                                float humanHydrationtoFill = ConfigFile.MaxHydrationStorage - human.Hydration;
+                                if (hydrate > humanHydrationtoFill)
+                                {
+                                    hydrate = Mathf.Clamp(hydrate, 0f, humanHydrationtoFill);
+                                }
+                            }
+                            else if (hydrate < 0f)
+                            {
+                                if (hydrate * -1f > human.Hydration)
+                                {
+                                    hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);
+                                }
+                            }
+                            ModLog.Info("Water got/lost from eating " + __instance.DisplayName + ": " + hydrate);
+                            human.Hydrate(hydrate);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ModLog.Error(ex);
+                    }
+                }
+            }
+        }
+    }
 
     // Changes fertilized Eggs requisites to hatch:
     [HarmonyPatch(typeof(FertilizedEgg))]
