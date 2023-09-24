@@ -273,20 +273,19 @@ namespace PlantsnNutritionRebalance.Scripts
             configLogLevel = PnN.Config.Bind("0 - General configuration",
                  "LogLevel",
                  0, 
-                 "Set the log level of the mod. Values can be 0 for errors only (default), 1 for informational logs or 2 for debug logs." +
-                 "Mod logs can be found inside the player.log file in the path %appdata%\\..\\localLow\\rocketwerkz\\rocketstation\\" +
-                 "Warning, if you set this to a value different than 0, the log files can become very large after a extended amount of time playing," +
-                 "expecially when running this mod in a dedicated server.");
-            LogLevel = configLogLevel.Value;
+                 "Set the log level of the mod. Values can be 0 for errors only (default), 1 for informational logs or 2 for debug logs. " +
+                 "Mod logs can be found inside the player.log file in the path %appdata%\\..\\localLow\\rocketwerkz\\rocketstation\\ " +
+                 "Warning, if you set this to a value different than 0, the log files can become very large after a extended amount of time playing.");
+            LogLevel = Mathf.Clamp(configLogLevel.Value, 0, 2);
 
             //Plants configuration section
             configPlantWaterConsumptionMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
                  500f, // The default value
                  "By how much this mod should multiply the water consumption of plants?" +
-                 "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols" +
-                 "That means, in vanilla, 1 single stack of ice will keep a plant alive for more than 23148 hours of gameplay! That's why the suggested value here" +
-                 "is 500, it increases the plants drinks to ~0.003 moles of water per tick. With this, 1 ice water stack will keep a plant alive for 46 hours of gameplay," +
+                 "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols " +
+                 "That means, in vanilla, 1 single stack of ice will keep a plant alive for more than 23148 hours of gameplay! That's why the suggested value here " +
+                 "is 500, it increases the plants drinks to ~0.003 moles of water per tick. With this, 1 ice water stack will keep a plant alive for 46 hours of gameplay, " +
                  "or 20 plants for 2 hours, enough to make the water management meaningful." +
                  "If you set this option to 1, you'll get the vanilla water consumption values on plants."); // Description of the option to show in the config file
 
@@ -295,8 +294,8 @@ namespace PlantsnNutritionRebalance.Scripts
             configPlantWaterConsumptionLimit = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionLimit",  // The key of the configuration option in the configuration file
                  0.004f, // The default value
-                 "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks" +
-                 "considerably more water than the other plants. Should be set to a positive float value. If you change the PlantWaterConsumptionMultiplier, you'll probably want" +
+                 "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks " +
+                 "considerably more water than the other plants. Should be set to a positive float value. If you change the PlantWaterConsumptionMultiplier, you'll probably want " +
                  "to change this one too accordingly."); // Description of the option to show in the config file
 
             PlantWaterConsumptionLimit = Mathf.Clamp(configPlantWaterConsumptionLimit.Value, 0.000001f, 100000f);
@@ -304,7 +303,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configPlantWaterTranspirationPercentage = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterTranspirationPercentage",  // The key of the configuration option in the configuration file
                  25f, // The default value
-                 "Set the percentage of the water consumed by plants that should be transpirated back to the atmosphere." +
+                 "Set the percentage of the water consumed by plants that should be transpirated back to the atmosphere. " +
                  "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration."); // Description of the option to show in the config file
 
             PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);
@@ -314,8 +313,8 @@ namespace PlantsnNutritionRebalance.Scripts
             configAtmosphereFogThreshold = PnN.Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
                  "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
                  1f, // The default value
-                 "Set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any" +
-                 "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog" +
+                 "Set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any " +
+                 "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog " +
                  "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
 
             AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
@@ -326,23 +325,23 @@ namespace PlantsnNutritionRebalance.Scripts
                 "NutritionLossMultiplier", // The key of the configuration option in the configuration file
                 1f,
                 "Multiplier for the nutrition loss per tick of the character. Can be set to a positive value between 0.1 and 10." +
-                "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 wich will give you ~8 days of hunger. If you change this value for 2," +
-                "your hunger will last only 4 days and will have to eat 2x more each day. If you set this value for 0.5, your character full hunger will last for 16 days on Stationeers" +
+                "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 wich will give you ~8 days of hunger. If you change this value for 2, " +
+                "your hunger will last only 4 days and will have to eat 2x more each day. If you set this value for 0.5, your character full hunger will last for 16 days on Stationeers " +
                 "Difficulty and you'll have to eat 50% less calories each day." +
                 "You'll want to change this option mainly if you also change the max nutrition storage of the character." +
-                "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive. With default mod values you need ~15" +
-                "to feed each player on stationeers difficulty (~12 on medium and ~10 on easy). If you change this to 0.5, you'll need only 7 plants growing on Stationeers difficulty," +
+                "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive. With default mod values you need ~15 " +
+                "to feed each player on stationeers difficulty (~12 on medium and ~10 on easy). If you change this to 0.5, you'll need only 7 plants growing on Stationeers difficulty, " +
                 "6 on normal or 5 on easy to feed each player.");
 
-            NutritionLossMultiplier = Mathf.Clamp(configNutritionLossMultiplier.Value, 0.1f, 10f);
+            NutritionLossMultiplier = Mathf.Clamp(configNutritionLossMultiplier.Value, 0.000001f, 10f);
 
             configHydrationLossMultiplier = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "HydrationLossMultiplier", // The key of the configuration option in the configuration file
                 1f,
-                "Multiplier for the hydration loss per tick of the character. Can be set to a positive value between 0.1 and 10. The water consumtpion logic in Stationeers" +
-                "is somewhat complex, it depends of the enviroment/suit temperature and other factors, so i don't really recommend changing this here, instead try to use the HydrationRate" +
-                "inside the worldsettings.xml file at the save folder whenever possible. If you want to disable water consumption, it's also better to do it in worldsettings.xml (Just set" +  
-                "the value to 0). If, for some reason that is not enough for you and you still want to mess with this value, try to do it in small increments/decrements like 0.1 and" +
+                "Multiplier for the hydration loss per tick of the character. Can be set to a positive value between 0.1 and 10. The water consumtpion logic in Stationeers " +
+                "is somewhat complex, it depends of the enviroment/suit temperature and other factors, so i don't really recommend changing this here, instead try to use the HydrationRate " +
+                "inside the worldsettings.xml file at the save folder whenever possible. If you want to disable water consumption, it's also better to do it in worldsettings.xml (Just set " +  
+                "the value to 0). If, for some reason that is not enough for you and you still want to mess with this value, try to do it in small increments/decrements like 0.1 and " +
                 "check ingame because small changes in this value will cause a big impact in your character water consumption due to the way the water consumption is calculated in the game.");
 
             HydrationLossMultiplier = Mathf.Clamp(configHydrationLossMultiplier.Value, 0.1f, 10f);
@@ -350,23 +349,23 @@ namespace PlantsnNutritionRebalance.Scripts
             configMaxNutritionStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "MaxNutritionStorage", // The key of the configuration option in the configuration file
                 4000f,
-                "This set the max amount of nutrition the character can store. If you change this value, it's highly advisable to start a new save or edit the character" +
-                "<Nutrition> tag directly into the save (world.xml file) to adjust your character nutrition value to be inside the max value you set here." +
-                "This greatly affects the amount of filling each food gives and also how long your starting 100% nutrition will last. For example, if you change" +
-                "this to 2000, potatoes will fill 2% of your food (instead of 1%) but on Stationeers difficulty your character will get only 4 days worth of it's initial nutrition," +
-                "instead of 8 days.Your Nutrition will also appear to drop 2x faster (in percentage) because now your max nutrition is lower. If you adjust this value, you can also adjust" +
-                "NutritionLossMultiplier to counter this effect but if you do so, it will considerably decrease the amount of plants you need to grow, making the food-plant cycle far easier." +
+                "This set the max amount of nutrition the character can store. If you change this value, it's highly advisable to start a new save or edit the character " +
+                "<Nutrition> tag directly into the save (world.xml file) to adjust your character nutrition value to be inside the max value you set here. " +
+                "This greatly affects the amount of filling each food gives and also how long your starting 100% nutrition will last. For example, if you change " +
+                "this to 2000, potatoes will fill 2% of your food (instead of 1%) but on Stationeers difficulty your character will get only 4 days worth of it's initial nutrition, " +
+                "instead of 8 days.Your Nutrition will also appear to drop 2x faster (in percentage) because now your max nutrition is lower. If you adjust this value, you can also adjust " +
+                "NutritionLossMultiplier to counter this effect but if you do so, it will considerably decrease the amount of plants you need to grow, making the food-plant cycle far easier. " +
                 "NOTE: When playing in MP, the host and the clients need to have the same value here, or the hunger percentage will not show up properly.");
             MaxNutritionStorage = Mathf.Clamp(configMaxNutritionStorage.Value, 1f, 1000000f);
 
             configMaxHydrationStorage = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
                 "MaxHydrationStorage", // The key of the configuration option in the configuration file
                 42f,
-                "This set the max amount of hydration the character can store. If you change this value, it's advisable to start a new save or edit the character" +
-                "<Hydration> tag directly into the save (world.xml file) to move your character hydration value to be inside the max value you set here." +
-                "This greatly affects the amount of filling each water canister gives you and also how long your starting 100% hydration will last. For example, if you change\n" +
-                "this to 21, a full water canister will now fill 36% of your water (instead of 18%) but on Stationeers difficulty your character will get only 1¼ days worth of hydration." +
-                "Your Hydration will also appear to drop faster (in percentage) because now your max hydration is lower." +
+                "This set the max amount of hydration the character can store. If you change this value, it's advisable to start a new save or edit the character " +
+                "<Hydration> tag directly into the save (world.xml file) to move your character hydration value to be inside the max value you set here. " +
+                "This greatly affects the amount of filling each water canister gives you and also how long your starting 100% hydration will last. For example, if you change " +
+                "this to 21, a full water canister will now fill 36% of your water (instead of 18%) but on Stationeers difficulty your character will get only 1¼ days worth of hydration. " +
+                "Your Hydration will also appear to drop faster (in percentage) because now your max hydration is lower. " +
                 "NOTE: When playing in MP, the host and the clients need to have the same value here, or the hydration percentage will not show up properly.");
             MaxHydrationStorage = Mathf.Clamp(configMaxHydrationStorage.Value, 1f, 1000000f);
 
@@ -398,24 +397,24 @@ namespace PlantsnNutritionRebalance.Scripts
             configEnableRespawnPenaltyLogic = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
                 "EnableRespawnPenaltyLogic", // The key of the configuration option in the configuration file
                 true,
-                "This option enable or disable the respawn penalty logic of the mod. On Vanilla, players who die are rewarded with 100% nutrition/Hydration stats." +
+                "This option enable or disable the respawn penalty logic of the mod. On Vanilla, players who die are rewarded with 100% nutrition/Hydration stats. " +
                 "This issue is even proeminent with the Plants and Nutrition mod because the mod considerably increases the amount of Nutrition/Hydration a player " +
-                "can have." +
-                "If this option is set to true, characters who die will respawn with nutrition and hydration proportional to the days past in the save. The mod will take into account" +
-                "the difficulty of the save, the maxNutritionStorage, the current day and other factors and try to \"Guess\" what your hydration/nutrition should be. For example, on a Normal" +
+                "can have. " +
+                "If this option is set to true, characters who die will respawn with nutrition and hydration proportional to the days past in the save. The mod will take into account " +
+                "the difficulty of the save, the maxNutritionStorage, the current day and other factors and try to \"Guess\" what your hydration/nutrition should be. For example, on a Normal " +
                 "difficulty save, default mod values and sun/orbit in 2, your character will have 10 days worth of food, and will loose 10% food each day. If you die on day 6, the mod " +
-                "will respawn the player with 40% food, because that's what your initial nutrition should approximately be. After day 10, dead characters will respawn with minimal food," +
-                "just enough to run to the pantry room to eat something." +
+                "will respawn the player with 40% food, because that's what your initial nutrition should approximately be. After day 10, dead characters will respawn with minimal food, " +
+                "just enough to run to the pantry room to eat something. " +
                 "If set to false, the Vanilla behaviour will be kept so, after death, you will always respawn with full nutrition/hydration.");
             EnableRespawnPenaltyLogic = configEnableRespawnPenaltyLogic.Value;
 
             configCustomNewPlayerRespawn = PnN.Config.Bind("4 - Character Respawn Configuration", // The section under which the option is shown 
                 "CustomNewPlayerRespawn", // The key of the configuration option in the configuration file
                 false,
-                "This option control if new players who never played on the save should join with nutrition/hydration proportional to the days past in the save or with custom food amounts set" +
-                "in CustomNewPlayerRespawnNutrition and CustomNewPlayerRespawnHydration. If set to false, when new players join, they will respawn with food proportional to the days past in the" +
-                "save. You'll want to enable this option mostly on dedicated servers where new players will join and start playing after the server is running for a long time, on saves where each" +
-                "player make separated bases, and you want them to join with full food but still penalize them if they die." +
+                "This option control if new players who never played on the save should join with nutrition/hydration proportional to the days past in the save or with custom food amounts set " +
+                "in CustomNewPlayerRespawnNutrition and CustomNewPlayerRespawnHydration. If set to false, when new players join, they will respawn with food proportional to the days past in the " +
+                "save. You'll want to enable this option mostly on dedicated servers where new players will join and start playing after the server is running for a long time, on saves where each " +
+                "player make separated bases, and you want them to join with full food but still penalize them if they die. " +
                 "This option only work if EnableRespawnPenaltyLogic is also true, otherwise everyone will always respawn with 100% nutrition/hydration.");
             CustomNewPlayerRespawn = configCustomNewPlayerRespawn.Value;
 
@@ -435,7 +434,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configEnableFoodChanges = PnN.Config.Bind("5 - Foods Configuration", // The section under which the option is shown 
                 "EnableFoodChanges", // The key of the configuration option in the configuration file
                 true,
-                "This option enable or disable the changes of the Nutrition amount of foods and the Eat time. If set to true, the nutrition and eat time of foods will be" +
+                "This option enable or disable the changes of the Nutrition amount of foods and the Eat time. If set to true, the nutrition and eat time of foods will be " +
                 "changed to the values set for each food below. If set to false, the vanilla nutrition values for foods will be kept with all it's oddities like overpowered " +
                 "tomato soup and Pumpkin pie not really worth the trouble making.");
             EnableFoodChanges = configEnableFoodChanges.Value;
@@ -443,7 +442,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configEnableFoodHydration = PnN.Config.Bind("5 - Foods Configuration", // The section under which the option is shown 
                 "EnableFoodHydration", // The key of the configuration option in the configuration file
                 true,
-                "This option activate/deactivate the mod function to make some food give back hydration. If set to true, some foods will give/remove hydration based on the amount set" +
+                "This option activate/deactivate the mod function to make some food give back hydration. If set to true, some foods will give/remove hydration based on the amount set " +
                 "for each food in the values below. If set to false,this system will be disabled and you'll get vanilla behaviour where foods gives only nutrition. The extra food hydration " +
                 "given is calculated based on the amount of nutrition eaten from the food. Note that if the hydration is full, the character will not gain any extra hydration and, if the Hydration " +
                 "value is negative, you'll loose hydration (think about eating French Fries full of salt).");
@@ -452,12 +451,12 @@ namespace PlantsnNutritionRebalance.Scripts
             configTomatoSoupNutrition = PnN.Config.Bind("5 - Foods Configuration", 
                 "TomatoSoupNutrition", 
                 135f, 
-                "Amount of Nutrition given by eating Tomato Soup. Needs to be a positive value between 1 and 10000. NOTE: Before changing the nutrition each food gives, you should" +
+                "Amount of Nutrition given by eating Tomato Soup. Needs to be a positive value between 1 and 10000. NOTE: Before changing the nutrition each food gives, you should " +
                 "remember that, by changing this nutrition amount, you'll probably break the nutrition balance between the plant needed to make this food and other plants. For example," +
                 "if you choose to double the nutrition given by Tomato Soup, you'll need half of the amount of tomato plants growing in your greenhouse to feed each player compared to " +
-                "other plants/foods. So if you decide to change a single food nutrition, you'll should change all foods to retain the nutritional balance of plants if you want to retain balance.\n" +
+                "other plants/foods. So if you decide to change a single food nutrition, you'll should change all foods to retain the nutritional balance of plants if you want to retain balance. " +
                 "The default values of food nutrition used in this mod aims to create the need for ~15 plants growing continuoulsy to feed each player so, before changing any " +
-                "food values, it's strongly advisable to test the new values in the mod spreadsheet available at <spreadsheetlink> to check how the change will impact the balance and" +
+                "food values, it's strongly advisable to test the new values in the mod spreadsheet available at <spreadsheetlink> to check how the change will impact the balance and " +
                 "the amount of plants you need to grow continuoulsy.");
             TomatoSoupNutrition = Mathf.Clamp(configTomatoSoupNutrition.Value, 1f, 10000f);
 
@@ -630,8 +629,8 @@ namespace PlantsnNutritionRebalance.Scripts
             configMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "MilkHydration",
                 0.04f,
-                "Amount of Hydration that the character will gain or loose per each 1ml of milk. For example, with the default" +
-                "value of 0.04, if you eat 100ml of milk you'll get 100*0.04 = 4 units of hydration. If you're using the default" +
+                "Amount of Hydration that the character will gain or loose per each 1ml of milk. For example, with the default " +
+                "value of 0.04, if you eat 100ml of milk you'll get 100*0.04 = 4 units of hydration. If you're using the default " +
                 "max hydration of the mod, which is 42, that means almost 10% hydration back.");
             MilkHydration = configMilkHydration.Value;
 
@@ -712,8 +711,8 @@ namespace PlantsnNutritionRebalance.Scripts
                 0f,
                 "Amount of Hydration that the character will gain or loose per each 1 unit of this food. For example, " +
                 "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
+                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll " +
+                "get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
                 "If it's negative, you'll loose hydration when eating the food.") ;
             CerealBarHydration = configCerealBarHydration.Value;
 
@@ -1089,7 +1088,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configEggDecayRate = PnN.Config.Bind("6 - Egg Configuration",
                 "EggDecayRate",
                 0.000091f,
-                "The spoil rate for eggs AND fertilized eggs. Should be a value between 0 and 1. Lower values will make it spoil slower. A value of 1" +
+                "The spoil rate for eggs AND fertilized eggs. Should be a value between 0 and 1. Lower values will make it spoil slower. A value of 1 " +
                 "will make it spoil instantly. The default value make it last for ~12 game days in sun/orbit 2. ");
             EggDecayRate = Mathf.Clamp(configEggDecayRate.Value, 0f, 1f);
 
