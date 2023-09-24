@@ -325,7 +325,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 "NutritionLossMultiplier", // The key of the configuration option in the configuration file
                 1f,
                 "Multiplier for the nutrition loss per tick of the character. Can be set to a positive value between 0.1 and 10." +
-                "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 wich will give you ~8 days of hunger. If you change this value for 2, " +
+                "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 which will give you ~8 days of hunger. If you change this value for 2, " +
                 "your hunger will last only 4 days and will have to eat 2x more each day. If you set this value for 0.5, your character full hunger will last for 16 days on Stationeers " +
                 "Difficulty and you'll have to eat 50% less calories each day." +
                 "You'll want to change this option mainly if you also change the max nutrition storage of the character." +
@@ -1089,7 +1089,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 "EggDecayRate",
                 0.000091f,
                 "The spoil rate for eggs AND fertilized eggs. Should be a value between 0 and 1. Lower values will make it spoil slower. A value of 1 " +
-                "will make it spoil instantly. The default value make it last for ~12 game days in sun/orbit 2. ");
+                "will make it spoil instantly. The default value is 0.000091 which make it last for ~12 game days in sun/orbit 2. ");
             EggDecayRate = Mathf.Clamp(configEggDecayRate.Value, 0f, 1f);
 
             configEggMinimumPressureToHatch = PnN.Config.Bind("6 - Egg Configuration",
