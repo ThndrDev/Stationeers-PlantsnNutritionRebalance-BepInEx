@@ -364,7 +364,7 @@ namespace PlantsnNutritionRebalance.Scripts
             }
         }
     }
-
+    
     // Update food Nutrition Values
     [HarmonyPatch(typeof(Stationpedia))]
     [HarmonyPatch("AddNutrition")]
@@ -423,7 +423,7 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         [HarmonyPrefix] //unnamed patching errors on game load
         [UsedImplicitly]
-        private static void HydratingByConsumedQuantity(Item __instance, ref float nutritionquantity, ref Thing useOnThing)
+        private static void HydratingByConsumedQuantity(Item __instance, ref float quantity, ref Thing useOnThing)
         {
             if (ConfigFile.EnableFoodHydration)
             {
@@ -431,27 +431,34 @@ namespace PlantsnNutritionRebalance.Scripts
                 {
                     try
                     {
-                        float hydrationValue = FoodsValues.getFoodHydration(__instance.DisplayName);                        
+                        //-0.05
+                        float hydrationValue = FoodsValues.getFoodHydration(__instance.DisplayName);
+                        ModLog.Debug("Item-OnUseItem: item Name: " + __instance.DisplayName + " Hydration rate received from config file: " + hydrationValue);
                         Human human = useOnThing as Human;
                         if (human && hydrationValue != 0f)
                         {
-                            float hydrate = nutritionquantity * hydrationValue;
+                            // -4,25 = 85 * -0.05
+                            float hydrate = quantity * hydrationValue;
+                            ModLog.Debug("Item-OnUseItem: item Name: " + __instance.DisplayName + " total Hydrate value got when considering the food quantity: " + hydrate);
                             if (hydrate > 0f)
                             {
                                 float humanHydrationtoFill = ConfigFile.MaxHydrationStorage - human.Hydration;
                                 if (hydrate > humanHydrationtoFill)
                                 {
                                     hydrate = Mathf.Clamp(hydrate, 0f, humanHydrationtoFill);
+                                    ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's positive and bigger than the amount available to fill 100%. hydrate: " + hydrate);
                                 }
                             }
                             else if (hydrate < 0f)
                             {
+                                //  ( -4,25*-1 )    10
                                 if (hydrate * -1f > human.Hydration)
                                 {
                                     hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);
+                                    ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's negative and the hydration avaliable in the character is lower than the amount the food will remove. dehydrate amount: " + hydrate);
                                 }
                             }
-                            ModLog.Info("Water got/lost from eating " + __instance.DisplayName + ": " + hydrate);
+                            ModLog.Info("Item-OnUseItem: Final hydration got/lost from eating " + __instance.DisplayName + ": " + hydrate);
                             human.Hydrate(hydrate);
                         }
                     }
@@ -473,7 +480,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPrefix]
         public static bool PatchFertilizedEgg(FertilizedEgg __instance)
         {
-            if (__instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= 50f && __instance.WorldAtmosphere.PressureGasses <= 120.5f && __instance.WorldAtmosphere.Temperature >= 309.15f && __instance.WorldAtmosphere.Temperature < 311.65f)
+            if (__instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && __instance.WorldAtmosphere.PressureGasses <= ConfigFile.EggMaximumPressureToHatch && __instance.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && __instance.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
             {
                 if (__instance.ParentSlot != null && __instance.ParentSlot.Occupant)
                 {
@@ -482,8 +489,8 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 //Good enviroment, Hatching.
                 __instance.HatchTime -= 0.5f;
-                //If it's near hatching (1 day left), then randomly move the egg to simulate the chick trying to pip the shell.
-                if (__instance.HatchTime < 2400)
+                //If it's near hatching, then randomly move the egg to simulate the chick trying to pip the shell.
+                if (__instance.HatchTime < ConfigFile.EggNearHatching)
                 {
                     if (UnityEngine.Random.Range(0f, 10f) > 9)
                         __instance.RigidBody.AddForce(new Vector3(UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f)));
@@ -506,7 +513,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         private static void PatchFertilizedEggAwake(FertilizedEgg __instance)
         {
-            __instance.HatchTime = 16800f; //Should hatch in 7 days
+            __instance.HatchTime = ConfigFile.EggHatchTime;
         }
     }
 
@@ -522,9 +529,8 @@ namespace PlantsnNutritionRebalance.Scripts
 
             if (__instance.DisplayName == "Egg" || __instance.DisplayName == "Fertilized Egg")
             {
-                __instance.DecayRate = 0.000091f; //should spoil in ~12 game days without refrigeration
+                __instance.DecayRate = ConfigFile.EggDecayRate;
             }
-
         }
     }
 
@@ -546,7 +552,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static string getTooltipText(FertilizedEgg fertilizedEgg)
         {
             string text = "";
-            if (fertilizedEgg.HasAtmosphere == true && fertilizedEgg.WorldAtmosphere.PressureGasses >= 50f && fertilizedEgg.WorldAtmosphere.PressureGasses < 120.5f && fertilizedEgg.WorldAtmosphere.Temperature >= 309.15f && fertilizedEgg.WorldAtmosphere.Temperature < 311.65f)
+            if (fertilizedEgg.HasAtmosphere == true && fertilizedEgg.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && fertilizedEgg.WorldAtmosphere.PressureGasses < ConfigFile.EggMaximumPressureToHatch && fertilizedEgg.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && fertilizedEgg.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
             {
                 if (fertilizedEgg.ParentSlot != null && fertilizedEgg.ParentSlot.Occupant)
                 {
@@ -567,14 +573,14 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 else
                 {
-                    if (fertilizedEgg.WorldAtmosphere.PressureGasses < 50f)
-                        text += string.Format("The Egg <color=red>is in a low pressure environment</color> (P < 50kpa)\n");
+                    if (fertilizedEgg.WorldAtmosphere.PressureGasses < ConfigFile.EggMinimumPressureToHatch)
+                        text += string.Format("The Egg <color=red>is in a low pressure environment</color> (P < " + ConfigFile.EggMinimumPressureToHatch + ")\n");
                     else if (fertilizedEgg.WorldAtmosphere.PressureGasses >= 120.5f)
-                        text += string.Format("The Egg <color=red>is in a high pressure environment</color> (P > 120kpa)\n");
+                        text += string.Format("The Egg <color=red>is in a high pressure environment</color> (P > " + ConfigFile.EggMaximumPressureToHatch + ")\n");
                     if (fertilizedEgg.WorldAtmosphere.Temperature < 309.15f)
-                        text += string.Format("The Egg temperature <color=red>is too cold</color> (T < 36°C)\n");
+                        text += string.Format("The Egg temperature <color=red>is too cold</color> (T < " + Mathf.RoundToInt(ConfigFile.EggMinimumTemperatureToHatch-273.15f) + "°C)\n");
                     else if (fertilizedEgg.WorldAtmosphere.Temperature >= 311.65f)
-                        text += string.Format("The Egg temperature <color=red>is too hot</color> (T > 38°C)\n");
+                        text += string.Format("The Egg temperature <color=red>is too hot</color> (T > " + Mathf.RoundToInt(ConfigFile.EggMaximumTemperatureToHatch-273.15f) + "°C)\n");
                 }
             }
             return text;

@@ -1,6 +1,4 @@
-﻿using BepInEx;
-using BepInEx.Configuration;
-using HarmonyLib;
+﻿using BepInEx.Configuration;
 using UnityEngine;
 
 
@@ -136,6 +134,14 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configSoybeanHydration;
         private static ConfigEntry<float> configTomatoHydration;
 
+        private static ConfigEntry<float> configEggHatchTime;
+        private static ConfigEntry<float> configEggDecayRate;
+        private static ConfigEntry<float> configEggMinimumPressureToHatch;
+        private static ConfigEntry<float> configEggMaximumPressureToHatch;
+        private static ConfigEntry<float> configEggMinimumTemperatureToHatch;
+        private static ConfigEntry<float> configEggMaximumTemperatureToHatch;
+        private static ConfigEntry<float> configEggNearHatching;
+
         public static int LogLevel;
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
@@ -253,6 +259,14 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float SoybeanHydration;
         public static float TomatoHydration;
 
+        public static float EggHatchTime;
+        public static float EggDecayRate;
+        public static float EggMinimumPressureToHatch;
+        public static float EggMaximumPressureToHatch;
+        public static float EggMinimumTemperatureToHatch;
+        public static float EggMaximumTemperatureToHatch;
+        public static float EggNearHatching;
+
         public static void HandleConfig(PlantsnNutritionRebalancePlugin PnN) // Create and manage the configuration file parameters
         {
             //Log Section
@@ -299,7 +313,7 @@ namespace PlantsnNutritionRebalance.Scripts
             //Liquid Fog Section
             configAtmosphereFogThreshold = PnN.Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
                  "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
-                 5f, // The default value
+                 1f, // The default value
                  "Set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any" +
                  "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog" +
                  "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
@@ -328,8 +342,8 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Multiplier for the hydration loss per tick of the character. Can be set to a positive value between 0.1 and 10. The water consumtpion logic in Stationeers" +
                 "is somewhat complex, it depends of the enviroment/suit temperature and other factors, so i don't really recommend changing this here, instead try to use the HydrationRate" +
                 "inside the worldsettings.xml file at the save folder whenever possible. If you want to disable water consumption, it's also better to do it in worldsettings.xml (Just set" +  
-                "the value to 0). If that is not enough for you and you still want to mess with this value for some reason, try to do it in small increments/decrements like 0.01 and" +
-                "check ingame because small changes in this value will cause a big impact in your character water consumption.");
+                "the value to 0). If, for some reason that is not enough for you and you still want to mess with this value, try to do it in small increments/decrements like 0.1 and" +
+                "check ingame because small changes in this value will cause a big impact in your character water consumption due to the way the water consumption is calculated in the game.");
 
             HydrationLossMultiplier = Mathf.Clamp(configHydrationLossMultiplier.Value, 0.1f, 10f);
 
@@ -429,10 +443,10 @@ namespace PlantsnNutritionRebalance.Scripts
             configEnableFoodHydration = PnN.Config.Bind("5 - Foods Configuration", // The section under which the option is shown 
                 "EnableFoodHydration", // The key of the configuration option in the configuration file
                 true,
-                "This option activate/deactivate the mod function to make some food give back hydration. If set to true, some foods will give/remove hydration. If set to false," +
-                "this system will be disabled and you'll get vanilla behaviour (foods gives only nutrition and no hydration). The extra hydration given is calculated based on " +
-                "the amount of nutrition eaten from the food. Note that if the hydration is full, the character will not gain any extra hydration. If the Hydration value is negative," +
-                " you'll loose hydration (think about French Fries full of salt).");
+                "This option activate/deactivate the mod function to make some food give back hydration. If set to true, some foods will give/remove hydration based on the amount set" +
+                "for each food in the values below. If set to false,this system will be disabled and you'll get vanilla behaviour where foods gives only nutrition. The extra food hydration " +
+                "given is calculated based on the amount of nutrition eaten from the food. Note that if the hydration is full, the character will not gain any extra hydration and, if the Hydration " +
+                "value is negative, you'll loose hydration (think about eating French Fries full of salt).");
             EnableFoodHydration = configEnableFoodHydration.Value;
 
             configTomatoSoupNutrition = PnN.Config.Bind("5 - Foods Configuration", 
@@ -441,7 +455,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Amount of Nutrition given by eating Tomato Soup. Needs to be a positive value between 1 and 10000. NOTE: Before changing the nutrition each food gives, you should" +
                 "remember that, by changing this nutrition amount, you'll probably break the nutrition balance between the plant needed to make this food and other plants. For example," +
                 "if you choose to double the nutrition given by Tomato Soup, you'll need half of the amount of tomato plants growing in your greenhouse to feed each player compared to " +
-                "other plants/foods. So if you decide to change this food nutrition, you'll should change all foods to retain the nutritional balance of plants.\n" +
+                "other plants/foods. So if you decide to change a single food nutrition, you'll should change all foods to retain the nutritional balance of plants if you want to retain balance.\n" +
                 "The default values of food nutrition used in this mod aims to create the need for ~15 plants growing continuoulsy to feed each player so, before changing any " +
                 "food values, it's strongly advisable to test the new values in the mod spreadsheet available at <spreadsheetlink> to check how the change will impact the balance and" +
                 "the amount of plants you need to grow continuoulsy.");
@@ -455,13 +469,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configTomatoSoupHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "TomatoSoupHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            TomatoSoupHydration = Mathf.Clamp(configTomatoSoupHydration.Value, -1f, 1f);
+                2.7f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            TomatoSoupHydration = configTomatoSoupHydration.Value;
 
             configCornSoupNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CornSoupNutrition", 
@@ -477,13 +489,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCornSoupHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CornSoupHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CornSoupHydration = Mathf.Clamp(configCornSoupHydration.Value, -1f, 1f);
+                4.4f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CornSoupHydration = configCornSoupHydration.Value;
 
             configCannedRicePuddingNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedRicePuddingNutrition",
@@ -499,13 +509,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCannedRicePuddingHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedRicePuddingHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CannedRicePuddingHydration = Mathf.Clamp(configCannedRicePuddingHydration.Value, -1f, 1f);
+                2.2f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedRicePuddingHydration = configCannedRicePuddingHydration.Value;
 
             configPumpkinSoupNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinSoupNutrition",
@@ -521,13 +529,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configPumpkinSoupHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinSoupHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            PumpkinSoupHydration = Mathf.Clamp(configPumpkinSoupHydration.Value, -1f, 1f);
+                5.4f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            PumpkinSoupHydration = configPumpkinSoupHydration.Value;
 
             configPumpkinPieNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinPieNutrition",
@@ -543,13 +549,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configPumpkinPieHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinPieHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            PumpkinPieHydration = Mathf.Clamp(configPumpkinPieHydration.Value, -1f, 1f);
+                8f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            PumpkinPieHydration = configPumpkinPieHydration.Value;
 
             configBakedPotatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "BakedPotatoNutrition",
@@ -565,17 +569,15 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configBakedPotatoHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "BakedPotatoHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            BakedPotatoHydration = Mathf.Clamp(configBakedPotatoHydration.Value, -1f, 1f);
+                1f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            BakedPotatoHydration = configBakedPotatoHydration.Value;
 
             configFrenchFriesNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "FrenchFriesNutrition",
-                85f,
+                100f,
                 "Amount of Nutrition given by eating French Fries. Needs to be a positive value between 1 and 10000.");
             FrenchFriesNutrition = Mathf.Clamp(configFrenchFriesNutrition.Value, 1f, 10000f);
 
@@ -587,17 +589,15 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configFrenchFriesHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "FrenchFriesHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            FrenchFriesHydration = Mathf.Clamp(configFrenchFriesHydration.Value, -1f, 1f);
+                -1f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            FrenchFriesHydration = configFrenchFriesHydration.Value;
 
             configCannedFrenchFriesNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedFrenchFriesNutrition",
-                150f,
+                180f,
                 "Amount of Nutrition given by eating Canned French Fries. Needs to be a positive value between 1 and 10000.");
             CannedFrenchFriesNutrition = Mathf.Clamp(configCannedFrenchFriesNutrition.Value, 1f, 10000f);
 
@@ -609,18 +609,16 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCannedFrenchFriesHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedFrenchFriesHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CannedFrenchFriesHydration = Mathf.Clamp(configCannedFrenchFriesHydration.Value, -1f, 1f);
+                -1.8f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedFrenchFriesHydration = configCannedFrenchFriesHydration.Value;
 
             configMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "MilkNutrition",
                 2.3f,
-                "Amount of Nutrition given by eating Milk. Needs to be a positive value between 1 and 10000.");
+                "Amount of Nutrition given by eating 1ml of Milk. Needs to be a positive value between 1 and 10000.");
             MilkNutrition = Mathf.Clamp(configMilkNutrition.Value, 1f, 10000f);
 
             configMilkEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
@@ -631,13 +629,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "MilkHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            MilkHydration = Mathf.Clamp(configMilkHydration.Value, -1f, 1f);
+                0.04f,
+                "Amount of Hydration that the character will gain or loose per each 1ml of milk. For example, with the default" +
+                "value of 0.04, if you eat 100ml of milk you'll get 100*0.04 = 4 units of hydration. If you're using the default" +
+                "max hydration of the mod, which is 42, that means almost 10% hydration back.");
+            MilkHydration = configMilkHydration.Value;
 
             configCannedCondensedMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedCondensedMilkNutrition",
@@ -653,13 +649,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCannedCondensedMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedCondensedMilkHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CannedCondensedMilkHydration = Mathf.Clamp(configCannedCondensedMilkHydration.Value, -1f, 1f);
+                6f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedCondensedMilkHydration = configCannedCondensedMilkHydration.Value;
 
             configMuffinNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "MuffinNutrition",
@@ -675,13 +669,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configMuffinHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "MuffinHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            MuffinHydration = Mathf.Clamp(configMuffinHydration.Value, -1f, 1f);
+                2.2f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            MuffinHydration = configMuffinHydration.Value;
 
             configBreadLoafNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "BreadLoafNutrition",
@@ -697,13 +689,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configBreadLoafHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "BreadLoafHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            BreadLoafHydration = Mathf.Clamp(configBreadLoafHydration.Value, -1f, 1f);
+                0.5f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            BreadLoafHydration = configBreadLoafHydration.Value;
 
             configCerealBarNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CerealBarNutrition",
@@ -719,13 +709,13 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCerealBarHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CerealBarHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
+                0f,
+                "Amount of Hydration that the character will gain or loose per each 1 unit of this food. For example, " +
                 "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
                 "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
                 " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CerealBarHydration = Mathf.Clamp(configCerealBarHydration.Value, -1f, 1f);
+                "If it's negative, you'll loose hydration when eating the food.") ;
+            CerealBarHydration = configCerealBarHydration.Value;
 
             configCannedPowderedEggsNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedPowderedEggsNutrition",
@@ -739,21 +729,19 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Canned Powdered Eggs. Needs to be a positive value between 0.001 and 10.");
             CannedPowderedEggsEatSpeed = Mathf.Clamp(configCannedPowderedEggsEatSpeed.Value, 0.001f, 10f);
 
+            configCannedPowderedEggsHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedPowderedEggsHydration",
+                0f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedPowderedEggsHydration = configCannedPowderedEggsHydration.Value;
+
             configCannedEdamameNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedEdamameNutrition",
                 100f,
                 "Amount of Nutrition given by eating Canned Edamame. Needs to be a positive value between 1 and 10000.");
             CannedEdamameNutrition = Mathf.Clamp(configCannedEdamameNutrition.Value, 1f, 10000f);
-
-            configCannedPowderedEggsHydration = PnN.Config.Bind("5 - Foods Configuration",
-                "CannedPowderedEggsHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CannedPowderedEggsHydration = Mathf.Clamp(configCannedPowderedEggsHydration.Value, -1f, 1f);
 
             configCannedEdamameEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedEdamameEatSpeed",
@@ -763,13 +751,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCannedEdamameHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedEdamameHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CannedEdamameHydration = Mathf.Clamp(configCannedEdamameHydration.Value, -1f, 1f);
+                1f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedEdamameHydration = configCannedEdamameHydration.Value;
 
             configCondensedMilkNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CondensedMilkNutrition",
@@ -785,13 +771,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCannedCondensedMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CannedCondensedMilkHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CannedCondensedMilkHydration = Mathf.Clamp(configCannedCondensedMilkHydration.Value, -1f, 1f);
+                2f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedCondensedMilkHydration = configCannedCondensedMilkHydration.Value;
 
             configCookedSoybeanNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedSoybeanNutrition",
@@ -807,13 +791,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCookedSoybeanHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedSoybeanHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CookedSoybeanHydration = Mathf.Clamp(configCookedSoybeanHydration.Value, -1f, 1f);
+                0.3f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CookedSoybeanHydration = configCookedSoybeanHydration.Value;
 
             configCookedRiceNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedRiceNutrition",
@@ -830,12 +812,10 @@ namespace PlantsnNutritionRebalance.Scripts
             configCookedRiceHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedRiceHydration",
                 0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CookedRiceHydration = Mathf.Clamp(configCookedRiceHydration.Value, -1f, 1f);
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CookedRiceHydration = configCookedRiceHydration.Value;
 
             configCookedCornNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedCornNutrition",
@@ -851,13 +831,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCookedCornHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedCornHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CookedCornHydration = Mathf.Clamp(configCookedCornHydration.Value, -1f, 1f);
+                0.2f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CookedCornHydration = configCookedCornHydration.Value;
 
             configCookedPumpkinNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedPumpkinNutrition",
@@ -873,13 +851,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCookedPumpkinHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedPumpkinHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CookedPumpkinHydration = Mathf.Clamp(configCookedPumpkinHydration.Value, -1f, 1f);
+                0.4f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CookedPumpkinHydration = configCookedPumpkinHydration.Value;
 
             configPowderedEggsNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PowderedEggsNutrition",
@@ -896,12 +872,10 @@ namespace PlantsnNutritionRebalance.Scripts
             configPowderedEggsHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "PowderedEggsHydration",
                 0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            PowderedEggsHydration = Mathf.Clamp(configPowderedEggsHydration.Value, -1f, 1f);
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            PowderedEggsHydration = configPowderedEggsHydration.Value;
 
             configCookedTomatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedTomatoNutrition",
@@ -917,13 +891,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCookedTomatoHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedTomatoHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CookedTomatoHydration = Mathf.Clamp(configCookedTomatoHydration.Value, -1f, 1f);
+                0.4f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CookedTomatoHydration = configCookedTomatoHydration.Value;
 
             configWheatNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "WheatNutrition",
@@ -940,12 +912,10 @@ namespace PlantsnNutritionRebalance.Scripts
             configWheatHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "WheatHydration",
                 0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            WheatHydration = Mathf.Clamp(configWheatHydration.Value, -1f, 1f);
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            WheatHydration = configWheatHydration.Value;
 
             configCornNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CornNutrition",
@@ -961,17 +931,15 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configCornHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "CornHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            CornHydration = Mathf.Clamp(configCornHydration.Value, -1f, 1f);
+                0.5f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CornHydration = configCornHydration.Value;
 
             configFernNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "FernNutrition",
-                1f,
+                5f,
                 "Amount of Nutrition given by eating Fern. Needs to be a positive value between 1 and 10000.");
             FernNutrition = Mathf.Clamp(configFernNutrition.Value, 1f, 10000f);
 
@@ -983,13 +951,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configFernHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "FernHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            FernHydration = Mathf.Clamp(configFernHydration.Value, -1f, 1f);
+                0.3f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            FernHydration = configFernHydration.Value;
 
             configMushroomNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "MushroomNutrition",
@@ -1005,13 +971,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configMushroomHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "MushroomHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            MushroomHydration = Mathf.Clamp(configMushroomHydration.Value, -1f, 1f);
+                0.4f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            MushroomHydration = configMushroomHydration.Value;
 
             configPotatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PotatoNutrition",
@@ -1027,13 +991,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configPotatoHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "PotatoHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            PotatoHydration = Mathf.Clamp(configPotatoHydration.Value, -1f, 1f);
+                0.5f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            PotatoHydration = configPotatoHydration.Value;
 
             configPumpkinNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinNutrition",
@@ -1049,13 +1011,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configPumpkinHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "PumpkinHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            PumpkinHydration = Mathf.Clamp(configPumpkinHydration.Value, -1f, 1f);
+                1f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            PumpkinHydration = configPumpkinHydration.Value;
 
             configRiceNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "RiceNutrition",
@@ -1072,12 +1032,10 @@ namespace PlantsnNutritionRebalance.Scripts
             configRiceHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "RiceHydration",
                 0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            RiceHydration = Mathf.Clamp(configRiceHydration.Value, -1f, 1f);
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            RiceHydration = configRiceHydration.Value;
 
             configSoybeanNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "SoybeanNutrition",
@@ -1093,13 +1051,11 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configSoybeanHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "SoybeanHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            SoybeanHydration = Mathf.Clamp(configSoybeanHydration.Value, -1f, 1f);
+                0.6f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            SoybeanHydration = configSoybeanHydration.Value;
 
             configTomatoNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "TomatoNutrition",
@@ -1115,16 +1071,62 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configTomatoHydration = PnN.Config.Bind("5 - Foods Configuration",
                 "TomatoHydration",
-                0.1f,
-                "Amount of Hydration that the character will gain or loose per each 1 nutrition of this food. For example, " +
-                "if the food gives 50 nutrition and you set this to 0.1, you'll get 5 extra hydration units back on " +
-                "your character. If you're using the default max hydration of the mod, which is 42, that means you'll" +
-                " get ~12% hydration back. This setting needs to be a positive or negative value between -1 and 1. " +
-                "If it's negative, you'll loose hydration when eating the food.");
-            TomatoHydration = Mathf.Clamp(configTomatoHydration.Value, -1f, 1f);
+                0.6f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            TomatoHydration = configTomatoHydration.Value;
+            
+            //Egg Section
+            configEggHatchTime = PnN.Config.Bind("6 - Egg Configuration",
+                "EggHatchTime",
+                16800f,
+                "How long, in seconds should take to hatch a fertilized egg? The default value of 16800 is ~7 days in sun/orbit 2, " +
+                "or 1/3 of the time needed to hatch an egg in RL (21 days)." +
+                " Must be a positive value bigger than 1. For reference, each day in sun/orbit 2 in stationeers is 2400 seconds.");
+            EggHatchTime = Mathf.Clamp(configEggHatchTime.Value, 1f, 1000000f); ;
 
+            configEggDecayRate = PnN.Config.Bind("6 - Egg Configuration",
+                "EggDecayRate",
+                0.000091f,
+                "The spoil rate for eggs AND fertilized eggs. Should be a value between 0 and 1. Lower values will make it spoil slower. A value of 1" +
+                "will make it spoil instantly. The default value make it last for ~12 game days in sun/orbit 2. ");
+            EggDecayRate = Mathf.Clamp(configEggDecayRate.Value, 0f, 1f);
 
+            configEggMinimumPressureToHatch = PnN.Config.Bind("6 - Egg Configuration",
+                "EggMinimumPressureToHatch",
+                50f,
+                "The value in Kpa for the minimum pressure range that eggs should hatch. Needs to be a positive value between 0 and 100 and also needs" +
+                "to be LOWER than EggMaximumPressureToHatch.");
+            EggMinimumPressureToHatch = Mathf.Clamp(configEggMinimumPressureToHatch.Value, 0f, 100f);
 
+            configEggMaximumPressureToHatch = PnN.Config.Bind("6 - Egg Configuration",
+                "EggMaximumPressureToHatch",
+                120.5f,
+                "The value in Kpa for the maximum pressure range that eggs should hatch. Needs to be a positive value between 1 and 300 and also needs" +
+                "to be BIGGER than EggMinimumPressureToHatch.");
+            EggMaximumPressureToHatch = Mathf.Clamp(configEggMaximumPressureToHatch.Value, EggMinimumPressureToHatch, 300f);
+
+            configEggMinimumTemperatureToHatch = PnN.Config.Bind("6 - Egg Configuration",
+                "EggMinimumTemperatureToHatch",
+                309.15f,
+                "The value in kelvin for the minimum temperature range that eggs should hatch. The default values are the RL value needed to hatch eggs. " +
+                "Needs to be a positive value between 10 and 50 and also needs to be LOWER than EggMaximumTemperatureToHatch.");
+            EggMinimumTemperatureToHatch = Mathf.Clamp(configEggMinimumTemperatureToHatch.Value, 273.15f, 323.15f);
+
+            configEggMaximumTemperatureToHatch = PnN.Config.Bind("6 - Egg Configuration",
+                "EggMaximumTemperatureToHatch",
+                311.65f,
+                "The value in celsius for the maximum temperature range that eggs should hatch. The default values are the RL value needed to hatch eggs. " +
+                "Needs to be a positive value between 273.15 and 323.15 and also needs to be BIGGER than EggMinimumTemperatureToHatch.");
+            EggMaximumTemperatureToHatch = Mathf.Clamp(configEggMaximumTemperatureToHatch.Value, EggMinimumTemperatureToHatch, 323.15f);
+
+            configEggNearHatching = PnN.Config.Bind("6 - Egg Configuration",
+                "EggNearHatching",
+                2400f,
+                "The value in seconds to consider that the fertilized egg is near hatching. The mod will add small movements to simulate the " +
+                "chick trying to pip and break the shell of the egg. Needs to be a positive value and lower than configEggHatchTime. Set to 0 to disable.");
+            EggNearHatching = Mathf.Clamp(configEggNearHatching.Value, 0f, EggHatchTime);
         }
     }
 }

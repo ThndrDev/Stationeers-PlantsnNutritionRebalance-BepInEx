@@ -1,21 +1,14 @@
-﻿using System.Reflection;
-using BepInEx;
-using BepInEx.Configuration;
+﻿using BepInEx;
 using HarmonyLib;
 using UnityEngine;
 using Assets.Scripts.Objects;
 using Assets.Scripts.Objects.Items;
 using System.Collections.Generic;
-using Assets.Scripts.Genetics;
-using Assets.Scripts.Objects.Structures;
-using System.Collections;
-using System;
-using BepInEx.Logging;
-using JetBrains.Annotations;
+
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.0.0.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.0.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;

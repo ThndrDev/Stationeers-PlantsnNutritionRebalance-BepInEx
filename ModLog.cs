@@ -1,8 +1,4 @@
-﻿using Assets.Scripts.Objects.Entities;
-using Assets.Scripts.UI;
-using HarmonyLib;
-using JetBrains.Annotations;
-using UnityEngine;
+﻿
 using System;
 
 
