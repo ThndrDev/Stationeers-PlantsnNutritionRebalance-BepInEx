@@ -767,13 +767,13 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Time to eat each nutrition of Condensed Milk. Needs to be a positive value between 0.001 and 10.");
             CondensedMilkEatSpeed = Mathf.Clamp(configCondensedMilkEatSpeed.Value, 0.001f, 10f);
 
-            configCannedCondensedMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
-                "CannedCondensedMilkHydration",
+            configCondensedMilkHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CondensedMilkHydration",
                 2f,
                 "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
                 "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
                 "eating the food.");
-            CannedCondensedMilkHydration = configCannedCondensedMilkHydration.Value;
+            CondensedMilkHydration = configCondensedMilkHydration.Value;
 
             configCookedSoybeanNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "CookedSoybeanNutrition",
