@@ -9,10 +9,6 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Atmospherics;
 using System.Reflection;
 using System;
-using System.Collections.Generic;
-using Object = System.Object;
-using SimpleSpritePacker;
-using System.Security.Cryptography;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -126,8 +122,8 @@ namespace PlantsnNutritionRebalance.Scripts
             __result = ConfigFile.MaxNutritionStorage;
         }
 
+        static float LastNutritionLossPerTick;
         // Adjusts the HungerRate based on the world difficulty and changes the damage system for Starvation
-        static float LastNutritionLossPerTick = 0.083333f;
         [HarmonyPatch("LifeNutrition")]
         [HarmonyPrefix]
         [UsedImplicitly]
@@ -156,6 +152,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     NutritionLossPerTick = Mathf.Lerp(0.055555f, 0.208334f, hungerdifficulty);
                     break;
             }
+            // Save the last NutritionLossPerTick, to be used on the player respawn patch
             LastNutritionLossPerTick = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick;
 
             // Complete rewrite of base method Human.LifeNutrition
@@ -186,12 +183,17 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             if (ConfigFile.EnableRespawnPenaltyLogic)
             {
-                // First, get how long in days the max nutrition should last with the current configuration parameters
-                int NormalizedMaxHungerDays = Mathf.RoundToInt(ConfigFile.MaxNutritionStorage / LastNutritionLossPerTick / 2 / 60 / (20 * Settings.CurrentData.SunOrbitPeriod));
+                // Then, get how long in days the max nutrition should last with the current configuration parameters
+                int NormalizedMaxHungerDays = Mathf.RoundToInt(ConfigFile.MaxNutritionStorage / (LastNutritionLossPerTick==0f ? 0.083333f : LastNutritionLossPerTick) / 2 / 60 / 
+                    (20 * Settings.CurrentData.SunOrbitPeriod));
+                ModLog.Debug("Human-OnLifeCreated: NormalizedMaxHungerDays: " + NormalizedMaxHungerDays + " ConfigFile.MaxNutritionStorage: " + ConfigFile.MaxNutritionStorage +
+                             " LastNutritionLossPerTick:" + LastNutritionLossPerTick + " Settings.CurrentData.SunOrbitPeriod: " + Settings.CurrentData.SunOrbitPeriod);
                 // Then, calculate a nutrition slice for each day
                 float NutritionSlicePerDay = ConfigFile.MaxNutritionStorage / NormalizedMaxHungerDays;
+                ModLog.Debug("Human-OnLifeCreated: NutritionSlicePerDay: " + NutritionSlicePerDay);
                 // Get the normalized days
-                float DaysPastNorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod;
+                //float DaysPastNorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod;
+                ModLog.Debug("Human-OnLifeCreated: Current day: " + WorldManager.DaysPast);
 
                 // If the character is a new player joining and not a old character who died, and the configfile is set to modify the amount of food to give to the new player
                 // apply the desired amount of food for the new character
@@ -201,19 +203,26 @@ namespace PlantsnNutritionRebalance.Scripts
                     ModLog.Info("Human-OnLifeCreated: Nutrition given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 // If it's a respawn and the DaysPastNorm is lower than the NormalizedMaxHungerDays, that means we should calculate the amount of food to give to the respawning character
-                else if (DaysPastNorm < NormalizedMaxHungerDays)
+                else if (WorldManager.DaysPast < NormalizedMaxHungerDays)
                 {
-                    __instance.Nutrition = NutritionSlicePerDay * (NormalizedMaxHungerDays - DaysPastNorm);
+                    __instance.Nutrition = NutritionSlicePerDay * (NormalizedMaxHungerDays - WorldManager.DaysPast);
                     ModLog.Info("Human-OnLifeCreated: Nutrition given for an player who died and are respawning: " + __instance.Nutrition);
                 }
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHungerDays, that means we should give a minimal amount of food, just enough for the character to go eat something
                 else
                 {
-                    __instance.Nutrition = ConfigFile.MaxNutritionStorage / 100;
+                    __instance.Nutrition = ConfigFile.MaxNutritionStorage / 95;
+                    ModLog.Info("Human-OnLifeCreated: Minimal Nutrition given for respawing player after "+ WorldManager.DaysPast + " days passed: " + __instance.Nutrition);
                 }
                 // Now do the same logic, but for Hydration:
-                //0.001798755  --  0,003237759
-                int NormalizedMaxHydrationDays = Mathf.RoundToInt(___MaxHydrationStorage / ((____hydrationLossPerTick + ____hydrationLossPerTick * 0.2f)* WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)  / 2 / 60 / (20 * Settings.CurrentData.SunOrbitPeriod));
+                //Make sure we don't get values with 0 so they don't break the division from NormalizedMaxHydrationDays
+                //for hydrationLossPerTick
+                float hydrationLossPerTick = (____hydrationLossPerTick == 0f ? 0.001798755f : ____hydrationLossPerTick);
+                float HydrationRate = (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate == 0f ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
+                int NormalizedMaxHydrationDays = Mathf.RoundToInt(___MaxHydrationStorage / ((hydrationLossPerTick + hydrationLossPerTick * 0.2f) * HydrationRate)  / 2 / 60 /
+                    (20 * Settings.CurrentData.SunOrbitPeriod));
+                ModLog.Debug("Human-OnLifeCreated: NormalizedMaxHydrationDays: " + NormalizedMaxHydrationDays + " hydrationLossPerTick: " + hydrationLossPerTick + " HydrationRate: " +
+                    HydrationRate);
                 float HydrationSlicePerDay = ConfigFile.MaxHydrationStorage / NormalizedMaxHydrationDays;
                 float HydrationToGive;
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
@@ -221,15 +230,16 @@ namespace PlantsnNutritionRebalance.Scripts
                     HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
                     ModLog.Info("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
-                else if (DaysPastNorm < NormalizedMaxHydrationDays)
+                else if (WorldManager.DaysPast < NormalizedMaxHydrationDays)
                 {
-                    HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - DaysPastNorm);
+                    HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - WorldManager.DaysPast);
                     ModLog.Info("Human-OnLifeCreated: Hydration given because a player who died are respawning: " + HydrationToGive);
                 }
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
                 else
                 {
-                    HydrationToGive = ConfigFile.MaxHydrationStorage / 100; //just give 1% water
+                    HydrationToGive = ConfigFile.MaxHydrationStorage / 95; //give a little more than 1% water
+                    ModLog.Info("Human-OnLifeCreated: Minimal Hydration given for respawing player after " + WorldManager.DaysPast + " days passed: " + HydrationToGive);
                 }
                 Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);
             }
@@ -285,12 +295,12 @@ namespace PlantsnNutritionRebalance.Scripts
                 {
                     float EatSpeed = FoodsValues.getFoodEatSpeed(__instance.DisplayName);
                     float NutritionValue = FoodsValues.getFoodNutrition(__instance.DisplayName);
-                    if (EatSpeed >= 0f)
+                    if (EatSpeed > 0f)
                     {
                         ModLog.Debug("Food-OnUseSecondary: Changing EatSpeed for food " + __instance.DisplayName + " From: "+ __instance.EatSpeed + " To: " + EatSpeed);
                         __instance.EatSpeed = EatSpeed;
                     }
-                    if (NutritionValue >= 0f)
+                    if (NutritionValue > 0f)
                     {
                         ModLog.Debug("Food-OnUseSecondary: Changing NutritionValue for food " + __instance.DisplayName + " From: " + __instance.NutritionValue + " To: " + NutritionValue);
                         __instance.NutritionValue = NutritionValue;
@@ -431,13 +441,11 @@ namespace PlantsnNutritionRebalance.Scripts
                 {
                     try
                     {
-                        //-0.05
                         float hydrationValue = FoodsValues.getFoodHydration(__instance.DisplayName);
                         ModLog.Debug("Item-OnUseItem: item Name: " + __instance.DisplayName + " Hydration rate received from config file: " + hydrationValue);
                         Human human = useOnThing as Human;
                         if (human && hydrationValue != 0f)
                         {
-                            // -4,25 = 85 * -0.05
                             float hydrate = quantity * hydrationValue;
                             ModLog.Debug("Item-OnUseItem: item Name: " + __instance.DisplayName + " total Hydrate value got when considering the food quantity: " + hydrate);
                             if (hydrate > 0f)
@@ -451,7 +459,6 @@ namespace PlantsnNutritionRebalance.Scripts
                             }
                             else if (hydrate < 0f)
                             {
-                                //  ( -4,25*-1 )    10
                                 if (hydrate * -1f > human.Hydration)
                                 {
                                     hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);

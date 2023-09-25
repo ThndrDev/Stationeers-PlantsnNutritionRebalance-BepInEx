@@ -1,7 +1,6 @@
 ﻿using BepInEx.Configuration;
 using UnityEngine;
 
-
 namespace PlantsnNutritionRebalance.Scripts
 {
     internal class ConfigFile

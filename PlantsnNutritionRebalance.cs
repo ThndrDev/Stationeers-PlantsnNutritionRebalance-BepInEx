@@ -5,7 +5,6 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Objects.Items;
 using System.Collections.Generic;
 
-
 namespace PlantsnNutritionRebalance.Scripts
 {
     [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.0.0")]
