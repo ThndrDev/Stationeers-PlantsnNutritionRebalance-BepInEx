@@ -326,11 +326,11 @@ namespace PlantsnNutritionRebalance.Scripts
                 "Multiplier for the nutrition loss per tick of the character. Can be set to a positive value between 0.1 and 10." +
                 "For example, on Stationeers difficulty, by default, you'll get a nutrition loss of 0.104167 which will give you ~8 days of hunger. If you change this value for 2, " +
                 "your hunger will last only 4 days and will have to eat 2x more each day. If you set this value for 0.5, your character full hunger will last for 16 days on Stationeers " +
-                "Difficulty and you'll have to eat 50% less calories each day." +
-                "You'll want to change this option mainly if you also change the max nutrition storage of the character." +
+                "Difficulty and you'll have to eat 50% less calories each day. " +
+                "You'll want to change this option mainly if you also change the max nutrition storage of the character. " +
                 "Just remember that, if you change this, it will also greatly affect the amount of plants you need to grow to keep your character alive. With default mod values you need ~15 " +
-                "to feed each player on stationeers difficulty (~12 on medium and ~10 on easy). If you change this to 0.5, you'll need only 7 plants growing on Stationeers difficulty, " +
-                "6 on normal or 5 on easy to feed each player.");
+                "plants to feed each player on stationeers difficulty (~12 on medium and ~10 on easy). If you change this to, for example, 0.5, you'll need only 7 plants growing on Stationeers " +
+                " difficulty, 6 on normal or 5 on easy to feed each player.");
 
             NutritionLossMultiplier = Mathf.Clamp(configNutritionLossMultiplier.Value, 0.000001f, 10f);
 
@@ -398,10 +398,10 @@ namespace PlantsnNutritionRebalance.Scripts
                 true,
                 "This option enable or disable the respawn penalty logic of the mod. On Vanilla, players who die are rewarded with 100% nutrition/Hydration stats. " +
                 "This issue is even proeminent with the Plants and Nutrition mod because the mod considerably increases the amount of Nutrition/Hydration a player " +
-                "can have. " +
+                "can have in his body. " +
                 "If this option is set to true, characters who die will respawn with nutrition and hydration proportional to the days past in the save. The mod will take into account " +
                 "the difficulty of the save, the maxNutritionStorage, the current day and other factors and try to \"Guess\" what your hydration/nutrition should be. For example, on a Normal " +
-                "difficulty save, default mod values and sun/orbit in 2, your character will have 10 days worth of food, and will loose 10% food each day. If you die on day 6, the mod " +
+                "difficulty save, default mod values and sun/orbit in 2, your character will have 10 days worth of food, and will loose ~10% food each day. If you die on day 6, the mod " +
                 "will respawn the player with 40% food, because that's what your initial nutrition should approximately be. After day 10, dead characters will respawn with minimal food, " +
                 "just enough to run to the pantry room to eat something. " +
                 "If set to false, the Vanilla behaviour will be kept so, after death, you will always respawn with full nutrition/hydration.");
@@ -411,8 +411,9 @@ namespace PlantsnNutritionRebalance.Scripts
                 "CustomNewPlayerRespawn", // The key of the configuration option in the configuration file
                 false,
                 "This option control if new players who never played on the save should join with nutrition/hydration proportional to the days past in the save or with custom food amounts set " +
-                "in CustomNewPlayerRespawnNutrition and CustomNewPlayerRespawnHydration. If set to false, when new players join, they will respawn with food proportional to the days past in the " +
-                "save. You'll want to enable this option mostly on dedicated servers where new players will join and start playing after the server is running for a long time, on saves where each " +
+                "in CustomNewPlayerRespawnNutrition and CustomNewPlayerRespawnHydration options below. If set to false, when new players join, they will respawn with food proportional to the days " +
+                "past in the " +
+                "save. You'll want to enable this option mostly on dedicated servers where new players will join and start playing after the server is running for a long time, or saves where each " +
                 "player make separated bases, and you want them to join with full food but still penalize them if they die. " +
                 "This option only work if EnableRespawnPenaltyLogic is also true, otherwise everyone will always respawn with 100% nutrition/hydration.");
             CustomNewPlayerRespawn = configCustomNewPlayerRespawn.Value;
@@ -442,7 +443,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 "EnableFoodHydration", // The key of the configuration option in the configuration file
                 true,
                 "This option activate/deactivate the mod function to make some food give back hydration. If set to true, some foods will give/remove hydration based on the amount set " +
-                "for each food in the values below. If set to false,this system will be disabled and you'll get vanilla behaviour where foods gives only nutrition. The extra food hydration " +
+                "for each food in the Hydration values below. If set to false,this system will be disabled and you'll get vanilla behaviour where foods gives only nutrition. The extra food hydration " +
                 "given is calculated based on the amount of nutrition eaten from the food. Note that if the hydration is full, the character will not gain any extra hydration and, if the Hydration " +
                 "value is negative, you'll loose hydration (think about eating French Fries full of salt).");
             EnableFoodHydration = configEnableFoodHydration.Value;
@@ -451,9 +452,9 @@ namespace PlantsnNutritionRebalance.Scripts
                 "TomatoSoupNutrition", 
                 135f, 
                 "Amount of Nutrition given by eating Tomato Soup. Needs to be a positive value between 1 and 10000. NOTE: Before changing the nutrition each food gives, you should " +
-                "remember that, by changing this nutrition amount, you'll probably break the nutrition balance between the plant needed to make this food and other plants. For example," +
+                "remember that, by changing just some foods nutrition amount, you'll probably break the nutrition balance between the plant needed to make this food and other plants. For example," +
                 "if you choose to double the nutrition given by Tomato Soup, you'll need half of the amount of tomato plants growing in your greenhouse to feed each player compared to " +
-                "other plants/foods. So if you decide to change a single food nutrition, you'll should change all foods to retain the nutritional balance of plants if you want to retain balance. " +
+                "other plants/foods. So if you decide to change a single food nutrition, you'll should change all foods if you want to retain the nutritional balance of plants. " +
                 "The default values of food nutrition used in this mod aims to create the need for ~15 plants growing continuoulsy to feed each player so, before changing any " +
                 "food values, it's strongly advisable to test the new values in the mod spreadsheet available at <spreadsheetlink> to check how the change will impact the balance and " +
                 "the amount of plants you need to grow continuoulsy.");
