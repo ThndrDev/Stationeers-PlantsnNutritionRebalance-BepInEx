@@ -224,6 +224,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 ModLog.Debug("Human-OnLifeCreated: NormalizedMaxHydrationDays: " + NormalizedMaxHydrationDays + " hydrationLossPerTick: " + hydrationLossPerTick + " HydrationRate: " +
                     HydrationRate);
                 float HydrationSlicePerDay = ConfigFile.MaxHydrationStorage / NormalizedMaxHydrationDays;
+                ModLog.Debug("Human-OnLifeCreated: HydrationSlicePerDay: " + HydrationSlicePerDay);
                 float HydrationToGive;
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
@@ -238,7 +239,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
                 else
                 {
-                    HydrationToGive = ConfigFile.MaxHydrationStorage / 95; //give a little more than 1% water
+                    HydrationToGive = ConfigFile.MaxHydrationStorage / 93; //give a little more than 1% water
                     ModLog.Info("Human-OnLifeCreated: Minimal Hydration given for respawing player after " + WorldManager.DaysPast + " days passed: " + HydrationToGive);
                 }
                 Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);

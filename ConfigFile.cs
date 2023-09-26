@@ -455,7 +455,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 "remember that, by changing just some foods nutrition amount, you'll probably break the nutrition balance between the plant needed to make this food and other plants. For example," +
                 "if you choose to double the nutrition given by Tomato Soup, you'll need half of the amount of tomato plants growing in your greenhouse to feed each player compared to " +
                 "other plants/foods. So if you decide to change a single food nutrition, you'll should change all foods if you want to retain the nutritional balance of plants. " +
-                "The default values of food nutrition used in this mod aims to create the need for ~15 plants growing continuoulsy to feed each player so, before changing any " +
+                "The default values of food nutrition used in this mod aims to create the need for 15 plants growing continuoulsy to feed each player so, before changing any " +
                 "food values, it's strongly advisable to test the new values in the mod spreadsheet available at <spreadsheetlink> to check how the change will impact the balance and " +
                 "the amount of plants you need to grow continuoulsy.");
             TomatoSoupNutrition = Mathf.Clamp(configTomatoSoupNutrition.Value, 1f, 10000f);
