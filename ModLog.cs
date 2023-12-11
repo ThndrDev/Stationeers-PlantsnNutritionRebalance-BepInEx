@@ -1,7 +1,4 @@
-﻿using System;
-
-
-namespace PlantsnNutritionRebalance.Scripts
+﻿namespace PlantsnNutritionRebalance.Scripts
 {
     internal class ModLog
     {
@@ -13,7 +10,7 @@ namespace PlantsnNutritionRebalance.Scripts
             }
         }
 
-        public static void Error(Exception line)
+        public static void Error(System.Exception line)
         {
             UnityEngine.Debug.LogError("[PlantsnNutritionRebalance]: Exception :");
             UnityEngine.Debug.LogException(line);

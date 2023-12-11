@@ -9,6 +9,7 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Atmospherics;
 using System.Reflection;
 using System;
+using Assets.Scripts.Networking;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -73,6 +74,45 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
+    //In the Rocket update, they ditched the nice and beautiful MaxHydrationValue parameter and
+    //for some reason, decided to hardcode the previous value (5f) everywhere. Even in the game interface.
+    //So, what was done in 1 line, now needs 2 patches:
+
+    //1 - Entity Hydration patch: Remove the hardcoded clamp restriction in Entity.Hydration 
+    [HarmonyPatch(typeof(Entity))]
+    public static class HydrationPatch
+    {
+        [HarmonyPatch("set_Hydration")]
+        [HarmonyPrefix]
+        [UsedImplicitly]
+        public static bool HydrationSetPatch(Thing __instance, float value, ref float ____hydration)
+        {
+            ____hydration = Mathf.Clamp(value, 0, ConfigFile.MaxHydrationStorage);
+
+            if (NetworkManager.IsServer)
+            {
+                __instance.NetworkUpdateFlags |= 1024;
+            }
+            return false; // Skip the original method
+        }
+    }
+    // 2 - PlayerStateWindow Update patch: Change the hardcoded max Hydration value in the UI
+    [HarmonyPatch(typeof(PlayerStateWindow))]
+    public static class PlayerStateWindowPatches
+    {
+        [HarmonyPatch("Update")]
+        [HarmonyPostfix]
+        [UsedImplicitly]
+        static public void PlayerStateWindowPatch(PlayerStateWindow __instance, StateInstance ____hydrationState)
+        {
+            if (!__instance.IsVisible || !__instance.Parent)
+            {
+                return;
+            }
+            ____hydrationState.UpdateText((int)(__instance.Parent.Hydration / ConfigFile.MaxHydrationStorage * 100f));
+        }
+    }
+
     [HarmonyPatch(typeof(Human))]
     public static class HumanPatches
     {
@@ -80,11 +120,10 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPatch("Awake")]
         [HarmonyPostfix]
         [UsedImplicitly]
-        static public void HydrationAndWarningsPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ____hydrationLossPerTick)
+        static public void HydrationAndWarningsPatch(Human __instance, ref float ____hydrationLossPerTick)
         {
-            ___MaxHydrationStorage = ConfigFile.MaxHydrationStorage;
             float hydrationLoss;
-            switch (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate)
+            switch (DifficultySetting.Current.HydrationRate.Value)
             {
                 case 1.5f: //stationeers difficulty, full water will last 100 game minutes (2 and a half days)
                     hydrationLoss = 0.0019446f;
@@ -99,7 +138,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     hydrationLoss = 0f;
                     break;
                 default: // if it's none of the above, will try to calculate hydrationLossPerTick based on DifficultySetting.HydrationRate:
-                    float a = Mathf.InverseLerp(0.0001f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
+                    float a = Mathf.InverseLerp(0.0001f, 3f, DifficultySetting.Current.HydrationRate.Value);
                     hydrationLoss = Mathf.Lerp(0.001507065f, 0.002382135f, a);
                     break;
             }
@@ -130,7 +169,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static bool MetabolismRatePatch(Human __instance)
         {
             float NutritionLossPerTick;
-            switch (WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate)
+            switch (DifficultySetting.Current.HungerRate.Value)
             {
                 case 1.5f: //stationeers difficulty, character food will last 8 game days
                     NutritionLossPerTick = 0.104167f;
@@ -148,15 +187,19 @@ namespace PlantsnNutritionRebalance.Scripts
                          // Difficulty in 3 should give 0.208334f, will last 4 game days 
                          // Difficulty in 2.25 should give 0.1562505f, will last 6 game days
                          // Difficulty in 0.001 should give 0.055555f, will last 14 days
-                    float hungerdifficulty = Mathf.InverseLerp(0f, 3f, WorldManager.CurrentWorldSetting.DifficultySetting.HungerRate);
+                    float hungerdifficulty = Mathf.InverseLerp(0f, 3f, DifficultySetting.Current.HungerRate.Value);
                     NutritionLossPerTick = Mathf.Lerp(0.055555f, 0.208334f, hungerdifficulty);
                     break;
             }
             // Save the last NutritionLossPerTick, to be used on the player respawn patch
             LastNutritionLossPerTick = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick;
 
-            // Complete rewrite of base method Human.LifeNutrition
-            float num = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick * (__instance.OrganBrain.IsOnline ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.LifeFunctionLoggedOut);
+            // Rewrite of base method Human.LifeNutrition
+            float num = ConfigFile.NutritionLossMultiplier * NutritionLossPerTick * ((__instance.OrganBrain != null && __instance.OrganBrain.IsOnline) ? 1f : DifficultySetting.Current.OfflineMetabolism);
+            if (__instance.IsSleeping)
+            {
+                num *= 0.5f;
+            }
             __instance.Nutrition -= num;
             // Entity.LifeNutrition
             if (__instance.IsArtificial)
@@ -168,7 +211,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 __instance.DamageState.Damage(ChangeDamageType.Increment, 0.2f, DamageUpdateType.Starvation);
                 return false;
             }
-            if (__instance.DamageState.Starvation > 0f && __instance.Nutrition >= 400f) // Only heals the character when nutrition is over 400 (after "Nutrition Critical" warning)
+            if (__instance.DamageState.Starvation > 0f && __instance.Nutrition >= __instance.CriticalNutrition) // Only heals the character when nutrition is over "Nutrition Critical" warning.
             {
                 __instance.DamageState.Damage(ChangeDamageType.Decrement, 0.1f, DamageUpdateType.Starvation);
             }
@@ -179,15 +222,17 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPatch("OnLifeCreated")]
         [HarmonyPostfix]
         [UsedImplicitly]
-        private static void RespawnPatch(Human __instance, ref float ___MaxHydrationStorage, ref float ____hydrationLossPerTick, ref bool isRespawn)
+        private static void RespawnPatch(Human __instance, ref float ____hydrationLossPerTick, ref bool isRespawn)
         {
+            float HydrationToGive;
+
             if (ConfigFile.EnableRespawnPenaltyLogic)
             {
-                // Then, get how long in days the max nutrition should last with the current configuration parameters
+                // Get how long in days the max nutrition should last with the current configuration parameters
                 int NormalizedMaxHungerDays = Mathf.RoundToInt(ConfigFile.MaxNutritionStorage / (LastNutritionLossPerTick==0f ? 0.083333f : LastNutritionLossPerTick) / 2 / 60 / 
-                    (20 * Settings.CurrentData.SunOrbitPeriod));
+                    ((float)Settings.CurrentData.DayLength));
                 ModLog.Debug("Human-OnLifeCreated: NormalizedMaxHungerDays: " + NormalizedMaxHungerDays + " ConfigFile.MaxNutritionStorage: " + ConfigFile.MaxNutritionStorage +
-                             " LastNutritionLossPerTick:" + LastNutritionLossPerTick + " Settings.CurrentData.SunOrbitPeriod: " + Settings.CurrentData.SunOrbitPeriod);
+                             " LastNutritionLossPerTick:" + LastNutritionLossPerTick + " Settings.CurrentData.DayLength: " + (float)Settings.CurrentData.DayLength);
                 // Then, calculate a nutrition slice for each day
                 float NutritionSlicePerDay = ConfigFile.MaxNutritionStorage / NormalizedMaxHungerDays;
                 ModLog.Debug("Human-OnLifeCreated: NutritionSlicePerDay: " + NutritionSlicePerDay);
@@ -218,14 +263,13 @@ namespace PlantsnNutritionRebalance.Scripts
                 //Make sure we don't get values with 0 so they don't break the division from NormalizedMaxHydrationDays
                 //for hydrationLossPerTick
                 float hydrationLossPerTick = (____hydrationLossPerTick == 0f ? 0.001798755f : ____hydrationLossPerTick);
-                float HydrationRate = (WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate == 0f ? 1f : WorldManager.CurrentWorldSetting.DifficultySetting.HydrationRate);
-                int NormalizedMaxHydrationDays = Mathf.RoundToInt(___MaxHydrationStorage / ((hydrationLossPerTick + hydrationLossPerTick * 0.2f) * HydrationRate)  / 2 / 60 /
-                    (20 * Settings.CurrentData.SunOrbitPeriod));
+                float HydrationRate = (DifficultySetting.Current.HydrationRate.Value == 0f ? 1f : DifficultySetting.Current.HydrationRate.Value);
+                int NormalizedMaxHydrationDays = Mathf.RoundToInt(ConfigFile.MaxHydrationStorage / ((hydrationLossPerTick + hydrationLossPerTick * 0.2f) * HydrationRate)  / 2 / 60 /
+                    ((float)Settings.CurrentData.DayLength));
                 ModLog.Debug("Human-OnLifeCreated: NormalizedMaxHydrationDays: " + NormalizedMaxHydrationDays + " hydrationLossPerTick: " + hydrationLossPerTick + " HydrationRate: " +
                     HydrationRate);
                 float HydrationSlicePerDay = ConfigFile.MaxHydrationStorage / NormalizedMaxHydrationDays;
                 ModLog.Debug("Human-OnLifeCreated: HydrationSlicePerDay: " + HydrationSlicePerDay);
-                float HydrationToGive;
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
@@ -242,8 +286,14 @@ namespace PlantsnNutritionRebalance.Scripts
                     HydrationToGive = ConfigFile.MaxHydrationStorage / 93; //give a little more than 1% water
                     ModLog.Info("Human-OnLifeCreated: Minimal Hydration given for respawing player after " + WorldManager.DaysPast + " days passed: " + HydrationToGive);
                 }
-                Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);
             }
+            else
+            {
+                //Respawn Penalty logic disabled, give full nutrition and hydration to the player:
+                __instance.Nutrition = ConfigFile.MaxNutritionStorage;
+                HydrationToGive = ConfigFile.MaxHydrationStorage;
+            }
+            Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);
         }
     }
 
