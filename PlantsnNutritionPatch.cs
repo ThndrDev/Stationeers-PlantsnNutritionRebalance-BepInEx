@@ -74,45 +74,6 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-    //In the Rocket update, they ditched the nice and beautiful MaxHydrationValue parameter and
-    //for some reason, decided to hardcode the previous value (5f) everywhere. Even in the game interface.
-    //So, what was done in 1 line, now needs 2 patches:
-
-    //1 - Entity Hydration patch: Remove the hardcoded clamp restriction in Entity.Hydration 
-    [HarmonyPatch(typeof(Entity))]
-    public static class HydrationPatch
-    {
-        [HarmonyPatch("set_Hydration")]
-        [HarmonyPrefix]
-        [UsedImplicitly]
-        public static bool HydrationSetPatch(Thing __instance, float value, ref float ____hydration)
-        {
-            ____hydration = Mathf.Clamp(value, 0, ConfigFile.MaxHydrationStorage);
-
-            if (NetworkManager.IsServer)
-            {
-                __instance.NetworkUpdateFlags |= 1024;
-            }
-            return false; // Skip the original method
-        }
-    }
-    // 2 - PlayerStateWindow Update patch: Change the hardcoded max Hydration value in the UI
-    [HarmonyPatch(typeof(PlayerStateWindow))]
-    public static class PlayerStateWindowPatches
-    {
-        [HarmonyPatch("Update")]
-        [HarmonyPostfix]
-        [UsedImplicitly]
-        static public void PlayerStateWindowPatch(PlayerStateWindow __instance, StateInstance ____hydrationState)
-        {
-            if (!__instance.IsVisible || !__instance.Parent)
-            {
-                return;
-            }
-            ____hydrationState.UpdateText((int)(__instance.Parent.Hydration / ConfigFile.MaxHydrationStorage * 100f));
-        }
-    }
-
     [HarmonyPatch(typeof(Human))]
     public static class HumanPatches
     {
