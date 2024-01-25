@@ -9,7 +9,6 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Atmospherics;
 using System.Reflection;
 using System;
-using Assets.Scripts.Networking;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -205,7 +204,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 // apply the desired amount of food for the new character
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
-                    __instance.Nutrition = ConfigFile.CustomNewPlayerRespawnNutrition;
+                    __instance.Nutrition = ConfigFile.CustomNewPlayerRespawnNutrition * (ConfigFile.MaxNutritionStorage / 100f);
                     ModLog.Info("Human-OnLifeCreated: Nutrition given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 // If it's a respawn and the DaysPastNorm is lower than the NormalizedMaxHungerDays, that means we should calculate the amount of food to give to the respawning character
@@ -233,7 +232,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 ModLog.Debug("Human-OnLifeCreated: HydrationSlicePerDay: " + HydrationSlicePerDay);
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
-                    HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration;
+                    HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration * (ConfigFile.MaxHydrationStorage / 100f);
                     ModLog.Info("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 else if (WorldManager.DaysPast < NormalizedMaxHydrationDays)
