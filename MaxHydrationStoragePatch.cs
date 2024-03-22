@@ -4,18 +4,8 @@ using Assets.Scripts.UI;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
-using Assets.Scripts.Objects.Entities;
-using Assets.Scripts.UI;
-using HarmonyLib;
-using JetBrains.Annotations;
-using UnityEngine;
-using Assets.Scripts.Objects.Items;
-using Assets.Scripts.Serialization;
 using Assets.Scripts.Objects;
-using Assets.Scripts.Atmospherics;
-using System.Reflection;
-using System;
-using Assets.Scripts.Networking;
+using Objects.Structures;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -35,7 +25,7 @@ namespace PlantsnNutritionRebalance.Scripts
             [UsedImplicitly]
             public static bool HydrationSetPatch(Thing __instance, float value, ref float ____hydration)
             {
-                ____hydration = Mathf.Clamp(value, 0, ConfigFile.MaxHydrationStorage);
+                ____hydration = Mathf.Clamp(value, 0, ConfigFile.MaxHydrationStorage * 1.75f);
 
                 if (NetworkManager.IsServer)
                 {
@@ -43,8 +33,19 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 return false; // Skip the original method
             }
+
+            //2 - Patch for the ENtity GetHydrationStorage multiplier. Added in the "Shelter in Space" update
+            [HarmonyPatch("GetHydrationStorage")]
+            [HarmonyPostfix]
+            [UsedImplicitly]
+            static public void GetHydrationStoragePatch(Entity __instance, ref float __result)
+            {
+                // Adjusts the max food of the character:
+                __result = ConfigFile.MaxHydrationStorage * __instance.GetFoodQualityMultiplier();
+            }
         }
-        // 2 - PlayerStateWindow Update patch: Change the hardcoded max Hydration value in the UI
+
+        // 3 - PlayerStateWindow Update patch: Change the hardcoded max Hydration value in the UI
         [HarmonyPatch(typeof(PlayerStateWindow))]
         public static class PlayerStateWindowPatches
         {
@@ -59,40 +60,6 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 ____hydrationState.UpdateText((int)(__instance.Parent.Hydration / ConfigFile.MaxHydrationStorage * 100f));
             }
-        }
-
-        // 3 - HydrationBase HydrateAmount patch: Change the hardcoded max Hydration value in the HydrationBase
-        [HarmonyPatch(typeof(HydrationBase))]
-        public static class HydrationBasePatches
-        {
-            [HarmonyPatch("HydrateAmount")]
-            [HarmonyPrefix]
-            [UsedImplicitly]
-            public static bool HydrateAmountPatch(Entity consumer, HydrationBase __instance, ref float __result)
-            {
-                if (__instance.HydrationValue == 0f)
-                {
-                    __result = __instance.Quantity; // .Quantity;                    
-                }
-                __result = Mathf.Min((ConfigFile.MaxHydrationStorage - consumer.Hydration) / __instance.HydrationValue, __instance.Quantity);
-                return false; // Skip the original method
-            }
-
-            /*
-            // 4 - HydrationBase OnUseSecondary patch: Change the hardcoded max hydration value
-            [HarmonyPatch("OnUseSecondary")]
-            [HarmonyPrefix]
-            [UsedImplicitly]
-            public static bool OnUseSecondaryPatch(HydrationBase __instance, ref bool __result, bool ___doAction = false, float ___actionCompletedRatio = 1f)
-            {
-                Human human = __instance.RootParent as Human;
-                if (human == null || Math.Abs(ConfigFile.MaxHydrationStorage - human.Hydration) < 0.005f || __instance.Quantity <= 0f)
-                {
-                    __result = __instance.Item.OnUseSecondary(___doAction, ___actionCompletedRatio);
-                    return false; // skip the original method
-                }
-                return true; // run the original method
-            }*/
         }
     }
 }

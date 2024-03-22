@@ -12,9 +12,6 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configPlantWaterConsumptionLimit;
         private static ConfigEntry<float> configPlantWaterTranspirationPercentage;
 
-        //Fog
-        private static ConfigEntry<float> configAtmosphereFogThreshold;
-
         //Character
         private static ConfigEntry<float> configNutritionLossMultiplier;
         private static ConfigEntry<float> configHydrationLossMultiplier;
@@ -145,7 +142,6 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
         public static float PlantWaterTranspirationPercentage;
-        public static float AtmosphereFogThreshold;
         public static float NutritionLossMultiplier;
         public static float HydrationLossMultiplier;
         public static float MaxNutritionStorage;
@@ -306,17 +302,6 @@ namespace PlantsnNutritionRebalance.Scripts
                  "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration."); // Description of the option to show in the config file
 
             PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);
-
-
-            //Liquid Fog Section
-            configAtmosphereFogThreshold = PnN.Config.Bind("2 - Fog Configuration", // The section under which the option is shown 
-                 "AtmosphereFogThreshold",  // The key of the configuration option in the configuration file
-                 1f, // The default value
-                 "Set the minimum amount of moles needed to start showing the fog effect in the atmosphere. The Vanilla behaviour is to show the effect when there's any " +
-                 "amount of liquid in atmosphere thus making any greenhouse who have plants transpirating water to always look foggy. Also note that this setting will affect the fog " +
-                 "visualization for *ALL* liquids in the atmosphere, not just water. Must be a float number between 0 and 100. Setting this to 0 will keep the Vanilla effect."); // Description of the option to show in the config file
-
-            AtmosphereFogThreshold = Mathf.Clamp(configAtmosphereFogThreshold.Value, 0f, 1000f);
 
 
             //Character configuration section
@@ -1116,7 +1101,7 @@ namespace PlantsnNutritionRebalance.Scripts
             configEggMaximumTemperatureToHatch = PnN.Config.Bind("6 - Egg Configuration",
                 "EggMaximumTemperatureToHatch",
                 311.65f,
-                "The value in celsius for the maximum temperature range that eggs should hatch. The default values are the RL value needed to hatch eggs. " +
+                "The value in kelvin for the maximum temperature range that eggs should hatch. The default values are the RL value needed to hatch eggs. " +
                 "Needs to be a positive value between 273.15 and 323.15 and also needs to be BIGGER than EggMinimumTemperatureToHatch.");
             EggMaximumTemperatureToHatch = Mathf.Clamp(configEggMaximumTemperatureToHatch.Value, EggMinimumTemperatureToHatch, 323.15f);
 

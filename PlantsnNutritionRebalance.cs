@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.3.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.4.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;

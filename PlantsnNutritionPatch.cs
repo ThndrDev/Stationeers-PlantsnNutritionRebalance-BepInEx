@@ -9,6 +9,7 @@ using Assets.Scripts.Objects;
 using Assets.Scripts.Atmospherics;
 using System.Reflection;
 using System;
+using Objects.Structures;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
@@ -30,30 +31,6 @@ namespace PlantsnNutritionRebalance.Scripts
                 float waterenergy = watertotranspirate * Chemistry.SpecificHeat(Chemistry.GasType.Water) * __instance.ParentTray.WaterAtmosphere.Temperature;
                 gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspirate, waterenergy)), AtmosphereHelper.MatterState.All);
                 __instance.BreathingAtmosphere.Add(gasMixture);
-            }
-        }
-    }
-
-    // Patch the atmosphere fog:
-    [HarmonyPatch(typeof(AtmosphericFog))]
-    public class AtmosphericFogPatch
-    {
-        [HarmonyPatch("get_IsValid")]
-        [UsedImplicitly]
-        [HarmonyPrefix]
-        public static bool PatchAtmosphericFog(AtmosphericFog __instance, ref bool __result)
-        {
-            if (ConfigFile.AtmosphereFogThreshold == 0f)
-                return true; //user don't want to change the Fog Threshold, so keep the Vanilla method
-            else
-            {
-                // Get the private Atmosphere property using reflection
-                var atmosphereProp = typeof(AtmosphericFog).GetProperty("Atmosphere", BindingFlags.NonPublic | BindingFlags.Instance);
-                // Get the value of the Atmosphere property for this instance of AtmosphericFog
-                var atmosphere = (Atmosphere)atmosphereProp.GetValue(__instance);
-                // Change the AtmosphereFog Moles threshold:
-                __result = atmosphere != null && atmosphere.GasMixture.TotalMolesLiquids > ConfigFile.AtmosphereFogThreshold && atmosphere.Mode == AtmosphereHelper.AtmosphereMode.World;
-                return false; // then skip the vanilla method
             }
         }
     }
@@ -112,10 +89,10 @@ namespace PlantsnNutritionRebalance.Scripts
         }
 
 
-        [HarmonyPatch("get_MaxNutritionStorage")]
+        [HarmonyPatch("get_BaseNutritionStorage")]
         [HarmonyPostfix]
         [UsedImplicitly]
-        static public void MaxNutritionPatch(ref float __result)
+        static public void BaseNutritionStoragePatch(ref float __result)
         {
             // Adjusts the max food of the character:
             __result = ConfigFile.MaxNutritionStorage;
@@ -255,6 +232,20 @@ namespace PlantsnNutritionRebalance.Scripts
             }
             Traverse.Create(__instance).Property("Hydration").SetValue(HydrationToGive);
         }
+    }
+
+    // Adjusts the time taken to drink in the fountain
+    [HarmonyPatch(typeof(StructureDrinkingFountain))]
+    public static class StructureDrinkingFountainPatch
+    {
+        [HarmonyPatch("HydrateTime")]
+        [HarmonyPostfix]
+        [UsedImplicitly]
+        public static void HydrationSetPatch(ref float __result)
+        {
+            __result = __result * 0.1f;
+        }
+
     }
 
     public static class FoodsValues
