@@ -22,7 +22,7 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPostfix]
         public static void TakePlantDrinkPatch(Plant __instance, ref float __result)
         {
-            if (ConfigFile.PlantWaterTranspirationPercentage == 0)
+            if (ConfigFile.PlantWaterTranspirationPercentage == 0 || __instance.ParentTray.WaterAtmosphere == null)
                 return;
             else
             {
