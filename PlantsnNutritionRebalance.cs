@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.4.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.5.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -36,8 +36,8 @@ namespace PlantsnNutritionRebalance.Scripts
         {
             //plant & seed
             private static int[] cornStages = { 1, 1600, 2400, 3200, 2400, 2400, -1, 0 }; //258339687 & -1290755415
-            private static int[] tomatoStages = { 1, 1600, 3200, 4800, 4800, 2400, -1, 0 }; //-998592080 & -1922066841
-            private static int[] pumpkinStages = { 1, 2400, 4800, 4800, 9600, 2400, -1, 0 }; //1277828144 & 1423199840
+            private static int[] tomatoStages = { 1, 1600, 3200, 4800, 4800, 7200, -1, 0 }; //-998592080 & -1922066841
+            private static int[] pumpkinStages = { 1, 2400, 4800, 4800, 9600, 7200, -1, 0 }; //1277828144 & 1423199840
             private static int[] riceStages = { 1, 2400, 3200, 4000, 2400, -1, 0 }; //658916791 & -1691151239
             private static int[] soyStages = { 1, 2400, 2400, 2400, 2400, -1, 0 }; //1924673028 & 1783004244
             private static int[] fernStages = { 1, 1200, 1600, 2000, 1200, -1, 0 }; //892110467 & -1990600883

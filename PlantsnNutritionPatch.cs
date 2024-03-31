@@ -487,9 +487,9 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         [UsedImplicitly]
         [HarmonyPrefix]
-        public static bool PatchFertilizedEgg(FertilizedEgg __instance)
+        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable)
         {
-            if (__instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && __instance.WorldAtmosphere.PressureGasses <= ConfigFile.EggMaximumPressureToHatch && __instance.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && __instance.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
+            if (____viable && __instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && __instance.WorldAtmosphere.PressureGasses <= ConfigFile.EggMaximumPressureToHatch && __instance.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && __instance.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
             {
                 if (__instance.ParentSlot != null && __instance.ParentSlot.Occupant)
                 {
@@ -552,8 +552,9 @@ namespace PlantsnNutritionRebalance.Scripts
         private static PassiveTooltip PatchFertilizedEggTooltip(PassiveTooltip __result, DynamicThing __instance)
         {
             if (__instance is FertilizedEgg fertilizedEgg)
-            {
-                __result.Extended = getTooltipText(fertilizedEgg);
+            {           
+                if (Traverse.Create(__instance).Field("_viable").GetValue<bool>())
+                __result.Extended += getTooltipText(fertilizedEgg);
             }
             return __result;
         }
@@ -568,7 +569,7 @@ namespace PlantsnNutritionRebalance.Scripts
                     //Good enviroment, but inside a Slot.
                     return text;
                 }
-                if (fertilizedEgg.HatchTime >= 2400f)
+                if (fertilizedEgg.HatchTime >= ConfigFile.EggNearHatching)
                     text = string.Format("The Egg <color=green>is hatching</color>\n");
                 else
                     text = string.Format("The Egg <color=green>is almost hatching </color>\nThe chick <color=green>is trying to pip the shell</color>");
