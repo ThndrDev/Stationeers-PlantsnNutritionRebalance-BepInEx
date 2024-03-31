@@ -48,6 +48,19 @@ namespace PlantsnNutritionRebalance.Scripts
             if (__result > ConfigFile.PlantWaterConsumptionLimit)
                 __result = ConfigFile.PlantWaterConsumptionLimit;
         }
+
+        //Patch perennial plants to yield only 1 or 2 fruits max
+        [HarmonyPatch("SetHarvestQuantityOnMature")]
+        [UsedImplicitly]
+        [HarmonyPostfix]
+        public static void PlantAwakePatch(PlantLifeRequirements __instance)
+        {
+            if (__instance.Plant.PrefabHash == -998592080 || __instance.Plant.PrefabHash == 1277828144) //Tomato or pumpkin
+            {
+                __instance.Plant.HarvestQuantity = __instance.Plant.IsFertilized ? 3 : 1;
+                __instance.Plant.IsFertilized = false;
+            }
+        }
     }
 
     [HarmonyPatch(typeof(Human))]
