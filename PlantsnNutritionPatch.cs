@@ -465,11 +465,11 @@ namespace PlantsnNutritionRebalance.Scripts
                             ModLog.Debug("Item-OnUseItem: item Name: " + __instance.DisplayName + " total Hydrate value got when considering the food quantity: " + hydrate);
                             if (hydrate > 0f)
                             {
-                                float humanHydrationtoFill = ConfigFile.MaxHydrationStorage - human.Hydration;
+                                float humanHydrationtoFill = ConfigFile.MaxHydrationStorage * human.GetFoodQualityMultiplier() - human.Hydration;
                                 if (hydrate > humanHydrationtoFill)
                                 {
                                     hydrate = Mathf.Clamp(hydrate, 0f, humanHydrationtoFill);
-                                    ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's positive and bigger than the amount available to fill 100%. hydrate: " + hydrate);
+                                    ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's positive and bigger than the amount available to fill " + human.GetFoodQualityMultiplier()*100f + "%. hydrate: " + hydrate);
                                 }
                             }
                             else if (hydrate < 0f)
