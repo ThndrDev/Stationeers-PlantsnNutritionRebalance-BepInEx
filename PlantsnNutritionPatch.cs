@@ -500,22 +500,36 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         [UsedImplicitly]
         [HarmonyPrefix]
-        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable)
+        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable, float ____minViableTemp)
         {
-            if (____viable && __instance.HasAtmosphere == true && __instance.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && __instance.WorldAtmosphere.PressureGasses <= ConfigFile.EggMaximumPressureToHatch && __instance.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && __instance.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
+            if (!____viable || __instance.ParentSlot != null || !__instance.HasAtmosphere)
+                return false;
+
+            Atmosphere worldAtmosphere = __instance.WorldAtmosphere;
+            float worldpressure = worldAtmosphere.PressureGasses;
+            float worldtemperature = worldAtmosphere.Temperature;
+
+            // Make egg unviable if tme temperature is below viable temp (10°C)
+            if (worldtemperature < ____minViableTemp)
             {
-                if (__instance.ParentSlot != null && __instance.ParentSlot.Occupant)
-                {
-                    //Good enviroment, but in Slot so don't hatch
-                    return false;
-                }
+                __instance.MakeUnviable();
+                return false;
+            }
+
+            if (worldpressure >= ConfigFile.EggMinimumPressureToHatch &&
+                worldpressure <= ConfigFile.EggMaximumPressureToHatch &&
+                worldtemperature >= ConfigFile.EggMinimumTemperatureToHatch &&
+                worldtemperature < ConfigFile.EggMaximumTemperatureToHatch)
+            {
                 //Good enviroment, Hatching.
                 __instance.HatchTime -= 0.5f;
                 //If it's near hatching, then randomly move the egg to simulate the chick trying to pip the shell.
-                if (__instance.HatchTime < ConfigFile.EggNearHatching)
+                if (__instance.HatchTime < ConfigFile.EggNearHatching && UnityEngine.Random.value > 0.9f)
                 {
-                    if (UnityEngine.Random.Range(0f, 10f) > 9)
-                        __instance.RigidBody.AddForce(new Vector3(UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f), UnityEngine.Random.Range(-10f, 10f)));
+                    Vector3 randomForce = new Vector3(UnityEngine.Random.Range(-10f, 10f),
+                                                      UnityEngine.Random.Range(-10f, 10f),
+                                                      UnityEngine.Random.Range(-10f, 10f));
+                    __instance.RigidBody.AddForce(randomForce);
                 }
                 if (__instance.HatchTime <= 0f)
                 {
@@ -577,7 +591,7 @@ namespace PlantsnNutritionRebalance.Scripts
             string text = "";
             if (fertilizedEgg.HasAtmosphere == true && fertilizedEgg.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && fertilizedEgg.WorldAtmosphere.PressureGasses < ConfigFile.EggMaximumPressureToHatch && fertilizedEgg.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && fertilizedEgg.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
             {
-                if (fertilizedEgg.ParentSlot != null && fertilizedEgg.ParentSlot.Occupant)
+                if (fertilizedEgg.ParentSlot != null && fertilizedEgg.ParentSlot.Get())
                 {
                     //Good enviroment, but inside a Slot.
                     return text;
