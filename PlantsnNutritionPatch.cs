@@ -474,11 +474,20 @@ namespace PlantsnNutritionRebalance.Scripts
                             }
                             else if (hydrate < 0f)
                             {
-                                if (hydrate * -1f > human.Hydration)
+                                ModLog.Debug("Item-OnUseItem: hydrate " + hydrate);
+                                ModLog.Debug("Item-OnUseItem: human.Hydration " + human.Hydration);
+
+                                if (hydrate * -1f > human.Hydration || (human.Hydration == 0f && hydrate < 0 ))
                                 {
-                                    hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);
-                                    ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's negative and the hydration avaliable in the character is lower than the amount the food will remove. dehydrate amount: " + hydrate);
+                                    //a.ln(-x)+b
+                                    float a = 1.2f;// Inclination of function curve if you increase will be more incrinate, increase more it will make the difference between negative hygratation values removing more life, already decreasing it will make the difference between smaller values removing less life making them closer
+                                    float b = 20.0f;// vertical displacement, if you increase all value will be more 
+                                    float lifelost = a * Mathf.Log(-hydrate) + b;
+                                    human.DamageState.Damage(ChangeDamageType.Increment, lifelost, DamageUpdateType.Starvation);
+                                    ModLog.Debug("Item-OnUseItem: you lost life that does not have water in your body, you are dehydrated! eating foods that make the situation worse will kill you. life lost amount: " + lifelost);
                                 }
+                                ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's negative and the hydration avaliable in the character is lower than the amount the food will remove. dehydrate amount: " + hydrate);
+                                hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);
                             }
                             ModLog.Info("Item-OnUseItem: Final hydration got/lost from eating " + __instance.DisplayName + ": " + hydrate);
                             human.Hydrate(hydrate);

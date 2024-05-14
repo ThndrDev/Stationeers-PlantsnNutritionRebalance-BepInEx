@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.9.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.10.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -43,6 +43,10 @@ namespace PlantsnNutritionRebalance.Scripts
             private static int[] fernStages = { 1, 1200, 1600, 2000, 1200, -1, 0 }; //892110467 & -1990600883
             private static int[] potatoStages = { 1, 1200, 2400, 2400, 1200, -1, 0 }; //1929046963 & 1005571172
             private static int[] wheatStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; //-1057658015 & -654756733
+            private static int[] CocoaTreeStages = { 1, 2400, 4800, 4800, 9600, 2400, -1, 0 };// 680051921 1139887531 
+            private static int[] SugarCaneStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; // -1335056202 -1884103228
+            private static int[] mushroomStages = { 1, 1200, 2400, 2400, 1200, -1, 0 }; //2044798572 311593418
+
 
             private static int[] flowerStages = { 1, 2400, 2400, 2400, -1, 0 }; //1712822019,-81376085,-1411986716,-1513337058,-1573623434
 
@@ -50,7 +54,6 @@ namespace PlantsnNutritionRebalance.Scripts
             private static int[] tropicalLilyPlantStages = { 1, 2400, 2400, 3600, 2400, -1, 0 }; //-800947386
             private static int[] peaceLilyPlantStages = { 1, 2400, 2400, 3600, 2400, -1, 0 }; //2042955224 
             private static int[] alienMushroomStages = { 1, 2400, 3600, 4800, -1, 0 }; //176446172 
-            //private static int[] mushroomStages = { 1, 1200, 1200, 1200, 1200, -1, 0 }; //2044798572
             private static int[] thermogenicGenepool1Stages = { 1, 2400, 2400, 3600, 3600, 2400, -1, 0 }; //-177792789 
             private static int[] thermogenicGenepool2Stages = { 1, 2400, 2400, 3600, 3600, 2400, -1, 0 }; //1819167057 
             private static int[] thermogenicCreativeStages = { 1, 2400, 2400, 3600, 3600, 2400, -1, 0 }; //-1208890208 
@@ -58,7 +61,6 @@ namespace PlantsnNutritionRebalance.Scripts
             private static int[] endothermicGenepool2Stages = { 1, 2400, 2400, 3600, 2400, -1, 0 }; //-1414203269 
             private static int[] endothermicCreativeStages = { 1, 2400, 3600, 3600, 2400, -1, 0 }; //-1159179557
             private static int[] switchGrassStages = { 1, 800, 800, 2400, 800, -1, 0 }; //-532672323
-
 
 
             private static Dictionary<int, int[]> plantStages = new Dictionary<int, int[]>();
@@ -73,6 +75,10 @@ namespace PlantsnNutritionRebalance.Scripts
                 plantStages.Add(-1990600883, fernStages);
                 plantStages.Add(1005571172, potatoStages);
                 plantStages.Add(-654756733, wheatStages);
+                plantStages.Add(1139887531, CocoaTreeStages);
+                plantStages.Add(-1884103228, SugarCaneStages);
+                plantStages.Add(311593418, mushroomStages);
+
                 //seedbag plants
                 plantStages.Add(258339687, cornStages);
                 plantStages.Add(-998592080, tomatoStages);
@@ -82,6 +88,9 @@ namespace PlantsnNutritionRebalance.Scripts
                 plantStages.Add(892110467, fernStages);
                 plantStages.Add(1929046963, potatoStages);
                 plantStages.Add(-1057658015, wheatStages);
+                plantStages.Add(680051921, CocoaTreeStages);
+                plantStages.Add(-1335056202, SugarCaneStages);
+                plantStages.Add(2044798572, mushroomStages);
 
                 //flowers
                 plantStages.Add(1712822019, flowerStages);
@@ -94,7 +103,6 @@ namespace PlantsnNutritionRebalance.Scripts
                 plantStages.Add(266654416, filterFernStages);
                 plantStages.Add(-800947386, tropicalLilyPlantStages);
                 plantStages.Add(2042955224, peaceLilyPlantStages);
-                //plantStages.Add(2044798572, mushroomStages);
                 plantStages.Add(176446172, alienMushroomStages);
                 plantStages.Add(-177792789, thermogenicGenepool1Stages);
                 plantStages.Add(1819167057, thermogenicGenepool2Stages);
