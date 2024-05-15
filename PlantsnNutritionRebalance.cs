@@ -43,10 +43,9 @@ namespace PlantsnNutritionRebalance.Scripts
             private static int[] fernStages = { 1, 1200, 1600, 2000, 1200, -1, 0 }; //892110467 & -1990600883
             private static int[] potatoStages = { 1, 1200, 2400, 2400, 1200, -1, 0 }; //1929046963 & 1005571172
             private static int[] wheatStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; //-1057658015 & -654756733
-            private static int[] CocoaTreeStages = { 1, 2400, 4800, 4800, 9600, 2400, -1, 0 };// 680051921 1139887531 
-            private static int[] SugarCaneStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; // -1335056202 -1884103228
+            private static int[] cocoaTreeStages = { 1, 2400, 4800, 4800, 9600, 2400, -1, 0 };// 680051921 1139887531 
+            private static int[] sugarCaneStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; // -1335056202 -1884103228
             private static int[] mushroomStages = { 1, 1200, 2400, 2400, 1200, -1, 0 }; //2044798572 311593418
-
 
             private static int[] flowerStages = { 1, 2400, 2400, 2400, -1, 0 }; //1712822019,-81376085,-1411986716,-1513337058,-1573623434
 
@@ -75,8 +74,8 @@ namespace PlantsnNutritionRebalance.Scripts
                 plantStages.Add(-1990600883, fernStages);
                 plantStages.Add(1005571172, potatoStages);
                 plantStages.Add(-654756733, wheatStages);
-                plantStages.Add(1139887531, CocoaTreeStages);
-                plantStages.Add(-1884103228, SugarCaneStages);
+                plantStages.Add(1139887531, cocoaTreeStages);
+                plantStages.Add(-1884103228, sugarCaneStages);
                 plantStages.Add(311593418, mushroomStages);
 
                 //seedbag plants
@@ -88,8 +87,8 @@ namespace PlantsnNutritionRebalance.Scripts
                 plantStages.Add(892110467, fernStages);
                 plantStages.Add(1929046963, potatoStages);
                 plantStages.Add(-1057658015, wheatStages);
-                plantStages.Add(680051921, CocoaTreeStages);
-                plantStages.Add(-1335056202, SugarCaneStages);
+                plantStages.Add(680051921, cocoaTreeStages);
+                plantStages.Add(-1335056202, sugarCaneStages);
                 plantStages.Add(2044798572, mushroomStages);
 
                 //flowers

@@ -53,6 +53,12 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configCookedPumpkinNutrition;
         private static ConfigEntry<float> configPowderedEggsNutrition;
         private static ConfigEntry<float> configCookedTomatoNutrition;
+        private static ConfigEntry<float> configChocolateCakeNutrition;
+        private static ConfigEntry<float> configCakeNutrition;
+        private static ConfigEntry<float> configChocolateBarNutrition;
+        private static ConfigEntry<float> configChocolateCerealBarNutrition;
+        private static ConfigEntry<float> configCookedMushroomNutrition;
+        private static ConfigEntry<float> configCannedMushroomNutrition;
 
         private static ConfigEntry<float> configTomatoSoupEatSpeed;
         private static ConfigEntry<float> configCornSoupEatSpeed;
@@ -76,6 +82,12 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configCookedPumpkinEatSpeed;
         private static ConfigEntry<float> configPowderedEggsEatSpeed;
         private static ConfigEntry<float> configCookedTomatoEatSpeed;
+        private static ConfigEntry<float> configChocolateCakeEatSpeed;
+        private static ConfigEntry<float> configCakeEatSpeed;
+        private static ConfigEntry<float> configChocolateBarEatSpeed;
+        private static ConfigEntry<float> configChocolateCerealBarEatSpeed;
+        private static ConfigEntry<float> configCookedMushroomEatSpeed;
+        private static ConfigEntry<float> configCannedMushroomEatSpeed;
 
         private static ConfigEntry<float> configTomatoSoupHydration;
         private static ConfigEntry<float> configCornSoupHydration;
@@ -99,6 +111,12 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configCookedPumpkinHydration;
         private static ConfigEntry<float> configPowderedEggsHydration;
         private static ConfigEntry<float> configCookedTomatoHydration;
+        private static ConfigEntry<float> configChocolateCakeHydration;
+        private static ConfigEntry<float> configCakeHydration;
+        private static ConfigEntry<float> configChocolateBarHydration;
+        private static ConfigEntry<float> configChocolateCerealBarHydration;
+        private static ConfigEntry<float> configCookedMushroomHydration;
+        private static ConfigEntry<float> configCannedMushroomHydration;
 
         private static ConfigEntry<float> configWheatNutrition;
         private static ConfigEntry<float> configCornNutrition;
@@ -189,6 +207,12 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float RiceNutrition;
         public static float SoybeanNutrition;
         public static float TomatoNutrition;
+        public static float ChocolateCakeNutrition;
+        public static float CakeNutrition;
+        public static float ChocolateBarNutrition;
+        public static float ChocolateCerealBarNutrition;
+        public static float CookedMushroomNutrition;
+        public static float CannedMushroomNutrition;
 
         public static float TomatoSoupEatSpeed;
         public static float CornSoupEatSpeed;
@@ -221,6 +245,12 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float RiceEatSpeed;
         public static float SoybeanEatSpeed;
         public static float TomatoEatSpeed;
+        public static float ChocolateCakeEatSpeed;
+        public static float CakeEatSpeed;
+        public static float ChocolateBarEatSpeed;
+        public static float ChocolateCerealBarEatSpeed;
+        public static float CookedMushroomEatSpeed;
+        public static float CannedMushroomEatSpeed;
 
         public static float TomatoSoupHydration;
         public static float CornSoupHydration;
@@ -253,6 +283,12 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float RiceHydration;
         public static float SoybeanHydration;
         public static float TomatoHydration;
+        public static float ChocolateCakeHydration;
+        public static float CakeHydration;
+        public static float ChocolateBarHydration;
+        public static float ChocolateCerealBarHydration;
+        public static float CookedMushroomHydration;
+        public static float CannedMushroomHydration;
 
         public static float EggHatchTime;
         public static float EggDecayRate;
@@ -880,6 +916,126 @@ namespace PlantsnNutritionRebalance.Scripts
                 "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
                 "eating the food.");
             CookedTomatoHydration = configCookedTomatoHydration.Value;
+
+            configChocolateCakeNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateCakeNutrition",
+                700f,
+                "Amount of Nutrition given by eating Chocolate Cake. Needs to be a positive value between 1 and 10000.");
+            ChocolateCakeNutrition = Mathf.Clamp(configChocolateCakeNutrition.Value, 1f, 10000f);
+
+            configChocolateCakeEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateCakeEatSpeed",
+                0.010f,
+                "Time to eat each nutrition of Chocolate Cake. Needs to be a positive value between 0.001 and 10.");
+            ChocolateCakeEatSpeed = Mathf.Clamp(configChocolateCakeEatSpeed.Value, 0.001f, 10f);
+
+            configChocolateCakeHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateCakeHydration",
+                0f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            ChocolateCakeHydration = configChocolateCakeHydration.Value;
+
+            configCakeNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CakeNutrition",
+                600f,
+                "Amount of Nutrition given by eating Cake. Needs to be a positive value between 1 and 10000.");
+            CakeNutrition = Mathf.Clamp(configCakeNutrition.Value, 1f, 10000f);
+
+            configCakeEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CakeEatSpeed",
+                0.010f,
+                "Time to eat each nutrition of Cake. Needs to be a positive value between 0.001 and 10.");
+            CakeEatSpeed = Mathf.Clamp(configCakeEatSpeed.Value, 0.001f, 10f);
+
+            configCakeHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CakeHydration",
+                0f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CakeHydration = configCakeHydration.Value;
+
+            configChocolateBarNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateBarNutrition",
+                180f,
+                "Amount of Nutrition given by eating Chocolate Bar. Needs to be a positive value between 1 and 10000.");
+            ChocolateBarNutrition = Mathf.Clamp(configChocolateBarNutrition.Value, 1f, 10000f);
+
+            configChocolateBarEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateBarEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Chocolate Bar. Needs to be a positive value between 0.001 and 10.");
+            ChocolateBarEatSpeed = Mathf.Clamp(configChocolateBarEatSpeed.Value, 0.001f, 10f);
+
+            configChocolateBarHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateBarHydration",
+                0f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            ChocolateBarHydration = configChocolateBarHydration.Value;
+
+            configChocolateCerealBarNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateCerealBarNutrition",
+                150f,
+                "Amount of Nutrition given by eating Chocolate Cereal Bar. Needs to be a positive value between 1 and 10000.");
+            ChocolateCerealBarNutrition = Mathf.Clamp(configChocolateCerealBarNutrition.Value, 1f, 10000f);
+
+            configChocolateCerealBarEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateCerealBarEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Chocolate Cereal Bar. Needs to be a positive value between 0.001 and 10.");
+            ChocolateCerealBarEatSpeed = Mathf.Clamp(configChocolateCerealBarEatSpeed.Value, 0.001f, 10f);
+
+            configChocolateCerealBarHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "ChocolateCerealBarHydration",
+                0f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            ChocolateCerealBarHydration = configChocolateCerealBarHydration.Value;
+
+            configCannedMushroomNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedMushroomNutrition",
+                200f,
+                "Amount of Nutrition given by eating Canned Mushroom. Needs to be a positive value between 1 and 10000.");
+            CannedMushroomNutrition = Mathf.Clamp(configCannedMushroomNutrition.Value, 1f, 10000f);
+
+            configCannedMushroomEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedMushroomEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Canned Mushroom. Needs to be a positive value between 0.001 and 10.");
+            CannedMushroomEatSpeed = Mathf.Clamp(configCannedMushroomEatSpeed.Value, 0.001f, 10f);
+
+            configCannedMushroomHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CannedMushroomHydration",
+                0.4f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CannedMushroomHydration = configCannedMushroomHydration.Value;
+
+            configCookedMushroomNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedMushroomNutrition",
+                25f,
+                "Amount of Nutrition given by eating Cooked Mushroom. Needs to be a positive value between 1 and 10000.");
+            CookedMushroomNutrition = Mathf.Clamp(configCookedMushroomNutrition.Value, 1f, 10000f);
+
+            configCookedMushroomEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedMushroomEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Cooked Mushroom. Needs to be a positive value between 0.001 and 10.");
+            CookedMushroomEatSpeed = Mathf.Clamp(configCookedMushroomEatSpeed.Value, 0.001f, 10f);
+
+            configCookedMushroomHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "CookedMushroomHydration",
+                0.7f,
+                "Amount of Hydration that the character will gain or loose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
+                "eating the food.");
+            CookedMushroomHydration = configCookedMushroomHydration.Value;
 
             configWheatNutrition = PnN.Config.Bind("5 - Foods Configuration",
                 "WheatNutrition",

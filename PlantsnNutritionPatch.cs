@@ -479,12 +479,19 @@ namespace PlantsnNutritionRebalance.Scripts
 
                                 if (hydrate * -1f > human.Hydration || (human.Hydration == 0f && hydrate < 0 ))
                                 {
-                                    //a.ln(-x)+b
-                                    float a = 1.2f;// Inclination of function curve if you increase will be more incrinate, increase more it will make the difference between negative hygratation values removing more life, already decreasing it will make the difference between smaller values removing less life making them closer
-                                    float b = 20.0f;// vertical displacement, if you increase all value will be more 
+                                    // Calculate the amount of life lost due to dehydration based on a logarithmic function a.ln(-x)+b.
+                                    // The 'a' parameter represents the inclination of the function curve:
+                                    // - Increasing 'a' makes the curve steeper, resulting in more significant life loss per unit of hydration decrease.
+                                    // - Decreasing 'a' makes the curve shallower, resulting in smaller life loss per unit of hydration decrease, thus making them closer.
+                                    float a = 1.2f; // Adjust to change the steepness of the dehydration curve.
+                                    // The 'b' parameter represents the vertical displacement of the function curve:
+                                    // - Increasing 'b' shifts the entire curve upwards, causing all life loss values to increase.
+                                    float b = 20.0f; // Adjust to globally increase or decrease life loss.
+                                    // Calculate the amount of life lost using the logarithmic function with parameters 'a' and 'b'.
                                     float lifelost = a * Mathf.Log(-hydrate) + b;
+                                    // Apply the calculated life loss to the human entity's damage state, indicating starvation as the cause.
                                     human.DamageState.Damage(ChangeDamageType.Increment, lifelost, DamageUpdateType.Starvation);
-                                    ModLog.Debug("Item-OnUseItem: you lost life that does not have water in your body, you are dehydrated! eating foods that make the situation worse will kill you. life lost amount: " + lifelost);
+                                    ModLog.Debug($"Item-OnUseItem: Warning! Dehydration is causing life loss. Avoid dehydrating foods while not having enough hydration to prevent further harm. Life lost: {lifelost}");
                                 }
                                 ModLog.Debug("Item-OnUseItem: Clamped hydration amount because it's negative and the hydration avaliable in the character is lower than the amount the food will remove. dehydrate amount: " + hydrate);
                                 hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);
