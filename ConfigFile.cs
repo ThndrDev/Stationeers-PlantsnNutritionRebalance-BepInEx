@@ -11,6 +11,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configPlantWaterConsumptionMultiplier;
         private static ConfigEntry<float> configPlantWaterConsumptionLimit;
         private static ConfigEntry<float> configPlantWaterTranspirationPercentage;
+        private static ConfigEntry<float> configPlantGrowthTimeMultiplier;
 
         //Character
         private static ConfigEntry<float> configNutritionLossMultiplier;
@@ -160,6 +161,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float PlantWaterConsumptionMultiplier;
         public static float PlantWaterConsumptionLimit;
         public static float PlantWaterTranspirationPercentage;
+        public static float PlantGrowthTimeMultiplier;
         public static float NutritionLossMultiplier;
         public static float HydrationLossMultiplier;
         public static float MaxNutritionStorage;
@@ -339,6 +341,17 @@ namespace PlantsnNutritionRebalance.Scripts
 
             PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);
 
+            configPlantGrowthTimeMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
+                 "PlantGrowthTimeMultiplier",  // The key of the configuration option in the configuration file
+                 1f, // The default value
+                 "Set the multiplier for the time plants take to grow. 1 is the default value, which is balanced to ~20 plants in your greenhouse to feed each player " +
+                 "(assuming all other values left default). If you change this to 2, plants will take 2 times longer to grow and consequently you will need ~40 plants " +
+                 "to feed each player. if you set to 0.5, plants will grow in half the default mod time, and you'll need ~10 plants for each player. " +
+                 "Can be a float number between 0.01 and 10. " +
+                 "You can see how long each plant takes in each stage here (stages are in seconds): " +
+                 " https://github.com/ThndrDev/Stationeers-PlantsnNutritionRebalance-BepInEx/blob/ac582f1d062bdbd5d28defd9f2668b4864af7fc9/PlantsnNutritionRebalance.cs#L37"); // Description of the option to show in the config file
+
+            PlantGrowthTimeMultiplier = Mathf.Clamp(configPlantGrowthTimeMultiplier.Value, 0.01f, 10f);
 
             //Character configuration section
             configNutritionLossMultiplier = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.1.10.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.2.0.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
@@ -38,13 +38,13 @@ namespace PlantsnNutritionRebalance.Scripts
             private static int[] cornStages = { 1, 1600, 2400, 3200, 2400, 2400, -1, 0 }; //258339687 & -1290755415
             private static int[] tomatoStages = { 1, 1600, 3200, 4800, 4800, 2400, -1, 0 }; //-998592080 & -1922066841
             private static int[] pumpkinStages = { 1, 2400, 4800, 4800, 9600, 2400, -1, 0 }; //1277828144 & 1423199840
-            private static int[] riceStages = { 1, 2400, 3200, 4000, 2400, -1, 0 }; //658916791 & -1691151239
+            private static int[] riceStages = { 1, 3600, 5200, 7400, 1200, -1, 0 }; //658916791 & -1691151239
             private static int[] soyStages = { 1, 2400, 2400, 2400, 2400, -1, 0 }; //1924673028 & 1783004244
             private static int[] fernStages = { 1, 1200, 1600, 2000, 1200, -1, 0 }; //892110467 & -1990600883
             private static int[] potatoStages = { 1, 1200, 2400, 2400, 1200, -1, 0 }; //1929046963 & 1005571172
-            private static int[] wheatStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; //-1057658015 & -654756733
+            private static int[] wheatStages = { 1, 3600, 5200, 7400, 1200, -1, 0 }; //-1057658015 & -654756733
             private static int[] cocoaTreeStages = { 1, 2400, 4800, 4800, 9600, 2400, -1, 0 };// 680051921 1139887531 
-            private static int[] sugarCaneStages = { 1, 2400, 4000, 3200, 2400, -1, 0 }; // -1335056202 -1884103228
+            private static int[] sugarCaneStages = { 1, 1200, 4000, 2000, 2400, 2400, - 1, 0 }; // -1335056202 -1884103228
             private static int[] mushroomStages = { 1, 1200, 2400, 2400, 1200, -1, 0 }; //2044798572 311593418
 
             private static int[] flowerStages = { 1, 2400, 2400, 2400, -1, 0 }; //1712822019,-81376085,-1411986716,-1513337058,-1573623434
@@ -140,7 +140,7 @@ namespace PlantsnNutritionRebalance.Scripts
                             var plantStage = plant.GrowthStates[index];
                             if (plantStage.Length > 2)
                             {
-                                plantStage.Length = plantStages[plant.PrefabHash][index];
+                                plantStage.Length =  Mathf.Max((int)plantStages[plant.PrefabHash][index] * ConfigFile.PlantGrowthTimeMultiplier, 1);
                             }
                         }
                     }

@@ -61,3 +61,5 @@ bin/Debug/netstandard2.0/MonoMod.Utils.xml
 bin/Debug/netstandard2.0/MonoMod.RuntimeDetour.xml
 bin/Debug/netstandard2.0/BepInEx.xml
 Properties/launchSettings.json
+/.vs
+/obj
