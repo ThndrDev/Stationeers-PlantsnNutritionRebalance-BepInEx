@@ -20,14 +20,14 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPatch("TakePlantDrink")]
         [UsedImplicitly]
         [HarmonyPostfix]
-        public static void TakePlantDrinkPatch(Plant __instance, ref float __result)
+        public static void TakePlantDrinkPatch(Plant __instance, ref MoleQuantity __result)
         {
             if (ConfigFile.PlantWaterTranspirationPercentage == 0 || __instance.ParentTray.WaterAtmosphere == null)
                 return;
             else
             {
                 GasMixture gasMixture = GasMixtureHelper.Create();
-                MoleQuantity watertotranspirate = new MoleQuantity((double)(__result / 100) * (double)ConfigFile.PlantWaterTranspirationPercentage);                
+                MoleQuantity watertotranspirate = new MoleQuantity((__result.ToFloat() / 100f) * ConfigFile.PlantWaterTranspirationPercentage);                
                 MoleEnergy waterenergy = IdealGas.Energy(__instance.ParentTray.WaterAtmosphere.Temperature, Mole.GetSpecificHeat(Chemistry.GasType.Water), watertotranspirate);
                 gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspirate, waterenergy)), AtmosphereHelper.MatterState.All);
                 __instance.BreathingAtmosphere.Add(gasMixture);
@@ -42,11 +42,11 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPatch("get_WaterPerTick")]
         [UsedImplicitly]
         [HarmonyPostfix]
-        public static void WaterPerTickPatch(ref float __result)
+        public static void WaterPerTickPatch(ref MoleQuantity __result)
         {
             __result *= ConfigFile.PlantWaterConsumptionMultiplier;
-            if (__result > ConfigFile.PlantWaterConsumptionLimit)
-                __result = ConfigFile.PlantWaterConsumptionLimit;
+            if (__result > new MoleQuantity(ConfigFile.PlantWaterConsumptionLimit))
+                __result = new MoleQuantity(ConfigFile.PlantWaterConsumptionLimit);
         }
 
         //Patch perennial plants to yield only 1 or 2 fruits max
