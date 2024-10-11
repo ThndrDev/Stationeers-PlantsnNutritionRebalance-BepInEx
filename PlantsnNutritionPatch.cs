@@ -27,8 +27,8 @@ namespace PlantsnNutritionRebalance.Scripts
             else
             {
                 GasMixture gasMixture = GasMixtureHelper.Create();
-                float watertotranspirate = (__result / 100) * ConfigFile.PlantWaterTranspirationPercentage;
-                float waterenergy = watertotranspirate * Chemistry.SpecificHeat(Chemistry.GasType.Water) * __instance.ParentTray.WaterAtmosphere.Temperature;
+                MoleQuantity watertotranspirate = new MoleQuantity((double)(__result / 100) * (double)ConfigFile.PlantWaterTranspirationPercentage);                
+                MoleEnergy waterenergy = IdealGas.Energy(__instance.ParentTray.WaterAtmosphere.Temperature, Mole.GetSpecificHeat(Chemistry.GasType.Water), watertotranspirate);
                 gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspirate, waterenergy)), AtmosphereHelper.MatterState.All);
                 __instance.BreathingAtmosphere.Add(gasMixture);
             }
@@ -516,14 +516,14 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         [UsedImplicitly]
         [HarmonyPrefix]
-        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable, float ____minViableTemp)
+        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable, TemperatureKelvin ____minViableTemp)
         {
             if (!____viable || __instance.ParentSlot != null || !__instance.HasAtmosphere)
                 return false;
 
             Atmosphere worldAtmosphere = __instance.WorldAtmosphere;
-            float worldpressure = worldAtmosphere.PressureGasses;
-            float worldtemperature = worldAtmosphere.Temperature;
+            PressurekPa worldpressure = worldAtmosphere.PressureGasses;
+            TemperatureKelvin worldtemperature = worldAtmosphere.Temperature;
 
             // Make egg unviable if tme temperature is below viable temp (10°C)
             if (worldtemperature < ____minViableTemp)
@@ -532,10 +532,10 @@ namespace PlantsnNutritionRebalance.Scripts
                 return false;
             }
 
-            if (worldpressure >= ConfigFile.EggMinimumPressureToHatch &&
-                worldpressure <= ConfigFile.EggMaximumPressureToHatch &&
-                worldtemperature >= ConfigFile.EggMinimumTemperatureToHatch &&
-                worldtemperature < ConfigFile.EggMaximumTemperatureToHatch)
+            if (worldpressure >= new PressurekPa(ConfigFile.EggMinimumPressureToHatch) &&
+                worldpressure <= new PressurekPa(ConfigFile.EggMaximumPressureToHatch) &&
+                worldtemperature >= new TemperatureKelvin(ConfigFile.EggMinimumTemperatureToHatch) &&
+                worldtemperature < new TemperatureKelvin(ConfigFile.EggMaximumTemperatureToHatch))
             {
                 //Good enviroment, Hatching.
                 __instance.HatchTime -= 0.5f;
@@ -605,7 +605,11 @@ namespace PlantsnNutritionRebalance.Scripts
         private static string getTooltipText(FertilizedEgg fertilizedEgg)
         {
             string text = "";
-            if (fertilizedEgg.HasAtmosphere == true && fertilizedEgg.WorldAtmosphere.PressureGasses >= ConfigFile.EggMinimumPressureToHatch && fertilizedEgg.WorldAtmosphere.PressureGasses < ConfigFile.EggMaximumPressureToHatch && fertilizedEgg.WorldAtmosphere.Temperature >= ConfigFile.EggMinimumTemperatureToHatch && fertilizedEgg.WorldAtmosphere.Temperature < ConfigFile.EggMaximumTemperatureToHatch)
+            if (fertilizedEgg.HasAtmosphere == true && 
+                fertilizedEgg.WorldAtmosphere.PressureGasses >= new PressurekPa(ConfigFile.EggMinimumPressureToHatch) && 
+                fertilizedEgg.WorldAtmosphere.PressureGasses < new PressurekPa(ConfigFile.EggMaximumPressureToHatch) && 
+                fertilizedEgg.WorldAtmosphere.Temperature >= new TemperatureKelvin(ConfigFile.EggMinimumTemperatureToHatch) && 
+                fertilizedEgg.WorldAtmosphere.Temperature < new TemperatureKelvin(ConfigFile.EggMaximumTemperatureToHatch))
             {
                 if (fertilizedEgg.ParentSlot != null && fertilizedEgg.ParentSlot.Get())
                 {
@@ -626,13 +630,13 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 else
                 {
-                    if (fertilizedEgg.WorldAtmosphere.PressureGasses < ConfigFile.EggMinimumPressureToHatch)
+                    if (fertilizedEgg.WorldAtmosphere.PressureGasses < new PressurekPa(ConfigFile.EggMinimumPressureToHatch))
                         text += string.Format("The Egg <color=red>is in a low pressure environment</color> (P < " + ConfigFile.EggMinimumPressureToHatch + ")\n");
-                    else if (fertilizedEgg.WorldAtmosphere.PressureGasses >= 120.5f)
+                    else if (fertilizedEgg.WorldAtmosphere.PressureGasses >= new PressurekPa(120.5))
                         text += string.Format("The Egg <color=red>is in a high pressure environment</color> (P > " + ConfigFile.EggMaximumPressureToHatch + ")\n");
-                    if (fertilizedEgg.WorldAtmosphere.Temperature < 309.15f)
+                    if (fertilizedEgg.WorldAtmosphere.Temperature < new TemperatureKelvin(309.15))
                         text += string.Format("The Egg temperature <color=red>is too cold</color> (T < " + Mathf.RoundToInt(ConfigFile.EggMinimumTemperatureToHatch-273.15f) + "°C)\n");
-                    else if (fertilizedEgg.WorldAtmosphere.Temperature >= 311.65f)
+                    else if (fertilizedEgg.WorldAtmosphere.Temperature >= new TemperatureKelvin(311.65f))
                         text += string.Format("The Egg temperature <color=red>is too hot</color> (T > " + Mathf.RoundToInt(ConfigFile.EggMaximumTemperatureToHatch-273.15f) + "°C)\n");
                 }
             }
