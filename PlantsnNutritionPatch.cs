@@ -1,36 +1,130 @@
-﻿using Assets.Scripts.Objects.Entities;
+﻿using Assets.Scripts.Atmospherics;
+using Assets.Scripts.Objects;
+using Assets.Scripts.Objects.Entities;
+using Assets.Scripts.Objects.Items;
+using Assets.Scripts.Serialization;
 using Assets.Scripts.UI;
 using HarmonyLib;
 using JetBrains.Annotations;
-using UnityEngine;
-using Assets.Scripts.Objects.Items;
-using Assets.Scripts.Serialization;
-using Assets.Scripts.Objects;
-using Assets.Scripts.Atmospherics;
-using System.Reflection;
-using System;
 using Objects.Structures;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
+using UnityEngine;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    // Make plants transpirate some of the water they drink:
+    // Make plants transpire some of the water they drink:
     [HarmonyPatch(typeof(Plant))]
     public class PlantPatch
     {
         [HarmonyPatch("TakePlantDrink")]
         [UsedImplicitly]
         [HarmonyPostfix]
-        public static void TakePlantDrinkPatch(Plant __instance, ref MoleQuantity __result)
+        public static void TakePlantDrinkPatchPostfix(Plant __instance, ref MoleQuantity __result)
         {
-            if (ConfigFile.PlantWaterTranspirationPercentage == 0 || __instance.ParentTray.WaterAtmosphere == null)
+            //plant doesn't have water
+            if (__instance.ParentTray.WaterAtmosphere == null)
                 return;
-            else
+
+            //mushrooms or exothermic plants should not transpire water
+            if (__instance.PrefabHash == 2044798572 || __instance.PrefabHash == 1819167057 || __instance.PrefabHash == -177792789)            
+                return;
+            
+            if (__instance.IsDead)
+                return;
+            
+            // plants without light will consume only 10% water, and will not transpire.
+            if (__instance.CurrentLightExposure <= 0.01f)
+            {
+                MoleQuantity watertodrink = new MoleQuantity(__result.ToFloat() / 10f);
+                __result = watertodrink;
+                //ModLog.Debug("TakePlantDrinkPostfix: Plant: " + __instance.DisplayName + " is in darkness, drank 10% of normal water: " + watertodrink.ToFloat() + " and will not transpire");
+                return;
+            }
+            if (ConfigFile.PlantWaterTranspirationPercentage != 0) //Only transpire water if this is not set to 0 in the config file
             {
                 GasMixture gasMixture = GasMixtureHelper.Create();
-                MoleQuantity watertotranspirate = new MoleQuantity((__result.ToFloat() / 100f) * ConfigFile.PlantWaterTranspirationPercentage);                
-                MoleEnergy waterenergy = IdealGas.Energy(__instance.ParentTray.WaterAtmosphere.Temperature, Mole.GetSpecificHeat(Chemistry.GasType.Water), watertotranspirate);
-                gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspirate, waterenergy)), AtmosphereHelper.MatterState.All);
+                MoleQuantity watertotranspire = new MoleQuantity((__result.ToFloat() / 100f) * ConfigFile.PlantWaterTranspirationPercentage);
+                MoleEnergy waterenergy = IdealGas.Energy(__instance.ParentTray.WaterAtmosphere.Temperature, Mole.GetSpecificHeat(Chemistry.GasType.Water), watertotranspire);
+                gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspire, waterenergy)), AtmosphereHelper.MatterState.All);
                 __instance.BreathingAtmosphere.Add(gasMixture);
+                //ModLog.Debug("TakePlantDrinkPostfix: Plant: " + __instance.DisplayName + " transpired " + watertotranspire.ToFloat() + " moles of water to the atmosphere, with a temperature of " + __instance.ParentTray.WaterAtmosphere.Temperature + " K.");
+            }
+        }
+        [HarmonyPatch("TakePlantBreath")]
+        [UsedImplicitly]
+        [HarmonyPrefix]
+        public static bool TakePlantBreathPatch(Plant __instance)
+        {
+            // plants without light won't do photosyntesis and exhale oxygen, with the exception of mushrooms
+            if ((__instance.CurrentLightExposure <= 0.01f) && __instance.PrefabHash != 2044798572)
+            {
+                //ModLog.Debug("TakePlantBreathPrefix: Plant: " + __instance.DisplayName + " is in darkness, not doing photosyntesis");
+                return false; //skip the original method and don't do photosyntesis
+            }
+            if (__instance.ParentTray.WaterAtmosphere == null)
+            {
+                //ModLog.Debug("TakePlantBreathPrefix: Plant: " + __instance.DisplayName + " doesn't have enough water, not doing photosyntesis");
+                return false; //skip the original method and don't do photosyntesis
+            }
+
+           // ModLog.Debug("TakePlantBreathPrefix: Plant: " + __instance.DisplayName + " received light or is a mushroom, doing gas exchange");
+            return true; //plants will do photosyntesis as normal            
+        }
+
+        // Helper method to compute hydration efficiency for plants, used in transpiler below, see transpiler comment.
+        public static MoleQuantity ComputeWaterPerTick(Plant plant)
+        {
+            // plants with light or mushrooms consume the normal amount of water
+            if (plant.CurrentLightExposure > 0.01f || plant.PrefabHash == 2044798572)
+                return plant.lifeRequirements.WaterPerTick;
+                
+            // plants without light consume only 10% of the normal amount of water
+            return plant.lifeRequirements.WaterPerTick / 10f;
+        }
+
+        // The code below is to modify the hydration efficiency calculation when plants are in darkness, due to the mod reducing the water consumption
+        // from plants to 10% when they are not doing photosyntesis. Vanilla calculates the hydration efficiency on OnAtmosphericTick as:
+        // this.PlantStatus.HydrationEfficiency = (this.MolesDrunkLastTick / this.lifeRequirements.WaterPerTick).ToFloat();
+        // But this causes issues like plants complaining about not enough water or plant growth stalling due to low hydration efficiency.
+        // This Transpiler is just changing the call from this.lifeRequirements.WaterPerTick to get the value from the helper method ComputeWaterPerTick instead,
+        // where we properly account for light and dark hydration conditions.
+        [HarmonyPatch("OnAtmosphericTick")]
+        [HarmonyTranspiler]
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+        {
+            var instrList = new List<CodeInstruction>(instructions);
+
+            // target method/property and field
+            MethodInfo getWaterPerTick = AccessTools.Method(typeof(Assets.Scripts.Objects.Items.PlantLifeRequirements), "get_WaterPerTick");
+            MethodInfo helperMethod = AccessTools.Method(typeof(PlantsnNutritionRebalance.Scripts.PlantPatch), "ComputeWaterPerTick");
+            FieldInfo lifeRequirementsField = AccessTools.Field(typeof(Assets.Scripts.Objects.Items.Plant), "lifeRequirements");
+
+            for (int i = 0; i < instrList.Count; i++)
+            {
+                var inst = instrList[i];
+
+                // Detect the forward pattern: ldarg.0 ; ldfld lifeRequirements ; callvirt get_WaterPerTick
+                if (i + 2 < instrList.Count
+                    && instrList[i].opcode == OpCodes.Ldarg_0
+                    && instrList[i + 1].opcode == OpCodes.Ldfld
+                    && instrList[i + 1].operand is FieldInfo fi && fi == lifeRequirementsField
+                    && instrList[i + 2].opcode == OpCodes.Callvirt
+                    && instrList[i + 2].operand is MethodInfo mi && mi == getWaterPerTick)
+                {
+                    // Replace the 3-instruction sequence with: ldarg.0 ; call ComputeWaterPerTick
+                    yield return new CodeInstruction(OpCodes.Ldarg_0);
+                    yield return new CodeInstruction(OpCodes.Call, helperMethod);
+
+                    // Skip the next two original instructions (we already emitted replacements)
+                    i += 2;
+                    continue;
+                }
+
+                // Otherwise, yield instruction unchanged
+                yield return inst;
             }
         }
     }
@@ -45,22 +139,21 @@ namespace PlantsnNutritionRebalance.Scripts
         public static void WaterPerTickPatch(ref MoleQuantity __result)
         {
             __result *= ConfigFile.PlantWaterConsumptionMultiplier;
-            if (__result > new MoleQuantity(ConfigFile.PlantWaterConsumptionLimit))
-                __result = new MoleQuantity(ConfigFile.PlantWaterConsumptionLimit);
         }
 
-        //Patch perennial plants to yield only 1 or 2 fruits max
+        //Patch perennial plants to yield 5 fruits if it's fertilized, at first fruitng only
         [HarmonyPatch("SetHarvestQuantityOnMature")]
         [UsedImplicitly]
         [HarmonyPostfix]
-        public static void PlantAwakePatch(PlantLifeRequirements __instance)
+        public static void PlantSetHarvestQuantityOnMaturePatch(PlantLifeRequirements __instance)
         {
-            if (__instance.Plant.PrefabHash == -998592080 || __instance.Plant.PrefabHash == 1277828144) //Tomato or pumpkin
+            bool isPerennial = Traverse.Create(__instance.Plant).Field("_isPerennial").GetValue<bool>();
+            if (isPerennial && __instance.Plant.IsFertilized)
             {
-                __instance.Plant.HarvestQuantity = __instance.Plant.IsFertilized ? 3 : 1;
+                __instance.Plant.HarvestQuantity = 5;
                 __instance.Plant.IsFertilized = false;
             }
-        }
+        }       
     }
 
     [HarmonyPatch(typeof(Human))]
@@ -75,13 +168,13 @@ namespace PlantsnNutritionRebalance.Scripts
             float hydrationLoss;
             switch (DifficultySetting.Current.HydrationRate.Value)
             {
-                case 1.5f: //stationeers difficulty, full water will last 100 game minutes (2 and a half days)
+                case 1.5f: //stationeers difficulty, full water will last 100 game minutes (5 days)
                     hydrationLoss = 0.0019446f;
                     break;
-                case 1f: //normal difficulty, full water should last ~160 game minutes (4 days in sun/orbit 2)
+                case 1f: //normal difficulty, full water should last ~160 game minutes (8 days)
                     hydrationLoss = 0.001798755f;
                     break;
-                case 0.5f: //easy difficulty, full water should last ~220 game minutes
+                case 0.5f: //easy difficulty, full water should last ~220 game minutes (11 days)
                     hydrationLoss = 0.0017258325f;
                     break;
                 case 0f: //user disabled water consumption directly on world config
@@ -408,7 +501,6 @@ namespace PlantsnNutritionRebalance.Scripts
                     if (NutritionValue >= 0f)
                     {
                         food.NutritionValue = NutritionValue;
-                        ModLog.Debug("Stationpedia-AddNutrition: Changed nutritional value of food: " + prefab.DisplayName + " to: " + NutritionValue);
                     }
 
                 }
@@ -419,7 +511,6 @@ namespace PlantsnNutritionRebalance.Scripts
                     if (NutritionValue >= 0f)
                     {
                         stackableFood.NutritionValue = NutritionValue;
-                        ModLog.Debug("Stationpedia-AddNutrition: Changed nutritional value of stackableFood: " + prefab.DisplayName + " to: " + NutritionValue);
                     }
                 }
 
@@ -430,7 +521,6 @@ namespace PlantsnNutritionRebalance.Scripts
                     if (NutritionValue >= 0f)
                     {
                         Plantfood.NutritionValue = NutritionValue;
-                        ModLog.Debug("Stationpedia-AddNutrition: Changed nutritional value of stackableFood: " + prefab.DisplayName + " to: " + NutritionValue);
                     }
                 }
                 return true;

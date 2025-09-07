@@ -9,9 +9,9 @@ namespace PlantsnNutritionRebalance.Scripts
         
         //Plants
         private static ConfigEntry<float> configPlantWaterConsumptionMultiplier;
-        private static ConfigEntry<float> configPlantWaterConsumptionLimit;
         private static ConfigEntry<float> configPlantWaterTranspirationPercentage;
         private static ConfigEntry<float> configPlantGrowthTimeMultiplier;
+        private static ConfigEntry<bool> configDisableSoybeanH2Exhale;
 
         //Character
         private static ConfigEntry<float> configNutritionLossMultiplier;
@@ -60,6 +60,9 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configChocolateCerealBarNutrition;
         private static ConfigEntry<float> configCookedMushroomNutrition;
         private static ConfigEntry<float> configCannedMushroomNutrition;
+        private static ConfigEntry<float> configWatermelonNutrition;
+        private static ConfigEntry<float> configStrawberryNutrition;
+        private static ConfigEntry<float> configBlueberryNutrition;
 
         private static ConfigEntry<float> configTomatoSoupEatSpeed;
         private static ConfigEntry<float> configCornSoupEatSpeed;
@@ -89,6 +92,9 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configChocolateCerealBarEatSpeed;
         private static ConfigEntry<float> configCookedMushroomEatSpeed;
         private static ConfigEntry<float> configCannedMushroomEatSpeed;
+        private static ConfigEntry<float> configWatermelonEatSpeed;
+        private static ConfigEntry<float> configStrawberryEatSpeed;
+        private static ConfigEntry<float> configBlueberryEatSpeed;
 
         private static ConfigEntry<float> configTomatoSoupHydration;
         private static ConfigEntry<float> configCornSoupHydration;
@@ -118,6 +124,9 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configChocolateCerealBarHydration;
         private static ConfigEntry<float> configCookedMushroomHydration;
         private static ConfigEntry<float> configCannedMushroomHydration;
+        private static ConfigEntry<float> configWatermelonHydration;
+        private static ConfigEntry<float> configStrawberryHydration;
+        private static ConfigEntry<float> configBlueberryHydration;
 
         private static ConfigEntry<float> configWheatNutrition;
         private static ConfigEntry<float> configCornNutrition;
@@ -157,11 +166,13 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configEggMaximumTemperatureToHatch;
         private static ConfigEntry<float> configEggNearHatching;
 
+        private static ConfigEntry<int> configVersion; 
+
         public static int LogLevel;
         public static float PlantWaterConsumptionMultiplier;
-        public static float PlantWaterConsumptionLimit;
         public static float PlantWaterTranspirationPercentage;
         public static float PlantGrowthTimeMultiplier;
+        public static bool DisableSoybeanH2Exhale;
         public static float NutritionLossMultiplier;
         public static float HydrationLossMultiplier;
         public static float MaxNutritionStorage;
@@ -215,6 +226,9 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float ChocolateCerealBarNutrition;
         public static float CookedMushroomNutrition;
         public static float CannedMushroomNutrition;
+        public static float WatermelonNutrition;
+        public static float StrawberryNutrition;
+        public static float BlueberryNutrition;
 
         public static float TomatoSoupEatSpeed;
         public static float CornSoupEatSpeed;
@@ -253,6 +267,9 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float ChocolateCerealBarEatSpeed;
         public static float CookedMushroomEatSpeed;
         public static float CannedMushroomEatSpeed;
+        public static float WatermelonEatSpeed;
+        public static float StrawberryEatSpeed;
+        public static float BlueberryEatSpeed;
 
         public static float TomatoSoupHydration;
         public static float CornSoupHydration;
@@ -291,6 +308,9 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float ChocolateCerealBarHydration;
         public static float CookedMushroomHydration;
         public static float CannedMushroomHydration;
+        public static float WatermelonHydration;
+        public static float StrawberryHydration;
+        public static float BlueberryHydration;
 
         public static float EggHatchTime;
         public static float EggDecayRate;
@@ -302,6 +322,9 @@ namespace PlantsnNutritionRebalance.Scripts
 
         public static void HandleConfig(PlantsnNutritionRebalancePlugin PnN) // Create and manage the configuration file parameters
         {
+            // Enables the configuration to be edited and saved ingame.
+            PnN.Config.SaveOnConfigSet = true;
+
             //Log Section
             configLogLevel = PnN.Config.Bind("0 - General configuration",
                  "LogLevel",
@@ -314,44 +337,47 @@ namespace PlantsnNutritionRebalance.Scripts
             //Plants configuration section
             configPlantWaterConsumptionMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterConsumptionMultiplier",  // The key of the configuration option in the configuration file
-                 500f, // The default value
-                 "By how much this mod should multiply the water consumption of plants?" +
-                 "The vanilla water consumption value is aprox ~0.000006 moles per tick for most plants, quite low. For reference, 1 ice water stack has 1000 mols " +
-                 "That means, in vanilla, 1 single stack of ice will keep a plant alive for more than 23148 hours of gameplay! That's why the suggested value here " +
-                 "is 500, it increases the plants drinks to ~0.003 moles of water per tick. With this, 1 ice water stack will keep a plant alive for 46 hours of gameplay, " +
-                 "or 20 plants for 2 hours, enough to make the water management meaningful." +
-                 "If you set this option to 1, you'll get the vanilla water consumption values on plants."); // Description of the option to show in the config file
+                 1f, // The default value
+                 "Water consumption of each plant type is now defined by this mod via XML modding, each value was calculated to make plants photosyntesis mole-exact " +
+                 "by following the simplified photosyntesys formula. For most plants, that means for every 0.0012 mol of CO2 consumed per tick, plants will produce 0.0012 mol " +
+                 "of O2 and consume 0.0016 mol of water (accounting for 25% transpirated, 75% consumed by photosyntesis). That means, unlike Vanilla values, (almost) no molecules " +
+                 "should be created or lost in the photosyntesis process. Some small drift can still occur due to this mod doesn't taking " +
+                 "into account the plant mutations yet, but still should be much closer to the stable ratio of 1:1. So only change this multiplier " +
+                 " if you don't care about the mole equilibrium and want really hard to ramp up or decrease water consumption of plants." +
+                 "This value can be set to a float between 0.1 and 10."); 
 
-            PlantWaterConsumptionMultiplier = Mathf.Clamp(configPlantWaterConsumptionMultiplier.Value, 1f, 100000f);
-
-            configPlantWaterConsumptionLimit = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
-                 "PlantWaterConsumptionLimit",  // The key of the configuration option in the configuration file
-                 0.004f, // The default value
-                 "Limit the max consumption of water mols per tick a plant can drink. This is mainly to fix the behaviour of the water consumption of Winterspawn that drinks " +
-                 "considerably more water than the other plants. Should be set to a positive float value. If you change the PlantWaterConsumptionMultiplier, you'll probably want " +
-                 "to change this one too accordingly."); // Description of the option to show in the config file
-
-            PlantWaterConsumptionLimit = Mathf.Clamp(configPlantWaterConsumptionLimit.Value, 0.000001f, 100000f);
+            PlantWaterConsumptionMultiplier = Mathf.Clamp(configPlantWaterConsumptionMultiplier.Value, 0.1f, 10f);
 
             configPlantWaterTranspirationPercentage = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantWaterTranspirationPercentage",  // The key of the configuration option in the configuration file
                  25f, // The default value
                  "Set the percentage of the water consumed by plants that should be transpirated back to the atmosphere. " +
-                 "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration."); // Description of the option to show in the config file
+                 "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration. " +
+                 "If you choose to change this value, you should also change PlantWaterConsumptionMultiplier accordingly to keep plants photosyntesis mole-exact. " +
+                 "Let's say you choose to disable plant transpiration by setting this value to 0, you should also change PlantWaterConsumptionMultiplier " +
+                 "to 0.75, to keep the 1:1 ratio between oxygen produced and water consumed."); // Description of the option to show in the config file
 
             PlantWaterTranspirationPercentage = Mathf.Clamp(configPlantWaterTranspirationPercentage.Value, 0f, 100f);
 
             configPlantGrowthTimeMultiplier = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "PlantGrowthTimeMultiplier",  // The key of the configuration option in the configuration file
                  1f, // The default value
-                 "Set the multiplier for the time plants take to grow. 1 is the default value, which is balanced to ~20 plants in your greenhouse to feed each player " +
+                  "Set the multiplier for the time plants take to grow. 1 is the default value, which is balanced to ~20 plants in your greenhouse to feed each player " +
                  "(assuming all other values left default). If you change this to 2, plants will take 2 times longer to grow and consequently you will need ~40 plants " +
                  "to feed each player. if you set to 0.5, plants will grow in half the default mod time, and you'll need ~10 plants for each player. " +
-                 "Can be a float number between 0.01 and 10. " +
-                 "You can see how long each plant takes in each stage here (stages are in seconds): " +
-                 " https://github.com/ThndrDev/Stationeers-PlantsnNutritionRebalance-BepInEx/blob/ac582f1d062bdbd5d28defd9f2668b4864af7fc9/PlantsnNutritionRebalance.cs#L37"); // Description of the option to show in the config file
+                 "Can be a float number between 0.01 and 10."); // Description of the option to show in the config file
 
             PlantGrowthTimeMultiplier = Mathf.Clamp(configPlantGrowthTimeMultiplier.Value, 0.01f, 10f);
+
+            configDisableSoybeanH2Exhale = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
+                 "DisableSoybeanH2Exhale",  // The key of the configuration option in the configuration file
+                 false, // The default value
+                 "Soybean consumes Nitrogen and accordingly to the Nitrogen Fixation Reaction N2​+8H++8e−→2NH3​+H2​, it should give off H2(Volatiles) " + 
+                  "as a byproduct. To make growing soybean easier for noobs, devs just decided to magically destroy those molecules, so you don't have" +
+                  "to deal with base explosions, but with this mod, you can decide what you want. Set to true if you're a chicken and can't handle Soybean" +
+                  "exhaling Volatiles."); // Description of the option to show in the config file
+
+            DisableSoybeanH2Exhale = configDisableSoybeanH2Exhale.Value;            
 
             //Character configuration section
             configNutritionLossMultiplier = PnN.Config.Bind("3 - Character Configuration", // The section under which the option is shown 
@@ -1229,7 +1255,70 @@ namespace PlantsnNutritionRebalance.Scripts
                 "can be set to be a positive or negative float value. If it's negative, you'll loose hydration when " +
                 "eating the food.");
             TomatoHydration = configTomatoHydration.Value;
-            
+
+            // Watermelon Configuration
+            configWatermelonNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "WatermelonNutrition",
+                35f,
+                "Amount of Nutrition given by eating Watermelon. Needs to be a positive value between 1 and 10000.");
+            WatermelonNutrition = Mathf.Clamp(configWatermelonNutrition.Value, 1f, 10000f);
+
+            configWatermelonEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "WatermelonEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Watermelon. Needs to be a positive value between 0.001 and 10.");
+            WatermelonEatSpeed = Mathf.Clamp(configWatermelonEatSpeed.Value, 0.001f, 10f);
+
+            configWatermelonHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "WatermelonHydration",
+                1.5f,
+                "Amount of Hydration that the character will gain or lose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll lose hydration when " +
+                "eating the food.");
+            WatermelonHydration = configWatermelonHydration.Value;
+
+            // Strawberry Configuration
+            configStrawberryNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "StrawberryNutrition",
+                15f,
+                "Amount of Nutrition given by eating Strawberry. Needs to be a positive value between 1 and 10000.");
+            StrawberryNutrition = Mathf.Clamp(configStrawberryNutrition.Value, 1f, 10000f);
+
+            configStrawberryEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "StrawberryEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Strawberry. Needs to be a positive value between 0.001 and 10.");
+            StrawberryEatSpeed = Mathf.Clamp(configStrawberryEatSpeed.Value, 0.001f, 10f);
+
+            configStrawberryHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "StrawberryHydration",
+                0.4f,
+                "Amount of Hydration that the character will gain or lose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll lose hydration when " +
+                "eating the food.");
+            StrawberryHydration = configStrawberryHydration.Value;
+
+            // Blueberry Configuration
+            configBlueberryNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "BlueberryNutrition",
+                15f,
+                "Amount of Nutrition given by eating Blueberry. Needs to be a positive value between 1 and 10000.");
+            BlueberryNutrition = Mathf.Clamp(configBlueberryNutrition.Value, 1f, 10000f);
+
+            configBlueberryEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "BlueberryEatSpeed",
+                0.015f,
+                "Time to eat each nutrition of Blueberry. Needs to be a positive value between 0.001 and 10.");
+            BlueberryEatSpeed = Mathf.Clamp(configBlueberryEatSpeed.Value, 0.001f, 10f);
+
+            configBlueberryHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "BlueberryHydration",
+                0.4f,
+                "Amount of Hydration that the character will gain or lose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll lose hydration when " +
+                "eating the food.");
+            BlueberryHydration = configBlueberryHydration.Value;
+
             //Egg Section
             configEggHatchTime = PnN.Config.Bind("6 - Egg Configuration",
                 "EggHatchTime",
@@ -1280,6 +1369,38 @@ namespace PlantsnNutritionRebalance.Scripts
                 "The value in seconds to consider that the fertilized egg is near hatching. The mod will add small movements to simulate the " +
                 "chick trying to pip and break the shell of the egg. Needs to be a positive value and lower than configEggHatchTime. Set to 0 to disable.");
             EggNearHatching = Mathf.Clamp(configEggNearHatching.Value, 0f, EggHatchTime);
+
+            configVersion = PnN.Config.Bind("99 - Mod Configuration Version",
+                "ConfigurationVersion",
+                1,
+                "Version of this config file. Do not edit manually.");
+
+            // Update specific config values if the mod version changes
+            DoConfigUpdates(PnN);
+        }
+
+        private static void DoConfigUpdates(PlantsnNutritionRebalancePlugin PnN)
+        {
+            if (configPlantWaterConsumptionMultiplier.Value > 10f || configVersion.Value != 1f)
+            {
+                UpdateConfigValuesToV1(PnN);
+                try
+                {
+                    PnN.Config.Save(); // Save the new configuration values to file PlantsnNutrition.cfg
+                }
+                catch (System.Exception e)
+                {
+                    ModLog.Error("Plants and Nutrition: ConfigFile: Error trying to save the new configuration values to file PlantsnNutrition.cfg, make sure the file is closed");
+                }
+            }
+        }
+        private static void UpdateConfigValuesToV1(PlantsnNutritionRebalancePlugin PnN)
+        {
+            // After the survival update, it's now possible to edit the plant growth and water consumption values in a cleaner way through XML modding
+            // but the older config file did a multiplier of 500 on this, and it'll cause problems with the new configurations, so we'll force it to 1.
+            configPlantWaterConsumptionMultiplier.Value = 1f;
+            PlantWaterConsumptionMultiplier = 1f;
+            ModLog.Info("Plants and Nutrition: ConfigFile: Updating values of PlantWaterConsumptionMultiplier to the new default value of 1");
         }
     }
 }
