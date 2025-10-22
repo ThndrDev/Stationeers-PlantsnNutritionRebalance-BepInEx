@@ -35,12 +35,9 @@ namespace PlantsnNutritionRebalance.Scripts
             if (__instance.IsDead)
                 return;
             
-            // plants without light will consume only 10% water, and will not transpire.
+            // plants without light will not transpire.
             if (__instance.CurrentLightExposure <= 0.01f)
             {
-                MoleQuantity watertodrink = new MoleQuantity(__result.ToFloat() / 10f);
-                __result = watertodrink;
-                //ModLog.Debug("TakePlantDrinkPostfix: Plant: " + __instance.DisplayName + " is in darkness, drank 10% of normal water: " + watertodrink.ToFloat() + " and will not transpire");
                 return;
             }
             if (ConfigFile.PlantWaterTranspirationPercentage != 0) //Only transpire water if this is not set to 0 in the config file
@@ -136,8 +133,13 @@ namespace PlantsnNutritionRebalance.Scripts
         [HarmonyPatch("get_WaterPerTick")]
         [UsedImplicitly]
         [HarmonyPostfix]
-        public static void WaterPerTickPatch(ref MoleQuantity __result)
+        public static void WaterPerTickPatch(PlantLifeRequirements __instance, ref MoleQuantity __result)
         {
+            // plants without light will consume only 10% water, and will not transpire.
+            if (__instance.Plant.CurrentLightExposure <= 0.01f)
+            {                
+                __result = new MoleQuantity(__result.ToFloat() / 10f);
+            }
             __result *= ConfigFile.PlantWaterConsumptionMultiplier;
         }
 

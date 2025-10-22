@@ -353,7 +353,7 @@ namespace PlantsnNutritionRebalance.Scripts
                  25f, // The default value
                  "Set the percentage of the water consumed by plants that should be transpirated back to the atmosphere. " +
                  "Can be a float number between 0 and 100. Set it to 0 to disable plants water transpiration. " +
-                 "If you choose to change this value, you should also change PlantWaterConsumptionMultiplier accordingly to keep plants photosyntesis mole-exact. " +
+                 "If you choose to change this value, you should also change PlantWaterConsumptionMultiplier accordingly to keep plants photosyntesis balanced. " +
                  "Let's say you choose to disable plant transpiration by setting this value to 0, you should also change PlantWaterConsumptionMultiplier " +
                  "to 0.75, to keep the 1:1 ratio between oxygen produced and water consumed."); // Description of the option to show in the config file
 
@@ -372,10 +372,10 @@ namespace PlantsnNutritionRebalance.Scripts
             configDisableSoybeanH2Exhale = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "DisableSoybeanH2Exhale",  // The key of the configuration option in the configuration file
                  false, // The default value
-                 "Soybean consumes Nitrogen and accordingly to the Nitrogen Fixation Reaction N2​+8H++8e−→2NH3​+H2​, it should give off H2(Volatiles) " + 
-                  "as a byproduct. To make growing soybean easier for noobs, devs just decided to magically destroy those molecules, so you don't have" +
-                  "to deal with base explosions, but with this mod, you can decide what you want. Set to true if you're a chicken and can't handle Soybean" +
-                  "exhaling Volatiles."); // Description of the option to show in the config file
+                 "Soybean consumes Nitrogen and accordingly to the Nitrogen Fixation Reaction N2​+8H+8e−→2NH3​+H2​, it should give off 1 H2(Volatiles) " + 
+                 "as a byproduct. To make growing soybean easier for new players, devs just decided to magically destroy those molecules, so you don't have " +
+                 "to deal with base explosions, but with this mod, you can decide what you want. Set this to true if you want to keep vanilla behaviour and " +
+                 "stop soybean from exhaling Volatiles."); 
 
             DisableSoybeanH2Exhale = configDisableSoybeanH2Exhale.Value;            
 
