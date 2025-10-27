@@ -70,60 +70,6 @@ namespace PlantsnNutritionRebalance.Scripts
            // ModLog.Debug("TakePlantBreathPrefix: Plant: " + __instance.DisplayName + " received light or is a mushroom, doing gas exchange");
             return true; //plants will do photosyntesis as normal            
         }
-
-        // Helper method to compute hydration efficiency for plants, used in transpiler below, see transpiler comment.
-        public static MoleQuantity ComputeWaterPerTick(Plant plant)
-        {
-            // plants with light or mushrooms consume the normal amount of water
-            if (plant.CurrentLightExposure > 0.01f || plant.PrefabHash == 2044798572)
-                return plant.lifeRequirements.WaterPerTick;
-                
-            // plants without light consume only 10% of the normal amount of water
-            return plant.lifeRequirements.WaterPerTick / 10f;
-        }
-
-        // The code below is to modify the hydration efficiency calculation when plants are in darkness, due to the mod reducing the water consumption
-        // from plants to 10% when they are not doing photosyntesis. Vanilla calculates the hydration efficiency on OnAtmosphericTick as:
-        // this.PlantStatus.HydrationEfficiency = (this.MolesDrunkLastTick / this.lifeRequirements.WaterPerTick).ToFloat();
-        // But this causes issues like plants complaining about not enough water or plant growth stalling due to low hydration efficiency.
-        // This Transpiler is just changing the call from this.lifeRequirements.WaterPerTick to get the value from the helper method ComputeWaterPerTick instead,
-        // where we properly account for light and dark hydration conditions.
-        [HarmonyPatch("OnAtmosphericTick")]
-        [HarmonyTranspiler]
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-        {
-            var instrList = new List<CodeInstruction>(instructions);
-
-            // target method/property and field
-            MethodInfo getWaterPerTick = AccessTools.Method(typeof(Assets.Scripts.Objects.Items.PlantLifeRequirements), "get_WaterPerTick");
-            MethodInfo helperMethod = AccessTools.Method(typeof(PlantsnNutritionRebalance.Scripts.PlantPatch), "ComputeWaterPerTick");
-            FieldInfo lifeRequirementsField = AccessTools.Field(typeof(Assets.Scripts.Objects.Items.Plant), "lifeRequirements");
-
-            for (int i = 0; i < instrList.Count; i++)
-            {
-                var inst = instrList[i];
-
-                // Detect the forward pattern: ldarg.0 ; ldfld lifeRequirements ; callvirt get_WaterPerTick
-                if (i + 2 < instrList.Count
-                    && instrList[i].opcode == OpCodes.Ldarg_0
-                    && instrList[i + 1].opcode == OpCodes.Ldfld
-                    && instrList[i + 1].operand is FieldInfo fi && fi == lifeRequirementsField
-                    && instrList[i + 2].opcode == OpCodes.Callvirt
-                    && instrList[i + 2].operand is MethodInfo mi && mi == getWaterPerTick)
-                {
-                    // Replace the 3-instruction sequence with: ldarg.0 ; call ComputeWaterPerTick
-                    yield return new CodeInstruction(OpCodes.Ldarg_0);
-                    yield return new CodeInstruction(OpCodes.Call, helperMethod);
-
-                    // Skip the next two original instructions (we already emitted replacements)
-                    i += 2;
-                    continue;
-                }
-
-                // Otherwise, yield instruction unchanged
-                yield return inst;
-            }
-        }
     }
 
     // Adjusts the water consumption of plants:

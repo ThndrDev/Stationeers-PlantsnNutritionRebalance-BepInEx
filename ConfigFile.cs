@@ -1390,7 +1390,7 @@ namespace PlantsnNutritionRebalance.Scripts
                 }
                 catch (System.Exception e)
                 {
-                    ModLog.Error("Plants and Nutrition: ConfigFile: Error trying to save the new configuration values to file PlantsnNutrition.cfg, make sure the file is closed");
+                    ModLog.Error("Plants and Nutrition: ConfigFile: Error trying to save the new configuration values to file PlantsnNutrition.cfg, make sure the file is closed. Exception: "+ e);
                 }
             }
         }
