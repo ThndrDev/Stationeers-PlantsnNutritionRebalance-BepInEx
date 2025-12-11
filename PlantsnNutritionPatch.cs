@@ -8,9 +8,6 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using Objects.Structures;
 using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Emit;
 using UnityEngine;
 
 namespace PlantsnNutritionRebalance.Scripts
@@ -221,34 +218,37 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 // Get how long in days the max nutrition should last with the current configuration parameters
                 int NormalizedMaxHungerDays = Mathf.RoundToInt(ConfigFile.MaxNutritionStorage / (LastNutritionLossPerTick==0f ? 0.083333f : LastNutritionLossPerTick) / 2 / 60 / 
-                    ((float)Settings.CurrentData.DayLength));
-                ModLog.Debug("Human-OnLifeCreated: NormalizedMaxHungerDays: " + NormalizedMaxHungerDays + " ConfigFile.MaxNutritionStorage: " + ConfigFile.MaxNutritionStorage +
-                             " LastNutritionLossPerTick:" + LastNutritionLossPerTick + " Settings.CurrentData.DayLength: " + (float)Settings.CurrentData.DayLength);
+                    ((float)Settings.CurrentData.DayLength));                
                 // Then, calculate a nutrition slice for each day
                 float NutritionSlicePerDay = ConfigFile.MaxNutritionStorage / NormalizedMaxHungerDays;
-                ModLog.Debug("Human-OnLifeCreated: NutritionSlicePerDay: " + NutritionSlicePerDay);
-                // Get the normalized days
-                //float DaysPastNorm = WorldManager.DaysPast * Settings.CurrentData.SunOrbitPeriod;
-                ModLog.Debug("Human-OnLifeCreated: Current day: " + WorldManager.DaysPast);
-
+                ModLog.Debug("Human-OnLifeCreated: isRespawn: " + isRespawn + 
+                            " World: " + WorldManager.CurrentWorldId + 
+                            " Current day: " + WorldManager.DaysPast + 
+                            " NormalizedMaxHungerDays: " + NormalizedMaxHungerDays + 
+                            " ConfigFile.MaxNutritionStorage: " + ConfigFile.MaxNutritionStorage +
+                            " LastNutritionLossPerTick:" + LastNutritionLossPerTick + 
+                            " Settings.CurrentData.DayLength: " + (float)Settings.CurrentData.DayLength + 
+                            " NutritionSlicePerDay: " + NutritionSlicePerDay);
+                // Get the fixed DayPast counter. For some odd reason the starting day in Venus is 1, while in other worlds it's 0
+                uint DaysPast = (WorldManager.CurrentWorldId == "Venus" ? WorldManager.DaysPast - 1 : WorldManager.DaysPast);
                 // If the character is a new player joining and not a old character who died, and the configfile is set to modify the amount of food to give to the new player
-                // apply the desired amount of food for the new character
+                // then apply the desired amount of food:
                 if (!isRespawn && ConfigFile.CustomNewPlayerRespawn)
                 {
                     __instance.Nutrition = ConfigFile.CustomNewPlayerRespawnNutrition * (ConfigFile.MaxNutritionStorage / 100f);
                     ModLog.Info("Human-OnLifeCreated: Nutrition given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
                 // If it's a respawn and the DaysPastNorm is lower than the NormalizedMaxHungerDays, that means we should calculate the amount of food to give to the respawning character
-                else if (WorldManager.DaysPast < NormalizedMaxHungerDays)
+                else if (DaysPast < NormalizedMaxHungerDays)
                 {
-                    __instance.Nutrition = NutritionSlicePerDay * (NormalizedMaxHungerDays - WorldManager.DaysPast);
-                    ModLog.Info("Human-OnLifeCreated: Nutrition given for an player who died and are respawning: " + __instance.Nutrition);
+                    __instance.Nutrition = NutritionSlicePerDay * (NormalizedMaxHungerDays - DaysPast);
+                    ModLog.Info("Human-OnLifeCreated: Nutrition given for new player or for players that died and are respawning: " + __instance.Nutrition);
                 }
                 //if DaysPastNorm is equal or bigger than NormalizedMaxHungerDays, that means we should give a minimal amount of food, just enough for the character to go eat something
                 else
                 {
                     __instance.Nutrition = ConfigFile.MaxNutritionStorage / 95;
-                    ModLog.Info("Human-OnLifeCreated: Minimal Nutrition given for respawing player after "+ WorldManager.DaysPast + " days passed: " + __instance.Nutrition);
+                    ModLog.Info("Human-OnLifeCreated: Minimal Nutrition given for respawing player after "+ DaysPast + " days passed: " + __instance.Nutrition);
                 }
                 // Now do the same logic, but for Hydration:
                 //Make sure we don't get values with 0 so they don't break the division from NormalizedMaxHydrationDays
@@ -266,16 +266,16 @@ namespace PlantsnNutritionRebalance.Scripts
                     HydrationToGive = ConfigFile.CustomNewPlayerRespawnHydration * (ConfigFile.MaxHydrationStorage / 100f);
                     ModLog.Info("Human-OnLifeCreated: Hydration given because CustomNewPlayerRespawn is true and a new player joined: " + __instance.Nutrition);
                 }
-                else if (WorldManager.DaysPast < NormalizedMaxHydrationDays)
+                else if (DaysPast < NormalizedMaxHydrationDays)
                 {
-                    HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - WorldManager.DaysPast);
+                    HydrationToGive = HydrationSlicePerDay * (NormalizedMaxHydrationDays - DaysPast);
                     ModLog.Info("Human-OnLifeCreated: Hydration given because a player who died are respawning: " + HydrationToGive);
                 }
-                //if DaysPastNorm is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
+                //if DaysPast is equal or bigger than NormalizedMaxHydrationDays, that means we should give a minimal amount of hydration, just enough for the character to go drink something
                 else
                 {
                     HydrationToGive = ConfigFile.MaxHydrationStorage / 93; //give a little more than 1% water
-                    ModLog.Info("Human-OnLifeCreated: Minimal Hydration given for respawing player after " + WorldManager.DaysPast + " days passed: " + HydrationToGive);
+                    ModLog.Info("Human-OnLifeCreated: Minimal Hydration given for respawing player after " + DaysPast + " days passed: " + HydrationToGive);
                 }
             }
             else
@@ -288,7 +288,7 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-    // Adjusts the time taken to drink in the fountain
+        // Adjusts the time taken to drink in the fountain
     [HarmonyPatch(typeof(StructureDrinkingFountain))]
     public static class StructureDrinkingFountainPatch
     {
@@ -554,7 +554,7 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         [UsedImplicitly]
         [HarmonyPrefix]
-        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable, TemperatureKelvin ____minViableTemp)
+        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable)
         {
             if (!____viable || __instance.ParentSlot != null || !__instance.HasAtmosphere)
                 return false;
@@ -564,10 +564,11 @@ namespace PlantsnNutritionRebalance.Scripts
             TemperatureKelvin worldtemperature = worldAtmosphere.Temperature;
 
             // Make egg unviable if tme temperature is below viable temp (10°C)
-            if (worldtemperature < ____minViableTemp)
+            if (worldtemperature < TemperatureKelvin.FromCelsius(10f))
             {
-                __instance.MakeUnviable();
-                return false;
+                var makeUnviable = AccessTools.Method(__instance.GetType(), "MakeUnviable");
+                makeUnviable.Invoke(__instance, null);
+                return false; 
             }
 
             if (worldpressure >= new PressurekPa(ConfigFile.EggMinimumPressureToHatch) &&

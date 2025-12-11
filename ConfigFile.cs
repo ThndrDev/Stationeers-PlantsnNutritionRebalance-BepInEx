@@ -63,6 +63,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configWatermelonNutrition;
         private static ConfigEntry<float> configStrawberryNutrition;
         private static ConfigEntry<float> configBlueberryNutrition;
+        private static ConfigEntry<float> configBurgerNutrition;
 
         private static ConfigEntry<float> configTomatoSoupEatSpeed;
         private static ConfigEntry<float> configCornSoupEatSpeed;
@@ -95,6 +96,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configWatermelonEatSpeed;
         private static ConfigEntry<float> configStrawberryEatSpeed;
         private static ConfigEntry<float> configBlueberryEatSpeed;
+        private static ConfigEntry<float> configBurgerEatSpeed;
 
         private static ConfigEntry<float> configTomatoSoupHydration;
         private static ConfigEntry<float> configCornSoupHydration;
@@ -127,6 +129,7 @@ namespace PlantsnNutritionRebalance.Scripts
         private static ConfigEntry<float> configWatermelonHydration;
         private static ConfigEntry<float> configStrawberryHydration;
         private static ConfigEntry<float> configBlueberryHydration;
+        private static ConfigEntry<float> configBurgerHydration;
 
         private static ConfigEntry<float> configWheatNutrition;
         private static ConfigEntry<float> configCornNutrition;
@@ -229,6 +232,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float WatermelonNutrition;
         public static float StrawberryNutrition;
         public static float BlueberryNutrition;
+        public static float BurgerNutrition;
 
         public static float TomatoSoupEatSpeed;
         public static float CornSoupEatSpeed;
@@ -270,6 +274,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float WatermelonEatSpeed;
         public static float StrawberryEatSpeed;
         public static float BlueberryEatSpeed;
+        public static float BurgerEatSpeed;
 
         public static float TomatoSoupHydration;
         public static float CornSoupHydration;
@@ -311,6 +316,7 @@ namespace PlantsnNutritionRebalance.Scripts
         public static float WatermelonHydration;
         public static float StrawberryHydration;
         public static float BlueberryHydration;
+        public static float BurgerHydration;
 
         public static float EggHatchTime;
         public static float EggDecayRate;
@@ -1318,6 +1324,27 @@ namespace PlantsnNutritionRebalance.Scripts
                 "can be set to be a positive or negative float value. If it's negative, you'll lose hydration when " +
                 "eating the food.");
             BlueberryHydration = configBlueberryHydration.Value;
+
+            // Burger Configuration
+            configBurgerNutrition = PnN.Config.Bind("5 - Foods Configuration",
+                "BurgerNutrition",
+                300f,
+                "Amount of Nutrition given by eating Burger. Needs to be a positive value between 1 and 10000.");
+            BurgerNutrition = Mathf.Clamp(configBurgerNutrition.Value, 1f, 10000f);
+
+            configBurgerEatSpeed = PnN.Config.Bind("5 - Foods Configuration",
+                "BurgerEatSpeed",
+                0.010f,
+                "Time to eat each nutrition of Burger. Needs to be a positive value between 0.001 and 10.");
+            BurgerEatSpeed = Mathf.Clamp(configBurgerEatSpeed.Value, 0.001f, 10f);
+
+            configBurgerHydration = PnN.Config.Bind("5 - Foods Configuration",
+                "BurgerHydration",
+                0.1f,
+                "Amount of Hydration that the character will gain or lose per each 1 full unit of this food. This " +
+                "can be set to be a positive or negative float value. If it's negative, you'll lose hydration when " +
+                "eating the food.");
+            BurgerHydration = configBurgerHydration.Value;
 
             //Egg Section
             configEggHatchTime = PnN.Config.Bind("6 - Egg Configuration",
