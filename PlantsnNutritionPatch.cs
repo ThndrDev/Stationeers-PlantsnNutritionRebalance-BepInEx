@@ -1,13 +1,19 @@
-﻿using Assets.Scripts.Atmospherics;
+﻿using Assets.Scripts;
+using Assets.Scripts.Atmospherics;
+using Assets.Scripts.Localization2;
 using Assets.Scripts.Objects;
 using Assets.Scripts.Objects.Entities;
 using Assets.Scripts.Objects.Items;
 using Assets.Scripts.Serialization;
 using Assets.Scripts.UI;
+using Assets.Scripts.Util;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Objects.Structures;
 using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
 using UnityEngine;
 
 namespace PlantsnNutritionRebalance.Scripts
@@ -554,22 +560,14 @@ namespace PlantsnNutritionRebalance.Scripts
     {
         [UsedImplicitly]
         [HarmonyPrefix]
-        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable)
+        public static bool PatchFertilizedEgg(FertilizedEgg __instance, bool ____viable, ref bool ____hatching)
         {
-            if (!____viable || __instance.ParentSlot != null || !__instance.HasAtmosphere)
+            if (!____viable || ____hatching| __instance.ParentSlot != null || !__instance.HasAtmosphere)
                 return false;
 
             Atmosphere worldAtmosphere = __instance.WorldAtmosphere;
             PressurekPa worldpressure = worldAtmosphere.PressureGasses;
             TemperatureKelvin worldtemperature = worldAtmosphere.Temperature;
-
-            // Make egg unviable if tme temperature is below viable temp (10°C)
-            if (worldtemperature < TemperatureKelvin.FromCelsius(10f))
-            {
-                var makeUnviable = AccessTools.Method(__instance.GetType(), "MakeUnviable");
-                makeUnviable.Invoke(__instance, null);
-                return false; 
-            }
 
             if (worldpressure >= new PressurekPa(ConfigFile.EggMinimumPressureToHatch) &&
                 worldpressure <= new PressurekPa(ConfigFile.EggMaximumPressureToHatch) &&
@@ -586,9 +584,15 @@ namespace PlantsnNutritionRebalance.Scripts
                                                       UnityEngine.Random.Range(-10f, 10f));
                     __instance.RigidBody.AddForce(randomForce);
                 }
+                if (GameManager.RunSimulation)
+                {
+                    __instance.NetworkUpdateFlags |= 8192;
+                }
                 if (__instance.HatchTime <= 0f)
                 {
-                    OnServer.Interact(__instance.InteractOnOff, 1, false);
+                    ____hatching = true;
+                    MethodInfo hatchMethod = AccessTools.Method(typeof(FertilizedEgg), "Hatch");
+                    hatchMethod.Invoke(__instance, null);
                 }
             }
             return false;
@@ -625,29 +629,49 @@ namespace PlantsnNutritionRebalance.Scripts
         }
     }
 
-    [HarmonyPatch(typeof(DynamicThing))]
-    [HarmonyPatch("GetPassiveTooltip")]
-    public class FertilizedeggSTooltipPatch
+    // Changes the Tooltip of Fertilized Eggs:
+    [HarmonyPatch(typeof(FertilizedEgg))]
+    [HarmonyPatch("GetExtendedText")]
+    public class FertilizedEggGetExtendedTextPatch
     {
         [UsedImplicitly]
-        [HarmonyPostfix]
-        private static PassiveTooltip PatchFertilizedEggTooltip(PassiveTooltip __result, DynamicThing __instance)
+        [HarmonyPrefix]
+        private static bool PatchFertilizedEggGetExtendedText(FertilizedEgg __instance, ref StringBuilder __result, bool ____viable)
         {
-            if (__instance is FertilizedEgg fertilizedEgg)
-            {           
-                if (Traverse.Create(__instance).Field("_viable").GetValue<bool>())
-                __result.Extended += getTooltipText(fertilizedEgg);
+            StringBuilder extendedText = CallBase(__instance);
+            if (____viable)
+            {
+                extendedText.Append(getTooltipText(__instance)); //adds our own tooltip
+                float num = 1f - __instance.HatchTime / ConfigFile.EggHatchTime * 100f;
+                extendedText.AppendLine(GameStrings.WillHatchInto.AsString(__instance.ChickPrefab.ToTooltip()));
+                extendedText.AppendLine(GameStrings.FertilizedEggProcess.AsString(__instance.ToTooltip(), num.ToStringPercent("red")));                
             }
-            return __result;
+            else
+            {
+                extendedText.AppendLine(GameStrings.UnviableEggNotice.AsString(__instance.ToTooltip()));
+            }
+            __result = extendedText;
+            return false;
         }
 
+        [HarmonyReversePatch]
+        [HarmonyPatch(typeof(Item), "GetExtendedText")]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+
+        private static StringBuilder CallBase(Item instance)
+        {
+            // Just a stub for Harmony to allow calling the base method
+            throw new NotImplementedException("Reverse patch stub");
+        }
+
+        //adds extra tooltips to Fertilized Eggs
         private static string getTooltipText(FertilizedEgg fertilizedEgg)
         {
             string text = "";
-            if (fertilizedEgg.HasAtmosphere == true && 
-                fertilizedEgg.WorldAtmosphere.PressureGasses >= new PressurekPa(ConfigFile.EggMinimumPressureToHatch) && 
-                fertilizedEgg.WorldAtmosphere.PressureGasses < new PressurekPa(ConfigFile.EggMaximumPressureToHatch) && 
-                fertilizedEgg.WorldAtmosphere.Temperature >= new TemperatureKelvin(ConfigFile.EggMinimumTemperatureToHatch) && 
+            if (fertilizedEgg.HasAtmosphere == true &&
+                fertilizedEgg.WorldAtmosphere.PressureGasses >= new PressurekPa(ConfigFile.EggMinimumPressureToHatch) &&
+                fertilizedEgg.WorldAtmosphere.PressureGasses < new PressurekPa(ConfigFile.EggMaximumPressureToHatch) &&
+                fertilizedEgg.WorldAtmosphere.Temperature >= new TemperatureKelvin(ConfigFile.EggMinimumTemperatureToHatch) &&
                 fertilizedEgg.WorldAtmosphere.Temperature < new TemperatureKelvin(ConfigFile.EggMaximumTemperatureToHatch))
             {
                 if (fertilizedEgg.ParentSlot != null && fertilizedEgg.ParentSlot.Get())
@@ -674,9 +698,9 @@ namespace PlantsnNutritionRebalance.Scripts
                     else if (fertilizedEgg.WorldAtmosphere.PressureGasses >= new PressurekPa(120.5))
                         text += string.Format("The Egg <color=red>is in a high pressure environment</color> (P > " + ConfigFile.EggMaximumPressureToHatch + ")\n");
                     if (fertilizedEgg.WorldAtmosphere.Temperature < new TemperatureKelvin(309.15))
-                        text += string.Format("The Egg temperature <color=red>is too cold</color> (T < " + Mathf.RoundToInt(ConfigFile.EggMinimumTemperatureToHatch-273.15f) + "°C)\n");
+                        text += string.Format("The Egg temperature <color=red>is too cold</color> (T < " + Mathf.RoundToInt(ConfigFile.EggMinimumTemperatureToHatch - 273.15f) + "°C)\n");
                     else if (fertilizedEgg.WorldAtmosphere.Temperature >= new TemperatureKelvin(311.65f))
-                        text += string.Format("The Egg temperature <color=red>is too hot</color> (T > " + Mathf.RoundToInt(ConfigFile.EggMaximumTemperatureToHatch-273.15f) + "°C)\n");
+                        text += string.Format("The Egg temperature <color=red>is too hot</color> (T > " + Mathf.RoundToInt(ConfigFile.EggMaximumTemperatureToHatch - 273.15f) + "°C)\n");
                 }
             }
             return text;

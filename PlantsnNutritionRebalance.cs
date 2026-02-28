@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PlantsnNutritionRebalance.Scripts
 {
-    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.3.5.0")]
+    [BepInPlugin("PlantsnNutrition", "Plants and Nutrition", "1.3.6.0")]
     public class PlantsnNutritionRebalancePlugin : BaseUnityPlugin
     {
         public static PlantsnNutritionRebalancePlugin Instance;
