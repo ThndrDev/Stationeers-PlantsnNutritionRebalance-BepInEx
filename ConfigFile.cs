@@ -377,10 +377,10 @@ namespace PlantsnNutritionRebalance.Scripts
 
             configDisableSoybeanH2Exhale = PnN.Config.Bind("1 - Plants Configuration", // The section under which the option is shown 
                  "DisableSoybeanH2Exhale",  // The key of the configuration option in the configuration file
-                 false, // The default value
-                 "Soybean consumes Nitrogen and accordingly to the Nitrogen Fixation Reaction N2​+8H+8e−→2NH3​+H2​, it should give off 1 H2(Volatiles) " + 
+                 true, // The default value
+                 "Soybean consumes Nitrogen and accordingly to the Nitrogen Fixation Reaction N2​+8H+8e−→2NH3​+H2​, it should give off some H2 " + 
                  "as a byproduct. To make growing soybean easier for new players, devs just decided to magically destroy those molecules, so you don't have " +
-                 "to deal with base explosions, but with this mod, you can decide what you want. Set this to true if you want to keep vanilla behaviour and " +
+                 "to deal with base explosions, but with this mod, you can decide what you want. Leave this as true if you want to keep vanilla behaviour and " +
                  "stop soybean from exhaling Volatiles."); 
 
             DisableSoybeanH2Exhale = configDisableSoybeanH2Exhale.Value;            

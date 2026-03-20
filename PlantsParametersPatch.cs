@@ -26,7 +26,7 @@ namespace PlantsnNutritionRebalance.Scripts
             PlantGrowStagePatch.PatchPrefabs();
 
         }
-        // Disable volatiles exhalation for Soybean plants if 
+        // Disable hydrogen exhalation for Soybean plants if set in the config file
         public static void DisableSoybeanH2Exhale()
         {
             if (ConfigFile.DisableSoybeanH2Exhale)
@@ -45,8 +45,8 @@ namespace PlantsnNutritionRebalance.Scripts
                         return;
                     }
 
-                    // Remove Volatiles
-                    exhaled.RemoveAll(g => g.Type == Chemistry.GasType.Volatiles);
+                    // Remove Methane
+                    exhaled.RemoveAll(g => g.Type == Chemistry.GasType.Methane);
                 }
                 catch (Exception ex)
                 {

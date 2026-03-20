@@ -47,7 +47,7 @@ namespace PlantsnNutritionRebalance.Scripts
             {
                 GasMixture gasMixture = GasMixtureHelper.Create();
                 MoleQuantity watertotranspire = new MoleQuantity((__result.ToFloat() / 100f) * ConfigFile.PlantWaterTranspirationPercentage);
-                MoleEnergy waterenergy = IdealGas.Energy(__instance.ParentTray.WaterAtmosphere.Temperature, Mole.GetSpecificHeat(Chemistry.GasType.Water), watertotranspire);
+                MoleEnergy waterenergy = IdealGas.Energy(__instance.ParentTray.WaterAtmosphere.Temperature, Mole.SpecificHeat(Chemistry.GasType.Water), watertotranspire);
                 gasMixture.Add(new GasMixture(new Mole(Chemistry.GasType.Water, watertotranspire, waterenergy)), AtmosphereHelper.MatterState.All);
                 __instance.BreathingAtmosphere.Add(gasMixture);
                 //ModLog.Debug("TakePlantDrinkPostfix: Plant: " + __instance.DisplayName + " transpired " + watertotranspire.ToFloat() + " moles of water to the atmosphere, with a temperature of " + __instance.ParentTray.WaterAtmosphere.Temperature + " K.");
