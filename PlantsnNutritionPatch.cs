@@ -541,7 +541,7 @@ namespace PlantsnNutritionRebalance.Scripts
                                 hydrate = Mathf.Clamp(hydrate, human.Hydration * -1f, 0f);
                             }
                             ModLog.Info("Item-OnUseItem: Final hydration got/lost from eating " + __instance.DisplayName + ": " + hydrate);
-                            human.Hydrate(hydrate);
+                            Traverse.Create(human).Property("Hydration").SetValue(human.Hydration + hydrate);
                         }
                     }
                     catch (Exception ex)
